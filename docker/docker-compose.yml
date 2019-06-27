@@ -1,0 +1,15 @@
+version: '3.1'
+services:
+  todo-list-db:
+    image: mysql
+    env_file:
+      - ./env_file.env
+    ports:
+      - 3306:3306
+    volumes:
+      - todo-list-db:/var/lib/mysql
+      - ./todolist_init.sql:/docker-entrypoint-initdb.d/todolist_init.sql:ro
+
+volumes:
+  todo-list-db: null
+
