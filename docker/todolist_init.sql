@@ -3,10 +3,13 @@ CREATE DATABASE IF NOT EXISTS TODOLIST;
 GRANT ALL PRIVILEGES ON *.* to 'user'@'%';
 FLUSH PRIVILEGES;
 
+USE TODOLIST;
+
 CREATE TABLE IF NOT EXISTS todos (
-    id INT AUTO_INCREMENT,
+    id INTEGER AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
-    status ENUM('todo','in-progress','done') NOT NULL,
-    priority ENUM('low','medium','high'),
+    status TEXT NOT NULL,
+    priority TEXT,
     description TEXT,
+    PRIMARY KEY (id)
 )  ENGINE=INNODB;
