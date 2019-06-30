@@ -1,4 +1,4 @@
-// TODO enums converter java jpa deserialize
+// TODO what makes something restful https://spring.io/guides/tutorials/rest/
 package com.todolist.api;
 
 import org.springframework.boot.SpringApplication;
