@@ -2,7 +2,9 @@
 package com.todolist.api.model;
 
 import com.todolist.api.model.enums.Priority;
+import com.todolist.api.model.enums.PriorityConverter;
 import com.todolist.api.model.enums.Status;
+import com.todolist.api.model.enums.StatusConverter;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -16,11 +18,18 @@ public class Todo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String title;
-    @Transient
-    @Convert
+    @Convert(converter = StatusConverter.class)
     private Status status;
-    @Transient
-    @Convert
+    @Convert(converter = PriorityConverter.class)
     private Priority priority;
     private String description;
+
+    protected Todo(){}
+
+    public Todo(String title, Status status, Priority priority, String description) {
+        this.title = title;
+        this.status = status;
+        this.priority = priority;
+        this.description = description;
+    }
 }
