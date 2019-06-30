@@ -9,8 +9,9 @@ import java.util.stream.Collectors;
 public enum Status {
 
     TODO("T"),
-    IN_PROGRESS("I"),
-    DONE("D");
+    INPROGRESS("I"),
+    DONE("D"),
+    WONTDO("W");
 
     private static final Map<String, Status> VALUES_MAP;
 
