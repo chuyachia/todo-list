@@ -2,14 +2,32 @@ version: '3.1'
 services:
   todo-list-db:
     image: mysql
+    container_name: todo-list-db
     env_file:
       - ./env_file.env
     ports:
       - 3306:3306
+    networks:
+      - todo-list-network
     volumes:
       - todo-list-db:/var/lib/mysql
       - ./todolist_init.sql:/docker-entrypoint-initdb.d/todolist_init.sql:ro
-
+  todo-list-api:
+    image: todo-list-api:1.0-SNAPSHOT
+    container_name: todo-list-api
+    depends_on:
+      - todo-list-db
+    ports:
+      - 8088:8088
+    networks:
+      - todo-list-network
+    volumes:
+      - todo-list-api:/tmp
+networks:
+  todo-list-network:
+    driver: bridge
 volumes:
   todo-list-db: null
+  todo-list-api: null
+
 

@@ -1,4 +1,4 @@
-// TODO what makes something restful https://spring.io/guides/tutorials/rest/
+// TODO improve docker setup, add ui
 package com.todolist.api;
 
 import org.springframework.boot.SpringApplication;
