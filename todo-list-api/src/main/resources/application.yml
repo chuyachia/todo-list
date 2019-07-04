@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: "todo-list-api"
+  profiles:
+    active:
+      - local
+server:
+  port: 8088
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          filter:
+            CommonsRequestLoggingFilter: DEBUG
+---
+spring:
+  profiles: local
+  datasource:
+    jdbc-url: jdbc:mysql://localhost:3306/TODOLIST?useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&allowPublicKeyRetrieval=true
+    username: user
+    password: user
+---
+spring:
+  profiles: prod
+  datasource:
+    jdbc-url: jdbc:mysql://todo-list-db:3306/TODOLIST?useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&allowPublicKeyRetrieval=true
+    username: user
+    password: user
+logging:
+  file: /var/log/${spring.application.name}/${spring.application.name}.log
