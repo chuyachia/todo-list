@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@RequestMapping("api")
 public class TodoController {
     private final TodoRepository repository;
     private final TodoResourceAssembler assembler;
