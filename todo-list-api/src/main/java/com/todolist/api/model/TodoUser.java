@@ -6,6 +6,7 @@ import javax.persistence.*;
 
 @Data
 @Entity
+@Table(name="users")
 public class TodoUser {
 
     @Id
@@ -13,6 +14,9 @@ public class TodoUser {
     private Integer id;
     @Column(nullable=false, unique=true)
     private String username;
+    @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
+    private String role;
 
 }

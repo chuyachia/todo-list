@@ -1,4 +1,4 @@
-package com.todolist.api.security;
+package com.todolist.api.service;
 
 import com.todolist.api.exception.UserNotFoundException;
 import com.todolist.api.model.TodoUser;
@@ -27,6 +27,7 @@ public class TodoUserDetailsService implements UserDetailsService {
     private UserDetails buildUserDetails(TodoUser user) {
         return User.withUsername(user.getUsername())
                 .password(user.getPassword())
+                .roles(user.getRole()) // roles takes String[]
                 .build();
     }
 }

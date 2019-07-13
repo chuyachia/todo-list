@@ -13,3 +13,11 @@ CREATE TABLE IF NOT EXISTS todos (
     description TEXT,
     PRIMARY KEY (id)
 )  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER AUTO_INCREMENT,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role TEXT,
+    PRIMARY KEY (id)
+)  ENGINE=INNODB;

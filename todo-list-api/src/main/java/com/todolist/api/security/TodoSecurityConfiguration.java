@@ -1,14 +1,9 @@
-// https://www.baeldung.com/spring-security-authentication-with-a-database
-//https://www.baeldung.com/securing-a-restful-web-service-with-spring-security
-//https://www.baeldung.com/spring-security-registration-password-encoding-bcrypt
-
-// TODO /login is not found
 package com.todolist.api.security;
 
+import com.todolist.api.service.TodoUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,7 +14,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 
 @Configuration
 @EnableWebSecurity
-public class SecurityAdapter extends WebSecurityConfigurerAdapter {
+public class TodoSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private TodoUserDetailsService userDetailsService;
@@ -30,33 +25,35 @@ public class SecurityAdapter extends WebSecurityConfigurerAdapter {
     private SimpleUrlAuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
 
     @Override
-    protected void configure(AuthenticationManagerBuilder builder)
-            throws Exception {
-        builder.userDetailsService(userDetailsService)
-                .passwordEncoder(encoder());
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+
+        auth
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder());
     }
 
     @Override
     protected void configure(HttpSecurity http)
             throws Exception {
+
         http
-        .csrf().disable()
-        .exceptionHandling()
-        .authenticationEntryPoint(entryPoint)
-        .and()
-        .authorizeRequests()
-        .antMatchers("/api/**").authenticated()
-        .and()
-        .formLogin()
-        .loginProcessingUrl("/login")
-        .successHandler(successHandler)
-        .failureHandler(failureHandler)
-        .and()
-        .logout();
+                .csrf()
+                .disable()
+                .exceptionHandling()
+                .authenticationEntryPoint(entryPoint)
+                .and()
+                .authorizeRequests()
+                .antMatchers("/api/todos").authenticated()
+                .and()
+                .formLogin()
+                .successHandler(successHandler)
+                .failureHandler(failureHandler)
+                .and()
+                .logout();
     }
 
     @Bean
-    public PasswordEncoder encoder() {
-        return new BCryptPasswordEncoder(11);
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
