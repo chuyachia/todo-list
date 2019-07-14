@@ -2,6 +2,8 @@ package com.todolist.api.service;
 
 import com.todolist.api.exception.UserAlreadyExistsException;
 import com.todolist.api.model.TodoUser;
+import com.todolist.api.model.UserRole;
+import com.todolist.api.model.enums.Role;
 import com.todolist.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +27,10 @@ public class UserService implements IUserService{
             throw new UserAlreadyExistsException(existingUser.getUsername());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
-            user.setRole("USER");
+            UserRole role = new UserRole();
+            role.setRole(Role.USER);
+            role.setUser(user);
+            user.getRoles().add(role);
             repository.save(user);
         }
     }

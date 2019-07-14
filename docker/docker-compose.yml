@@ -13,7 +13,7 @@ services:
       - todo-list-db:/var/lib/mysql
       - ./todolist_init.sql:/docker-entrypoint-initdb.d/todolist_init.sql:ro
   todo-list-api:
-    image: todo-list-api:1.0-SNAPSHOT
+    image: todo-list-api:2.0-SNAPSHOT
     container_name: todo-list-api
     depends_on:
       - todo-list-db

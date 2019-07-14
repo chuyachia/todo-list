@@ -18,14 +18,14 @@ public enum Status {
     static {
         Map<String, Status> map = Arrays.stream(Status.values())
                 .collect(Collectors
-                        .toConcurrentMap(p -> p.code, Function.identity()));
+                        .toConcurrentMap(s -> s.code, Function.identity()));
 
         VALUES_MAP = Collections.unmodifiableMap(map);
     }
 
     private String code;
 
-    private Status(String code) {
+    Status(String code) {
         this.code = code;
     }
 
