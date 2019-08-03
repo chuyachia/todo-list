@@ -1,5 +1,6 @@
 package com.todolist.api.security;
 
+import com.todolist.api.model.enums.Role;
 import com.todolist.api.service.TodoUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,9 @@ public class TodoSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private TodoAuthenticationEntryPoint entryPoint;
     @Autowired
-    private SuccessHandler successHandler;
+    private LoginSuccessHandler loginSuccessHandler;
+    @Autowired
+    private LogoutSuccessHandler logoutSuccessHandler;
     private SimpleUrlAuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
 
     @Override
@@ -45,12 +48,17 @@ public class TodoSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/todos")
                 .authenticated()
+                .antMatchers("/users/**")
+                .hasRole(Role.ADMIN.getCode()) // TODO use enum in hasRole
                 .and()
                 .formLogin()
-                .successHandler(successHandler)
+                .successHandler(loginSuccessHandler)
                 .failureHandler(failureHandler)
                 .and()
-                .logout();
+                .logout()
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .logoutSuccessHandler(logoutSuccessHandler);
     }
 
     @Bean

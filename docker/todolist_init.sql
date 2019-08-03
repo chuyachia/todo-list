@@ -27,4 +27,11 @@ CREATE TABLE IF NOT EXISTS roles (
     user_id INTEGER NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users(id)
+    ON DELETE CASCADE
 )  ENGINE=INNODB;
+
+INSERT INTO users (id, username, password)
+VALUES (1, 'admin','$2a$10$JiHihK0nbeNPLBlqeXYgD.DaVW99FE1FMNl5EpN0CT4I5bFK9lzdC');
+
+INSERT INTO roles (role, user_id)
+VALUES ('A',1);

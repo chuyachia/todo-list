@@ -91,10 +91,10 @@ public class TodoController {
     public Resource<Todo> update(@RequestBody Todo newTodo, @PathVariable Integer id) {
         Todo updatedTodo = repository.findById(id)
                 .map(todo -> {
-                    todo.setTitle(newTodo.getTitle());
-                    todo.setStatus(newTodo.getStatus());
-                    todo.setPriority(newTodo.getPriority());
-                    todo.setDescription(newTodo.getDescription());
+                    if (newTodo.getTitle()!=null) { todo.setTitle(newTodo.getTitle());}
+                    if (newTodo.getStatus()!=null) {todo.setStatus(newTodo.getStatus());}
+                    if (newTodo.getPriority()!=null) {todo.setPriority(newTodo.getPriority());}
+                    if (newTodo.getDescription()!=null) {todo.setDescription(newTodo.getDescription());}
                     return repository.save(todo);
                 })
                 .orElseThrow(() -> new TodoNotFoundException(id));

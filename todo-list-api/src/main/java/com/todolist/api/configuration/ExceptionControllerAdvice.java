@@ -4,10 +4,7 @@ import com.todolist.api.exception.InvalidInputException;
 import com.todolist.api.exception.TodoNotFoundException;
 import com.todolist.api.exception.UserAlreadyExistsException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 @ControllerAdvice
 public class ExceptionControllerAdvice {

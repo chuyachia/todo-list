@@ -2,6 +2,7 @@ package com.todolist.api.controller;
 
 import com.todolist.api.model.Todo;
 import com.todolist.api.model.TodoUser;
+import com.todolist.api.model.enums.Role;
 import com.todolist.api.service.IUserService;
 import com.todolist.api.validator.TodoUserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,18 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public void create(@Valid TodoUser newUser) {
         service.registerNewUser(newUser);
+    }
+
+    @PutMapping("/users/{username}/{role}")
+    @ResponseStatus(HttpStatus.OK)
+    public void update(@PathVariable String role, @PathVariable String username) {
+        service.addUserRole(username, role);
+    }
+
+    @DeleteMapping("/users/{username}/{role}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable String role, @PathVariable String username) {
+        service.removeUserRole(username, role);
     }
 
 }

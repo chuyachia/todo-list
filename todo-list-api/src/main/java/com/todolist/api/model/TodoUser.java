@@ -18,7 +18,7 @@ public class TodoUser {
     private String username;
     @Column(nullable = false)
     private String password;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval=true)
     private List<UserRole> roles  = new ArrayList<UserRole>();
 
 
