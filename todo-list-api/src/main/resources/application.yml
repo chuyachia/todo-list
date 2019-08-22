@@ -4,6 +4,9 @@ spring:
   profiles:
     active:
       - local
+  cache:
+    caffeine:
+      spec: maximumSize=500,expireAfterAccess=1s
 server:
   port: 8088
 logging:

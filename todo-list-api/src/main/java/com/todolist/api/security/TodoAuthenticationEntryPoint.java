@@ -18,6 +18,6 @@ public class TodoAuthenticationEntryPoint implements AuthenticationEntryPoint {
             AuthenticationException authException) throws IOException {
 
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                "Unauthorized");
+                "Unauthorized. Login with /login or register with /register");
     }
 }

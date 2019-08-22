@@ -1,4 +1,3 @@
-// TODO improve docker setup, add ui
 package com.todolist.api;
 
 import org.springframework.boot.SpringApplication;
