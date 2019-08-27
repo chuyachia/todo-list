@@ -32,4 +32,8 @@ public class Todo {
         this.priority = priority;
         this.description = description;
     }
+
+    public String toCSVString() {
+        return this.getId()+";"+this.getTitle()+";"+this.getStatus()+";"+this.getPriority()+";"+this.getDescription();
+    }
 }

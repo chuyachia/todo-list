@@ -5,24 +5,36 @@ import com.todolist.api.model.Todo;
 import com.todolist.api.model.TodoResourceAssembler;
 import com.todolist.api.model.enums.Status;
 import com.todolist.api.repository.TodoRepository;
+import com.todolist.api.service.TodoService;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+
+import javax.servlet.http.HttpServletResponse;
+
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("api")
 public class TodoController {
     private final TodoRepository repository;
     private final TodoResourceAssembler assembler;
+    private final TodoService service;
 
-    TodoController(TodoRepository repository, TodoResourceAssembler assembler) {
+    TodoController(TodoRepository repository, TodoResourceAssembler assembler, TodoService service) {
         this.repository = repository;
         this.assembler = assembler;
+        this.service = service;
     }
 
     @GetMapping("/todos")
@@ -35,10 +47,24 @@ public class TodoController {
                 linkTo(methodOn(TodoController.class).getAll()).withSelfRel());
     }
 
+    @GetMapping("/download/todos")
+    public ResponseEntity<StreamingResponseBody> streamAll()  {
+            StreamingResponseBody stream = outputStream -> {
+                service.streamTodos(outputStream);
+                outputStream.flush();
+            };
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.add("Content-disposition", "attachment; filename=todos.csv");
+
+        return new ResponseEntity(stream,headers,HttpStatus.OK);
+    }
+
     @GetMapping("/todos/{id}")
     public Resource<Todo> getOne(@PathVariable Integer id) {
         Todo todo = repository.findById(id)
                 .orElseThrow(() -> new TodoNotFoundException(id));
+
         return assembler.toResource(todo);
     }
 
@@ -47,6 +73,7 @@ public class TodoController {
     public Resource<Todo> create(@RequestBody Todo newTodo) {
         newTodo.setStatus(Status.TODO);
         Todo todo = repository.save(newTodo);
+
         return assembler.toResource(todo);
     }
 
@@ -59,6 +86,7 @@ public class TodoController {
                     return repository.save(todo);
                 })
                 .orElseThrow(() -> new TodoNotFoundException(id));
+
         return assembler.toResource(updatedTodo);
     }
 
@@ -71,6 +99,7 @@ public class TodoController {
                     return repository.save(todo);
                 })
                 .orElseThrow(() -> new TodoNotFoundException(id));
+
         return assembler.toResource(updatedTodo);
     }
 
@@ -83,6 +112,7 @@ public class TodoController {
                     return repository.save(todo);
                 })
                 .orElseThrow(() -> new TodoNotFoundException(id));
+
         return assembler.toResource(updatedTodo);
     }
 
@@ -98,6 +128,7 @@ public class TodoController {
                     return repository.save(todo);
                 })
                 .orElseThrow(() -> new TodoNotFoundException(id));
+
         return assembler.toResource(updatedTodo);
     }
 
