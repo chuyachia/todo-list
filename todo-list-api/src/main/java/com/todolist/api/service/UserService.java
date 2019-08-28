@@ -41,7 +41,7 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public void addUserRole(String username, String role) {
+    public TodoUser addUserRole(String username, String role) {
         TodoUser user = repository.findByUsername(username);
         if (user == null) {
             throw new UserNotFoundException(username);
@@ -61,11 +61,13 @@ public class UserService implements IUserService{
                 user.getRoles().add(newUserRole);
             }
             repository.save(user);
+
+            return user;
         }
     }
 
     @Override
-    public void removeUserRole(String username, String role) {
+    public TodoUser removeUserRole(String username, String role) {
         TodoUser user = repository.findByUsername(username);
         if (user == null) {
             throw new UserNotFoundException(username);
@@ -77,6 +79,8 @@ public class UserService implements IUserService{
                     .collect(Collectors.toList());
             user.getRoles().remove(filteredRoles.get(0));
             repository.save(user);
+
+            return user;
         }
     }
 }

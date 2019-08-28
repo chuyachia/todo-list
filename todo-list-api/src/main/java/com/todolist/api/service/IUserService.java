@@ -7,6 +7,6 @@ import com.todolist.api.model.TodoUser;
 
 public interface IUserService {
     void registerNewUser(TodoUser user) throws UserAlreadyExistsException;
-    void addUserRole(String username, String role) throws UserNotFoundException, InvalidInputException;
-    void removeUserRole(String username, String role) throws UserNotFoundException, InvalidInputException;
+    TodoUser addUserRole(String username, String role) throws UserNotFoundException, InvalidInputException;
+    TodoUser removeUserRole(String username, String role) throws UserNotFoundException, InvalidInputException;
 }

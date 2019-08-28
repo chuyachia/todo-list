@@ -18,7 +18,7 @@ public class TodoService implements ITodoService {
 
     @Override
     @Transactional(readOnly = true)
-    public void streamTodos(OutputStream outputStream) {
+    public void streamAll(OutputStream outputStream) {
         Stream<Todo> todoStream = repository.streamAll();
         writeCSVHeader(outputStream);
         todoStream.forEach(todo -> writeCSVRow(todo,outputStream));

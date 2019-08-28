@@ -9,20 +9,14 @@ import com.todolist.api.service.TodoService;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.*;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 
-import javax.servlet.http.HttpServletResponse;
-
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("api")
@@ -47,10 +41,10 @@ public class TodoController {
                 linkTo(methodOn(TodoController.class).getAll()).withSelfRel());
     }
 
-    @GetMapping("/download/todos")
-    public ResponseEntity<StreamingResponseBody> streamAll()  {
+    @GetMapping("/todos/file")
+    public ResponseEntity<StreamingResponseBody> downloadAll()  {
             StreamingResponseBody stream = outputStream -> {
-                service.streamTodos(outputStream);
+                service.streamAll(outputStream);
                 outputStream.flush();
             };
         HttpHeaders headers = new HttpHeaders();
