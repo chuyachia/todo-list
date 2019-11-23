@@ -26,6 +26,9 @@ spring:
     jdbc-url: jdbc:mysql://localhost:3306/TODOLIST?useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&allowPublicKeyRetrieval=true
     username: user
     password: user
+todolist:
+  cors:
+    origin: http://localhost:3000
 ---
 spring:
   profiles: prod
