@@ -6,9 +6,12 @@ spring:
       - local
   cache:
     caffeine:
-      spec: maximumSize=500,expireAfterAccess=1s
+      spec: maximumSize=500,expireAfterAccess=1m
 server:
   port: 8088
+  servlet:
+    session:
+      timeout: 30m
 logging:
   level:
     org:

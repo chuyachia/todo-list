@@ -2,10 +2,7 @@ package com.todolist.api.service;
 
 import com.todolist.api.exception.UserNotFoundException;
 import com.todolist.api.model.TodoUser;
-import com.todolist.api.model.UserRole;
 import com.todolist.api.repository.UserRepository;
-import org.hibernate.Hibernate;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

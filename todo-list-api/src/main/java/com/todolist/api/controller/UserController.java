@@ -2,13 +2,10 @@ package com.todolist.api.controller;
 
 import com.todolist.api.exception.UserNotFoundException;
 import com.todolist.api.model.*;
-import com.todolist.api.model.enums.Role;
-import com.todolist.api.model.enums.RoleConverter;
 import com.todolist.api.repository.UserRepository;
 import com.todolist.api.service.IUserService;
 import com.todolist.api.validator.TodoUserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
