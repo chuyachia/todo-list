@@ -9,7 +9,7 @@ public class PriorityConverter implements AttributeConverter<Priority,String> {
         if (priority == null) {
             return null;
         }
-        return priority.getCode();
+        return priority.toString();
     }
 
     @Override
@@ -18,6 +18,6 @@ public class PriorityConverter implements AttributeConverter<Priority,String> {
             return null;
         }
 
-        return Priority.getValue(code);
+        return Priority.valueOf(code);
     }
 }

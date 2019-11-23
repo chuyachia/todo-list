@@ -8,7 +8,7 @@ public class StatusConverter implements AttributeConverter<Status,String> {
         if (status== null) {
             return null;
         }
-        return status.getCode();
+        return status.toString();
     }
 
     @Override
@@ -17,6 +17,6 @@ public class StatusConverter implements AttributeConverter<Status,String> {
             return null;
         }
 
-        return Status.getValue(code);
+        return Status.valueOf(code);
     }
 }

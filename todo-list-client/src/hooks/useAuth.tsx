@@ -21,12 +21,14 @@ const useAuth = (loginEndpoint: string):IAuth => {
             method: 'POST',
             body: formData,
             mode: 'cors',
+            credentials: 'include',
         }
 
         try {
             const signedIn = await fetch(loginEndpoint, options);
             if (signedIn.ok) {
                 setAuthenticated(true);
+                setFailed(false);
             } else {
                 setFailed(true);
             }

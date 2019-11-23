@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
