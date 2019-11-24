@@ -3,19 +3,21 @@ package com.todolist.api.controller;
 import com.todolist.api.exception.TodoNotFoundException;
 import com.todolist.api.model.Todo;
 import com.todolist.api.model.TodoResourceAssembler;
+import com.todolist.api.model.TodoUserDetail;
 import com.todolist.api.model.enums.Status;
 import com.todolist.api.repository.TodoRepository;
 import com.todolist.api.service.TodoService;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,7 +68,10 @@ public class TodoController {
     @PostMapping("/todos")
     @ResponseStatus(HttpStatus.CREATED)
     public Resource<Todo> create(@RequestBody Todo newTodo) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        TodoUserDetail todoUserDetail = (TodoUserDetail) auth.getPrincipal();
         newTodo.setStatus(Status.TODO);
+        newTodo.setUser(todoUserDetail.getTodoUser());
         Todo todo = repository.save(newTodo);
 
         return assembler.toResource(todo);
