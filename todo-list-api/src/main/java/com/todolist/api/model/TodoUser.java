@@ -1,7 +1,8 @@
 package com.todolist.api.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import lombok.ToString;
 
@@ -13,7 +14,7 @@ import java.util.List;
 @ToString(exclude = {"roles", "todos"}) // To avoid infinite loop
 @Entity
 @Table(name = "users")
-@JsonIgnoreProperties({"password", "roles", "todos"})
+@JsonIgnoreProperties({"password"})
 public class TodoUser {
 
     @Id
@@ -23,8 +24,10 @@ public class TodoUser {
     private String username;
     @Column(nullable = false)
     private String password;
+    @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     private List<UserRole> roles = new ArrayList<>();
+    @JsonBackReference
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     private List<Todo> todos = new ArrayList<>();
 }
