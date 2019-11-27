@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 @Repository
 public interface TodoRepository extends JpaRepository<Todo,Integer> {
-    @Cacheable(cacheNames = "todos")
+    @Cacheable(cacheNames = "todos", unless="#result==null")
     Optional<Todo> findById(Integer id);
 
     @QueryHints(value = @QueryHint(name ="org.hibernate.fetchSize", value = "" + Integer.MIN_VALUE))

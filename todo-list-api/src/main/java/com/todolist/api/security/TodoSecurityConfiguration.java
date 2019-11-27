@@ -46,7 +46,7 @@ public class TodoSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(entryPoint)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/todos")
+                .antMatchers("/api/todos/**")
                 .authenticated()
 //                .antMatchers("/users/**")
 //                .hasRole(Role.ADMIN.getCode()) // TODO use enum in hasRole
