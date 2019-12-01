@@ -12,6 +12,23 @@ CREATE TABLE IF NOT EXISTS users (
     PRIMARY KEY (id)
 )  ENGINE=INNODB;
 
+CREATE TABLE IF NOT EXISTS roles (
+    id INTEGER AUTO_INCREMENT,
+    role TEXT NOT NULL,
+    PRIMARY KEY (id)
+)  ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS users_roles (
+    user_id INTEGER NOT NULL,
+    role_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT,
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+    ON UPDATE CASCADE
+    ON DELETE RESTRICT
+) ENGINE=INNODB;
+
 CREATE TABLE IF NOT EXISTS todos (
     id INTEGER AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
@@ -24,17 +41,12 @@ CREATE TABLE IF NOT EXISTS todos (
     ON DELETE CASCADE
 )  ENGINE=INNODB;
 
-CREATE TABLE IF NOT EXISTS roles (
-    id INTEGER AUTO_INCREMENT,
-    role TEXT NOT NULL,
-    user_id INTEGER NOT NULL,
-    PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-    ON DELETE CASCADE
-)  ENGINE=INNODB;
 
 INSERT INTO users (id, username, password)
 VALUES (1, 'admin','$2a$10$JiHihK0nbeNPLBlqeXYgD.DaVW99FE1FMNl5EpN0CT4I5bFK9lzdC');
 
-INSERT INTO roles (role, user_id)
-VALUES ('A',1);
+INSERT INTO roles (id, role)
+VALUES (1, 'A'), (2, 'U');
+
+INSERT INTO users_roles(user_id, role_id)
+VALUES (1, 1), (1, 2);

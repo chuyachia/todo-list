@@ -24,10 +24,14 @@ public class TodoUser {
     private String username;
     @Column(nullable = false)
     private String password;
-    @JsonManagedReference
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
+    @ManyToMany
+    @JoinTable(
+        name = "users_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
     private List<UserRole> roles = new ArrayList<>();
-    @JsonBackReference
+    @JsonManagedReference
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     private List<Todo> todos = new ArrayList<>();
 }

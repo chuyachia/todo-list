@@ -34,7 +34,7 @@ public class UserService implements IUserService{
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             UserRole role = new UserRole();
             role.setRole(Role.USER);
-            role.setUser(user);
+//            role.setUser(user);
             user.getRoles().add(role);
             repository.save(user);
         }
@@ -57,7 +57,7 @@ public class UserService implements IUserService{
             if (!existingRoles.contains(role)) {
                 UserRole newUserRole = new UserRole();
                 newUserRole.setRole(newRole);
-                newUserRole.setUser(user);
+//                newUserRole.setUser(user);
                 user.getRoles().add(newUserRole);
             }
             repository.save(user);

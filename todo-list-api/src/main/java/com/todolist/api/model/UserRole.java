@@ -17,9 +17,4 @@ public class UserRole {
     private Integer id;
     @Convert(converter = RoleConverter.class)
     private Role role;
-    @ManyToOne
-    @JsonBackReference
-    @JoinColumn(name = "user_id", nullable = false)
-    private TodoUser user;
-
 }

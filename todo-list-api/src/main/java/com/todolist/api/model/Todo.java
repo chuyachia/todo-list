@@ -1,6 +1,7 @@
 // https://www.baeldung.com/jpa-persisting-enums-in-jpa
 package com.todolist.api.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.todolist.api.model.enums.Priority;
 import com.todolist.api.model.enums.PriorityConverter;
@@ -25,7 +26,7 @@ public class Todo {
     private Priority priority;
     private String description;
     @ManyToOne
-    @JsonManagedReference
+    @JsonBackReference
     @JoinColumn(name="user_id", nullable = false)
     private TodoUser user;
 

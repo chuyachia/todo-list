@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 @Service
 public class TodoUserDetailsService implements UserDetailsService {
 
+    private String rolePrefix = "ROLE_";
+
     @Autowired
     private UserRepository repository;
 
@@ -42,7 +44,8 @@ public class TodoUserDetailsService implements UserDetailsService {
     }
 
     private List<GrantedAuthority> buildUserAuthority(List<UserRole> userRoles) {
-        return userRoles.stream().map(role -> new SimpleGrantedAuthority(role.getRole().getCode()))
+        // Need to prefix with ROLE_ because Spring Security by default add this prefix when checking role
+        return userRoles.stream().map(role -> new SimpleGrantedAuthority(rolePrefix + role.getRole().toString()))
                 .collect(Collectors.toList());
     }
 }
