@@ -1,6 +1,7 @@
 package com.todolist.api.controller;
 
 import com.todolist.api.exception.TodoNotFoundException;
+import com.todolist.api.exception.UnAuthorizedOperationException;
 import com.todolist.api.model.Todo;
 import com.todolist.api.model.TodoResourceAssembler;
 import com.todolist.api.model.TodoUserDetail;
@@ -80,40 +81,63 @@ public class TodoController {
     @PostMapping("/todos/{id}/done")
     @ResponseStatus(HttpStatus.OK)
     public Resource<Todo> done(@PathVariable Integer id) {
-        Todo updatedTodo = repository.findById(id)
+        return repository.findById(id)
                 .map(todo -> {
-                    todo.setStatus(Status.DONE);
-                    return repository.save(todo);
+                    if (isTodoAuthor(todo)) {
+                        todo.setStatus(Status.DONE);
+                        return update(todo, id);
+                    } else {
+                        throw new UnAuthorizedOperationException("Modifying other users' todos are not allowed");
+                    }
                 })
                 .orElseThrow(() -> new TodoNotFoundException(id));
-
-        return assembler.toResource(updatedTodo);
     }
 
     @PostMapping("/todos/{id}/in-progress")
     @ResponseStatus(HttpStatus.OK)
     public Resource<Todo> inProgress(@PathVariable Integer id) {
-        Todo updatedTodo = repository.findById(id)
+        return repository.findById(id)
                 .map(todo -> {
-                    todo.setStatus(Status.INPROGRESS);
-                    return repository.save(todo);
+                    if (isTodoAuthor(todo)) {
+                        todo.setStatus(Status.INPROGRESS);
+                        return update(todo, id);
+                    } else {
+                        throw new UnAuthorizedOperationException("Modifying other users' todos are not allowed");
+                    }
                 })
                 .orElseThrow(() -> new TodoNotFoundException(id));
-
-        return assembler.toResource(updatedTodo);
     }
 
     @PostMapping("/todos/{id}/wont-do")
     @ResponseStatus(HttpStatus.OK)
     public Resource<Todo> wontDo(@PathVariable Integer id) {
-        Todo updatedTodo = repository.findById(id)
+        return repository.findById(id)
                 .map(todo -> {
-                    todo.setStatus(Status.WONTDO);
-                    return repository.save(todo);
+                    if (isTodoAuthor(todo)) {
+                        todo.setStatus(Status.WONTDO);
+                        return update(todo, id);
+                    } else {
+                        throw new UnAuthorizedOperationException("Modifying other users' todos are not allowed");
+                    }
                 })
                 .orElseThrow(() -> new TodoNotFoundException(id));
 
-        return assembler.toResource(updatedTodo);
+    }
+
+    @PostMapping("/todos/{id}/undo")
+    @ResponseStatus(HttpStatus.OK)
+    public Resource<Todo> unDo(@PathVariable Integer id) {
+        return repository.findById(id)
+                .map(todo -> {
+                    if (isTodoAuthor(todo)) {
+                        todo.setStatus(Status.TODO);
+                        return update(todo, id);
+                    } else {
+                        throw new UnAuthorizedOperationException("Modifying other users' todos are not allowed");
+                    }
+                })
+                .orElseThrow(() -> new TodoNotFoundException(id));
+
     }
 
     @PutMapping("/todos/{id}")
@@ -138,5 +162,11 @@ public class TodoController {
         Todo todo = repository.findById(id)
                 .orElseThrow(() -> new TodoNotFoundException((id)));
         repository.delete(todo);
+    }
+
+    boolean isTodoAuthor(Todo todo) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        TodoUserDetail todoUserDetail = (TodoUserDetail) auth.getPrincipal();
+        return todo.getUser().getId() == todoUserDetail.getTodoUser().getId();
     }
 }

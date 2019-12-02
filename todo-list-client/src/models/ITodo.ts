@@ -1,3 +1,5 @@
+import IUser from './IUser';
+
 type TTodoLinks = 'self' | 'inProgress' | 'wontDo' | 'done';
 
 export default interface ITodoItem {
@@ -6,5 +8,6 @@ export default interface ITodoItem {
     status: string;
     priority: string;
     description: string;
+    user: IUser;
     _links: Record<TTodoLinks, Record<'href' | 'title', string>>;
 }

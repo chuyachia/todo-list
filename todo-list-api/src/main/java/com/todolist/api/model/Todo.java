@@ -26,7 +26,7 @@ public class Todo {
     private Priority priority;
     private String description;
     @ManyToOne
-    @JsonBackReference
+    @JsonManagedReference
     @JoinColumn(name="user_id", nullable = false)
     private TodoUser user;
 
