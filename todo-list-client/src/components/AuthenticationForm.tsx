@@ -15,6 +15,8 @@ interface IAuthenticationFormProps {
     reason?: string;
 }
 
+const ENTER_KEY = 13;
+
 const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
                                                                     onSubmit,
                                                                     failed,
@@ -30,9 +32,21 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
     const usernameValidation = useValidation(usernameValidationFunction, onUsernameChange);
     const passwordValidation = useValidation(passwordValidationFunction, onPasswordChange);
 
+    const handleEnterKey = (e: React.KeyboardEvent) => {
+        if (e.keyCode === ENTER_KEY && usernameValidation.valid && passwordValidation.valid) {
+            submitAuthentication();
+        }
+    }
+
+    const submitAuthentication = () => {
+        onSubmit(username, password);
+        resetUsername();
+        resetPassword();
+    }
+
     return (
-        <div className={"AuthenticationForm"}>
-            <input className={"form-input"} type={"text"} placeholder={"Enter Username"}
+        <div className={"AuthenticationForm"} onKeyDown={handleEnterKey}>
+            <input className={"form-input"} type={"text"} placeholder={"Enter Username"} autoFocus={true}
                    onChange={usernameValidation.onChange}
                    onFocus={usernameValidation.onFocus} value={username}/>
             <small className={"validation-text"}>
@@ -47,13 +61,9 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
             <button
                 className={"submit-button"}
                 disabled={!usernameValidation.valid || !passwordValidation.valid}
-                onClick={() => {
-                    onSubmit(username, password);
-                    resetUsername();
-                    resetPassword();
-                }}>{submitButtonText}
+                onClick={submitAuthentication}>{submitButtonText}
             </button>
-            {failed && reason && <div>{reason}</div>}
+            {failed && reason && <i className={"warning-text"}>{reason}</i>}
         </div>
     )
 }

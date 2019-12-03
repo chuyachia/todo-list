@@ -1,4 +1,8 @@
-### Todolist REST API
+Work in progress
 
-RESTful API using Spring Data JPA and Spring Security with MySQL database and Docker.
+### Todolist REST API
+RESTful API using Hateoas with Spring Data JPA, Spring Security, MySQL database and Docker.
+
+### Todolist web client
+CRA, React Hook, Typescript.
 

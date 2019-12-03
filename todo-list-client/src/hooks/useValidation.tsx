@@ -4,7 +4,7 @@ interface IValidation {
     valid: boolean;
     touched: boolean;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onFocus: () => void;
+    onFocus: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const useValidation = (validation: (value: string) => boolean, onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void): IValidation => {
@@ -16,8 +16,9 @@ const useValidation = (validation: (value: string) => boolean, onChange?: (e: Re
         setValid(validation(e.target.value));
     }
 
-    const handleFocus = () => {
+    const handleFocus = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!touched) setTouched(true);
+        setValid(validation(e.target.value));
     }
 
     return {

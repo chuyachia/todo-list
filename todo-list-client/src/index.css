@@ -1,8 +1,10 @@
 :root {
   --base-space: 20px;
   --small-space: 10px;
+  --grey:#999;
   --light-blue: #09d3ac;
   --deep-blue: #282c34;
+  --red: #ed3315;
 }
 
 
@@ -15,7 +17,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.inactive-text {
+  color: var(--grey);
+}
+
+.warning-text {
+  color: var(--red);
+}
+
+.clickable {
+  cursor: pointer;
 }

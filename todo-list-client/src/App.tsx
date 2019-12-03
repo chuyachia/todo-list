@@ -34,25 +34,36 @@ const App: React.FC = () => {
         }
     }, [authenticated])
 
+    const renderAuthenticationForm = () => (
+        <>
+            <div>
+                <span onClick={() => setIsRegister(false)}
+                      className={`clickable ${isRegister ? 'inactive-text' : ''}`}>Login</span>
+                {" / "}
+                <span onClick={() => setIsRegister(true)}
+                      className={`clickable ${isRegister ? '' : 'inactive-text'}`}>Register</span>
+            </div>
+            {isRegister ?
+                <AuthenticationForm
+                    onSubmit={register}
+                    failed={failed}
+                    submitButtonText={"Register"}
+                    passwordValidationFunction={(value: string) => value.length > 5}
+                    passwordValidationMessage={"Password must contain more than 5 characters"}
+                    reason={reason}/> :
+                <AuthenticationForm
+                    onSubmit={logIn}
+                    failed={failed}
+                    submitButtonText={"Login"}
+                    reason={"Login failed"}/>}
+        </>
+    )
+
     return (
         <div className="App">
             <header className="App-header">
-                <p>Todo List App</p>
-                <div>
-                    <span onClick={() => setIsRegister(false)}>Login</span>
-                    {" / "}
-                    <span onClick={() => setIsRegister(true)}>Register</span>
-                </div>
-                {isRegister ?
-                    <AuthenticationForm
-                        onSubmit={register}
-                        failed={failed}
-                        submitButtonText={"Register"}
-                        passwordValidationFunction={(value: string) => value.length > 5}
-                        passwordValidationMessage={"Password must contain more than 5 characters"}
-                        reason={reason}/> :
-                    authenticated ? <div>Logged in </div> :
-                        <AuthenticationForm onSubmit={logIn} failed={failed} submitButtonText={"Login"}/>}
+                <h3>Todo List App</h3>
+                {!authenticated && renderAuthenticationForm()}
                 <div>{todos.map(todo => <TodoItem key={todo.id} {...todo}/>)}</div>
             </header>
         </div>

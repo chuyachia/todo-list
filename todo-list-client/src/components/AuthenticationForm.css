@@ -8,6 +8,7 @@
 .AuthenticationForm .submit-button {
     align-self: center;
     margin-top: var(--small-space);
+    margin-bottom: var(--small-space);
 }
 
 .AuthenticationForm .validation-text {
