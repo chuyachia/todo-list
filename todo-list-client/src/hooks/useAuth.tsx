@@ -6,6 +6,7 @@ interface IAuth {
     logIn: (username: string, password: string) => void;
     register: (username: string, password: string) => void;
     reason: string;
+    resetState: () => void;
 }
 
 const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
@@ -50,6 +51,11 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
         }
     }
 
+    function resetState() {
+        setFailed(false);
+        setAuthenticated(false);
+    }
+
     function _prepareFormData(username: string, password: string) {
         setFailed(false);
         const formData = new FormData()
@@ -72,6 +78,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
         logIn,
         register,
         reason,
+        resetState,
     }
 }
 

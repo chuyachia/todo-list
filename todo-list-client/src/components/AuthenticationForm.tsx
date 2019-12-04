@@ -2,8 +2,6 @@ import React from 'react';
 import useInput from '../hooks/useInput';
 import useValidation from "../hooks/useValidation";
 
-import './AuthenticationForm.css';
-
 interface IAuthenticationFormProps {
     onSubmit: (username: string, password: string) => void;
     failed: boolean;
@@ -27,8 +25,8 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
                                                                     usernameValidationMessage = "Username can not be empty",
                                                                     passwordValidationMessage = "Password must not be empty",
                                                                 }) => {
-    const {value: username, onChange: onUsernameChange, reset: resetUsername} = useInput();
-    const {value: password, onChange: onPasswordChange, reset: resetPassword} = useInput();
+    const {value: username, onChange: onUsernameChange, reset: resetUsername} = useInput<HTMLInputElement>();
+    const {value: password, onChange: onPasswordChange, reset: resetPassword} = useInput<HTMLInputElement>();
     const usernameValidation = useValidation(usernameValidationFunction, onUsernameChange);
     const passwordValidation = useValidation(passwordValidationFunction, onPasswordChange);
 
@@ -45,7 +43,7 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
     }
 
     return (
-        <div className={"AuthenticationForm"} onKeyDown={handleEnterKey}>
+        <div className={"form"} onKeyDown={handleEnterKey}>
             <input className={"form-input"} type={"text"} placeholder={"Enter Username"} autoFocus={true}
                    onChange={usernameValidation.onChange}
                    onFocus={usernameValidation.onFocus} value={username}/>

@@ -13,3 +13,29 @@
   font-size: calc(10px + 2vmin);
   color: white;
 }
+
+.form {
+  display: flex;
+  flex-flow: column wrap;
+  padding: var(--base-space);
+  width: 300px;
+}
+
+.form .submit-button {
+  align-self: center;
+  margin-top: var(--small-space);
+  margin-bottom: var(--small-space);
+}
+
+.form .validation-text {
+  height: var(--base-space);
+  align-self: flex-start;
+  color: var(--light-blue);
+  font-style: italic;
+  font-size:0.5em;
+}
+
+.form .form-input {
+  margin-top: var(--small-space);
+  margin-bottom: var(--small-space);
+}

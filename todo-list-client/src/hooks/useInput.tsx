@@ -1,15 +1,15 @@
 import React from 'react';
 
-interface IInput {
+interface IInput<T> {
     value: string;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onChange: (e: React.ChangeEvent<T>) => void;
     reset: () => void;
 }
 
-const useInput = (initValue: string = ''): IInput => {
+const useInput = <T extends HTMLInputElement | HTMLTextAreaElement| HTMLSelectElement>(initValue: string = ''): IInput<T> => {
     const [value, setValue] = React.useState<string>(initValue);
 
-    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
+    const onChange = (e: React.ChangeEvent<T>) => setValue(e.target.value);
 
 
     const reset = () => setValue("");
