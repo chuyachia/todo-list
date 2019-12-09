@@ -5,6 +5,8 @@ import com.todolist.api.exception.UnAuthorizedOperationException;
 import com.todolist.api.model.Todo;
 import com.todolist.api.model.TodoResourceAssembler;
 import com.todolist.api.model.TodoUserDetail;
+import com.todolist.api.model.UserRole;
+import com.todolist.api.model.enums.Role;
 import com.todolist.api.model.enums.Status;
 import com.todolist.api.repository.TodoRepository;
 import com.todolist.api.service.TodoService;
@@ -16,6 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+
+import javax.servlet.http.HttpServletRequest;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
@@ -58,13 +62,29 @@ public class TodoController {
         return new ResponseEntity(stream,headers,HttpStatus.OK);
     }
 
-    @GetMapping("/todos/{id}")
+    @GetMapping("/todos/id/{id}")
     public Resource<Todo> getOne(@PathVariable Integer id) {
         Todo todo = repository.findById(id)
                 .orElseThrow(() -> new TodoNotFoundException(id));
 
         return assembler.toResource(todo);
     }
+
+    @GetMapping("/todos/user/{username}")
+    public Resources<Resource<Todo>> getByUsername(@PathVariable String username, HttpServletRequest request) {
+        TodoUserDetail loggedInUser = getLoggedInUser();
+        if (!request.isUserInRole(Role.ADMIN.getCode()) &&
+                !loggedInUser.getTodoUser().getUsername().equals(username))
+            throw new UnAuthorizedOperationException("Listing other users' todos is not allowed");
+
+        List<Resource<Todo>> todos = repository.findByUserUsername(username)
+                .stream().map(t-> assembler.toResource(t))
+                .collect(Collectors.toList());
+
+        return new Resources<>(todos,
+                linkTo(methodOn(TodoController.class).getAll()).withSelfRel());
+    }
+
 
     @PostMapping("/todos")
     @ResponseStatus(HttpStatus.CREATED)
@@ -164,9 +184,13 @@ public class TodoController {
         repository.delete(todo);
     }
 
+    TodoUserDetail getLoggedInUser() {
+        return (TodoUserDetail) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+    }
+
     boolean isTodoAuthor(Todo todo) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        TodoUserDetail todoUserDetail = (TodoUserDetail) auth.getPrincipal();
+        TodoUserDetail todoUserDetail = getLoggedInUser();
         return todo.getUser().getId() == todoUserDetail.getTodoUser().getId();
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.QueryHint;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -16,6 +17,8 @@ import java.util.stream.Stream;
 public interface TodoRepository extends JpaRepository<Todo,Integer> {
     @Cacheable(cacheNames = "todos", unless="#result==null")
     Optional<Todo> findById(Integer id);
+
+    List<Todo> findByUserUsername(String username);
 
     @QueryHints(value = @QueryHint(name ="org.hibernate.fetchSize", value = "" + Integer.MIN_VALUE))
     @Query("SELECT t FROM Todo t")

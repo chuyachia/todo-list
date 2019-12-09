@@ -44,7 +44,7 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
 
     return (
         <div className={"form"} onKeyDown={handleEnterKey}>
-            <input className={"form-input"} type={"text"} placeholder={"Enter Username"} autoFocus={true}
+            <input className={"form-input"} type={"text"} placeholder={"Enter Username"}
                    onChange={usernameValidation.onChange}
                    onFocus={usernameValidation.onFocus} value={username}/>
             <small className={"validation-text"}>

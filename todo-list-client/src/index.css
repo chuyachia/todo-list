@@ -25,6 +25,10 @@ body {
   color: var(--red);
 }
 
+.success-text {
+  color: var(--light-blue)
+}
+
 .clickable {
   cursor: pointer;
 }
