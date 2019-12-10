@@ -1,6 +1,5 @@
 package com.todolist.api.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.todolist.api.model.enums.Role;
 import com.todolist.api.model.enums.RoleConverter;
 import lombok.Data;

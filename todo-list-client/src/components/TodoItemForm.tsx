@@ -1,18 +1,20 @@
 import React, {useState} from 'react';
 import useInput from '../hooks/useInput';
 import useValidation from "../hooks/useValidation";
+import ITodoItem from "../models/ITodo";
 
 interface ITodoItemForm {
     onBack: () => void;
     onSubmit: (title: string, description: string, priority: string) => void;
     submitError: boolean;
+    todo: ITodoItem | undefined;
 }
 
 const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
-    const titleInput = useInput<HTMLInputElement>();
+    const titleInput = useInput<HTMLInputElement>(props.todo ? props.todo.title : "");
     const titleInputValidation = useValidation((value: string) => value.length > 0, titleInput.onChange);
-    const priorityInput = useInput<HTMLSelectElement>(undefined);
-    const descriptionInput = useInput<HTMLTextAreaElement>();
+    const priorityInput = useInput<HTMLSelectElement>(props.todo ? props.todo.priority : "");
+    const descriptionInput = useInput<HTMLTextAreaElement>(props.todo ? props.todo.description : "");
     const [submitted, setSubmitted] = useState(false);
 
 

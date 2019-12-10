@@ -5,8 +5,10 @@ import com.todolist.api.model.enums.Status;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 @Component
@@ -20,10 +22,15 @@ public class TodoResourceAssembler implements ResourceAssembler<Todo, Resource> 
         Resource<Todo> todoResource = new Resource<>(todo,
                 linkTo(methodOn(TodoController.class).getOne(todo.getId())).withSelfRel());
 
-        if (todoUserDetail.getTodoUser().getId() == todo.getUser().getId()) {
+        if (auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_A")) ||
+                todoUserDetail.getTodoUser().getId() == todo.getUser().getId()) {
+            todoResource.add(
+                    linkTo(methodOn(TodoController.class)
+                            .update(null, todo.getId())).withRel("edit").withTitle("Edit"));
+
             Status status = todo.getStatus();
             switch (status) {
-                case TODO :
+                case TODO:
                     todoResource.add(
                             linkTo(methodOn(TodoController.class)
                                     .inProgress(todo.getId())).withRel("inProgress").withTitle("In Progress")
