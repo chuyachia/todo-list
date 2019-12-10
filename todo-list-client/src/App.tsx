@@ -14,7 +14,7 @@ const App: React.FC = () => {
         <div className="App">
             <header className="App-header">
                 <h3>Todo List App</h3>
-                {authenticated?
+                {authenticated ?
                     <TodoList authenticated={authenticated} username={user}/> :
                     <Authentication register={register} logIn={logIn} failed={failed} reason={reason}
                                     resetAuthState={resetAuthState}/>}

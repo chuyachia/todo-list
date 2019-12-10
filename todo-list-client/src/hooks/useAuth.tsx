@@ -7,10 +7,11 @@ interface IAuth {
     register: (username: string, password: string) => void;
     reason: string;
     resetState: () => void;
+    user: string;
 }
 
 const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
-
+    const [user, setUser] = React.useState<string>('');
     const [authenticated, setAuthenticated] = React.useState<boolean>(false);
     const [failed, setFailed] = React.useState<boolean>(false);
     const [reason, setReason] = React.useState<string>('');
@@ -41,6 +42,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
             const signedIn = await fetch(loginEndpoint, options);
             if (signedIn.ok) {
                 setAuthenticated(true);
+                setUser(username);
                 setFailed(false);
             } else {
                 setFailed(true);
@@ -79,6 +81,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
         register,
         reason,
         resetState,
+        user,
     }
 }
 

@@ -4,12 +4,13 @@ import ITodo from '../models/ITodo';
 interface ITodos {
     todos: ITodo[];
     fetchUserTodos: (username: string) => void;
-    submitNewTodo: (title: string, description: string, priority: string) => void;
+    fetchAllTodos: () => void;
+    submitNewTodo: (title: string, description: string, priority: string) => Promise<ITodo | null>;
     submitError: boolean;
     fetchError: boolean;
 }
 
-const useTodo = (fetchUserTodosEndpoint: string, sumbitNewTodoEndpoint: string): ITodos => {
+const useTodo = (fetchAllTodosEndpoint: string, fetchUserTodosEndpoint: string, sumbitNewTodoEndpoint: string): ITodos => {
     const [todos, setTodos] = React.useState([]);
     const [submitError, setSubmitError] = React.useState(false);
     const [fetchError, setFetchError] = React.useState(false);
@@ -35,7 +36,28 @@ const useTodo = (fetchUserTodosEndpoint: string, sumbitNewTodoEndpoint: string):
         }
     }
 
-    async function submitNewTodo(title: string, description: string, priority: string) {
+    async function fetchAllTodos() {
+        try {
+            setFetchError(false);
+            let url = fetchAllTodosEndpoint;
+            const response = await fetch(url, {
+                method: 'GET',
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                const todos = await response.json();
+                setTodos(todos._embedded.todoList);
+            } else {
+                setFetchError(true);
+            }
+        } catch (e) {
+            console.error(e);
+            setFetchError(true);
+        }
+    }
+
+    async function submitNewTodo(title: string, description: string, priority: string): Promise<ITodo | null> {
         try {
             setSubmitError(false);
             const response = await fetch(sumbitNewTodoEndpoint, {
@@ -52,7 +74,7 @@ const useTodo = (fetchUserTodosEndpoint: string, sumbitNewTodoEndpoint: string):
             });
 
             if (response.ok) {
-                const todo = await response.json();
+                return await response.json();
             } else {
                 setSubmitError(true);
             }
@@ -61,11 +83,14 @@ const useTodo = (fetchUserTodosEndpoint: string, sumbitNewTodoEndpoint: string):
             console.error(e);
             setSubmitError(true);
         }
+
+        return Promise.resolve(null);
     }
 
     return {
         todos,
         fetchUserTodos,
+        fetchAllTodos,
         submitNewTodo,
         submitError,
         fetchError,

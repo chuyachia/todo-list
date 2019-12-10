@@ -72,11 +72,6 @@ public class TodoController {
 
     @GetMapping("/todos/user/{username}")
     public Resources<Resource<Todo>> getByUsername(@PathVariable String username, HttpServletRequest request) {
-        TodoUserDetail loggedInUser = getLoggedInUser();
-        if (!request.isUserInRole(Role.ADMIN.getCode()) &&
-                !loggedInUser.getTodoUser().getUsername().equals(username))
-            throw new UnAuthorizedOperationException("Listing other users' todos is not allowed");
-
         List<Resource<Todo>> todos = repository.findByUserUsername(username)
                 .stream().map(t-> assembler.toResource(t))
                 .collect(Collectors.toList());
