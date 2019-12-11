@@ -37,7 +37,7 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
 
 
     return (
-        <div className={"form"} onChange={resetSubmitted}>
+        <div className={"form edit-todo"} onChange={resetSubmitted}>
             <label>Title</label>
             <input className={"form-input"} type={"text"} placeholder={"Enter title"}
                    onChange={titleInputValidation.onChange} onFocus={titleInputValidation.onFocus}
@@ -46,7 +46,7 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
                 {titleInputValidation.touched && !titleInputValidation.valid && "Title must not be empty"}
             </small>
             <label>Description</label>
-            <textarea className={"form-input"} placeholder={"Enter description"}
+            <textarea maxLength={200} className={"form-input"} placeholder={"Enter description"}
                       onChange={descriptionInput.onChange} value={descriptionInput.value}/>
             <label>Priority</label>
             <select className={"form-input"} value={priorityInput.value}
@@ -56,8 +56,10 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
                 <option value={"Medium"}>Medium</option>
                 <option value={"Low"}>Low</option>
             </select>
-            <button className={"submit-button"} onClick={submitNewTodo}>Add</button>
-            <button className={"submit-button"} onClick={goBack}>Back</button>
+            <div className={"buttons-wrap"}>
+                <button className={"submit-button primary"} onClick={submitNewTodo}>Submit</button>
+                <button className={"submit-button"} onClick={goBack}>Back</button>
+            </div>
             {submitted && !props.submitError && <i className={"success-text"}>Submit success</i>}
             {submitted && props.submitError && <i className={"warning-text"}>Submit error</i>}
         </div>);

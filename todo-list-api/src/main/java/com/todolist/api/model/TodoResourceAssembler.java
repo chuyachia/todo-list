@@ -51,7 +51,12 @@ public class TodoResourceAssembler implements ResourceAssembler<Todo, Resource> 
                             linkTo(methodOn(TodoController.class)
                                     .unDo(todo.getId())).withRel("unDo").withTitle("Undo")
                     );
-
+                    break;
+                case WONTDO:
+                    todoResource.add(
+                            linkTo(methodOn(TodoController.class)
+                                    .unDo(todo.getId())).withRel("unDo").withTitle("To Do")
+                    );
             }
         }
 

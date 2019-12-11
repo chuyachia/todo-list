@@ -1,10 +1,15 @@
 :root {
+  --large-space: 40px;
   --base-space: 20px;
   --small-space: 10px;
   --grey:#999;
-  --light-blue: #09d3ac;
+  --aqua: #09d3ac;
   --deep-blue: #282c34;
   --red: #ed3315;
+  --beige: #faebd7;
+  --light-purple: #e6e6fa;
+  --light-pink: #ffe3e1;
+  --light-grey: #d3d3d3;
 }
 
 
@@ -17,6 +22,32 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+button {
+  background: var(--deep-blue);
+  border-color: var(--deep-blue);
+  border-radius: 3px;
+  color: white;
+  padding: var(--small-space);
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button {
+  transition: 0.3s;
+}
+
+button.primary {
+  background: var(--aqua);
+  border-color: var(--aqua);
+  color: var(--deep-blue);
+}
+
+button.disabled {
+  cursor: not-allowed;
+  background: #999999;
+  border-color: #999999;
+}
+
 .inactive-text {
   color: var(--grey);
 }
@@ -26,7 +57,7 @@ body {
 }
 
 .success-text {
-  color: var(--light-blue)
+  color: var(--aqua)
 }
 
 .clickable {

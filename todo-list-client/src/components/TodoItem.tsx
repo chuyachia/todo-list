@@ -10,6 +10,8 @@ const TodoItem: React.FC<ITodoItem> = (props) => {
 
     const [todo, setTodo] = useState(props.todo);
     const {self, edit, ...links} = todo._links;
+    const isHighPriority = todo.priority === 'High';
+    const isDone = todo.status === "Won't Do" || todo.status === 'Done';
 
     async function changeTodoStatus(link: string) {
         const changeStatus = await fetch(link, {
@@ -25,19 +27,20 @@ const TodoItem: React.FC<ITodoItem> = (props) => {
     }
 
     return (
-        <div>
+        <article className={`todo-item ${isDone ? 'disabled' : isHighPriority ? 'warning' : ''}`}>
             <h3>{todo.title}</h3>
             <p>By: {todo.user.username}</p>
             <p>Priority: {todo.priority}</p>
             <p>Status: {todo.status}</p>
             <p>{todo.description}</p>
-            {edit !== undefined && <button onClick={()=>props.onEdit(todo)}>{edit.title}</button>}
-            {Object.keys(links).length > 0 && <p>Change status to: </p>}
-            {(Object.keys(links) as Array<keyof typeof links>).map((link) =>
-                <button key={link} onClick={() => changeTodoStatus(links[link].href)}>
-                    {links[link].title}
-                </button>)}
-        </div>)
+            <div className={"buttons-wrap"}>
+                {(Object.keys(links) as Array<keyof typeof links>).map((link) =>
+                    <button key={link} onClick={() => changeTodoStatus(links[link].href)}>
+                        {links[link].title}
+                    </button>)}
+                {edit !== undefined && <button onClick={() => props.onEdit(todo)}>{edit.title}</button>}
+            </div>
+        </article>)
 }
 
 export default TodoItem;

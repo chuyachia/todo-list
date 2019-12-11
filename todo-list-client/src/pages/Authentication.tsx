@@ -17,7 +17,7 @@ const Authentication: React.FC<IAuthenticationProps> = (props) => {
     }
 
     return (
-        <div>
+        <div className={"authentication"}>
             <div>
                 <span onClick={() => loginRegisterSwitch(false)}
                       className={`clickable ${isRegister ? 'inactive-text' : ''}`}>Login</span>

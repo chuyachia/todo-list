@@ -46,7 +46,7 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     }, [props.authenticated, props.username, showAllTodos])
 
     return (
-        <div>{isEdit ?
+        <div className={"todo-list"}>{isEdit ?
             <TodoItemForm onBack={handleBack} onSubmit={activeTodo !== undefined ? updateTodo : submitNewTodo}
                           submitError={submitError} todo={activeTodo}/>
             : <>
@@ -55,9 +55,9 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
                           className={`clickable ${showAllTodos ? 'inactive-text' : ''}`}>My Todos</span>
                     {" / "}
                     <span onClick={() => setShowAllTodos(true)}
-                          className={`clickable ${showAllTodos ? '' : 'inactive-text'}`}>All</span>
+                          className={`clickable ${showAllTodos ? '' : 'inactive-text'}`}>All Todos</span>
                 </div>
-                <button onClick={() => setIsEdit(true)}>New Todo</button>
+                <button className={"add-new primary"} onClick={() => setIsEdit(true)}>+</button>
                 {fetchError && <i className={"warning-text"}>Cannot fetch todos</i>}
                 <div>{todos.map(todo => <TodoItem key={hashCode(todo.title + todo.description + todo.priority)}
                                                   todo={todo} onEdit={handleEditTodo}/>)}</div>

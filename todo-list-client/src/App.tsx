@@ -11,16 +11,14 @@ const App: React.FC = () => {
     );
 
     return (
-        <div className="App">
-            <header className="App-header">
-                <h3>Todo List App</h3>
-                {authenticated ?
-                    <TodoList authenticated={authenticated} username={user}/> :
-                    <Authentication register={register} logIn={logIn} failed={failed} reason={reason}
-                                    resetAuthState={resetAuthState}/>}
+        <main className="App">
+            <h3>Todo List App</h3>
+            {authenticated ?
+                <TodoList authenticated={authenticated} username={user}/> :
+                <Authentication register={register} logIn={logIn} failed={failed} reason={reason}
+                                resetAuthState={resetAuthState}/>}
 
-            </header>
-        </div>
+        </main>
     );
 }
 

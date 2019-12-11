@@ -57,7 +57,7 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
                 {passwordValidation.touched && !passwordValidation.valid ? passwordValidationMessage : ""}
             </small>
             <button
-                className={"submit-button"}
+                className={`submit-button ${(!usernameValidation.valid || !passwordValidation.valid)?"disabled":"primary"}`}
                 disabled={!usernameValidation.valid || !passwordValidation.valid}
                 onClick={submitAuthentication}>{submitButtonText}
             </button>

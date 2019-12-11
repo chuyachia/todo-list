@@ -1,17 +1,21 @@
 .App {
   text-align: center;
-}
-
-
-.App-header {
   background-color: var(--deep-blue);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   font-size: calc(10px + 2vmin);
   color: white;
+}
+
+.authentication,
+.todo-list {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .form {
@@ -30,7 +34,7 @@
 .form .validation-text {
   height: var(--base-space);
   align-self: flex-start;
-  color: var(--light-blue);
+  color: var(--aqua);
   font-style: italic;
   font-size:0.5em;
 }
@@ -38,4 +42,68 @@
 .form .form-input {
   margin-top: var(--small-space);
   margin-bottom: var(--small-space);
+  font-size: 1rem;
+}
+
+textarea.form-input {
+  height: 150px;
+}
+
+.todo-item {
+  position: relative;
+  background: var(--beige);
+  color: #282c34;
+  padding: var(--small-space);
+  margin: var(--large-space);
+  min-width: 30vw;
+  max-width: 50vw;
+}
+
+.todo-item.warning {
+  background: var(--light-pink);
+}
+
+.todo-item.disabled {
+  background: var(--light-grey);
+}
+
+.todo-item:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-width: 0 30px 30px 0;
+  border-style: solid;
+  border-color: var(--grey) var(--deep-blue);
+}
+
+.todo-item p {
+  font-weight: lighter;
+}
+
+
+.add-new {
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  position: fixed;
+  top: var(--small-space);
+  right: var(--small-space);
+  font-size: 2em;
+  padding:0px;
+}
+
+.buttons-wrap {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+
+.buttons-wrap > button {
+  margin-left: var(--small-space);
+  margin-right: var(--small-space);
+}
+
+.edit-todo {
+  align-self: flex-start;
 }
