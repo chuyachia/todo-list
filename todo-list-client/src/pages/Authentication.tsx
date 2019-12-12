@@ -37,7 +37,7 @@ const Authentication: React.FC<IAuthenticationProps> = (props) => {
                     onSubmit={props.logIn}
                     failed={props.failed}
                     submitButtonText={"Login"}
-                    reason={"Login failed"}/>}
+                    reason={props.reason}/>}
         </div>
     )
 }

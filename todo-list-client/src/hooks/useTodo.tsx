@@ -12,13 +12,17 @@ interface ITodos {
     fetchError: boolean;
     editTodo: (todo: ITodoItem | undefined) => void;
     activeTodo: ITodoItem | undefined;
+    errorMessage: string;
 }
+
+const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
 
 const useTodo = (fetchAllTodosEndpoint: string, fetchUserTodosEndpoint: string, sumbitNewTodoEndpoint: string): ITodos => {
     const [todos, setTodos] = React.useState([])
     const [activeTodo, setActiveTodo] = React.useState<ITodoItem | undefined>(undefined);
     const [submitError, setSubmitError] = React.useState(false);
     const [fetchError, setFetchError] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState(DEFAULT_ERROR_MESSAGE);
 
     async function fetchUserTodos(username: string) {
         try {
@@ -34,10 +38,12 @@ const useTodo = (fetchAllTodosEndpoint: string, fetchUserTodosEndpoint: string, 
                 setTodos(safeGet(['_embedded', 'todoList'], todos, []));
             } else {
                 setFetchError(true);
+                _setErrorMessage(response);
             }
         } catch (e) {
             console.error(e);
             setFetchError(true);
+            setErrorMessage(DEFAULT_ERROR_MESSAGE);
         }
     }
 
@@ -55,10 +61,12 @@ const useTodo = (fetchAllTodosEndpoint: string, fetchUserTodosEndpoint: string, 
                 setTodos(safeGet(['_embedded', 'todoList'], todos, []));
             } else {
                 setFetchError(true);
+                _setErrorMessage(response);
             }
         } catch (e) {
             console.error(e);
             setFetchError(true);
+            setErrorMessage(DEFAULT_ERROR_MESSAGE);
         }
     }
 
@@ -83,11 +91,13 @@ const useTodo = (fetchAllTodosEndpoint: string, fetchUserTodosEndpoint: string, 
                 return await response.json();
             } else {
                 setSubmitError(true);
+                _setErrorMessage(response);
             }
 
         } catch (e) {
             console.error(e);
             setSubmitError(true);
+            setErrorMessage(DEFAULT_ERROR_MESSAGE);
         }
         return Promise.resolve(null);
     }
@@ -114,11 +124,13 @@ const useTodo = (fetchAllTodosEndpoint: string, fetchUserTodosEndpoint: string, 
                     return await response.json();
                 } else {
                     setSubmitError(true);
+                    _setErrorMessage(response);
                 }
 
             } catch (e) {
                 console.error(e);
                 setSubmitError(true);
+                setErrorMessage(DEFAULT_ERROR_MESSAGE);
             }
         }
         return Promise.resolve(null);
@@ -126,6 +138,16 @@ const useTodo = (fetchAllTodosEndpoint: string, fetchUserTodosEndpoint: string, 
 
     const editTodo = (todo: ITodoItem | undefined) => {
         setActiveTodo(todo);
+    }
+
+    async function _setErrorMessage(response: Response) {
+        setSubmitError(true);
+        if (response.status.toString().startsWith("4")) {
+            const error = await response.json();
+            setErrorMessage(error.message);
+        } else {
+            setErrorMessage(DEFAULT_ERROR_MESSAGE);
+        }
     }
 
     return {
@@ -138,6 +160,7 @@ const useTodo = (fetchAllTodosEndpoint: string, fetchUserTodosEndpoint: string, 
         editTodo,
         activeTodo,
         updateTodo,
+        errorMessage,
     }
 
 }

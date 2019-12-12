@@ -10,6 +10,8 @@ interface IAuth {
     user: string;
 }
 
+const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
+
 const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
     const [user, setUser] = React.useState<string>('');
     const [authenticated, setAuthenticated] = React.useState<boolean>(false);
@@ -25,12 +27,17 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
                 logIn(username, password);
             } else {
                 const response = await registered.json();
-                setReason(response.message);
+                if (response.status.toString().startsWith("4")) {
+                    setReason(response.message);
+                } else {
+                    setReason(DEFAULT_ERROR_MESSAGE);
+                }
                 setFailed(true);
             }
         } catch (e) {
             setFailed(true);
             console.error(e);
+            setReason(DEFAULT_ERROR_MESSAGE);
         }
 
     }
@@ -46,10 +53,17 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
                 setFailed(false);
             } else {
                 setFailed(true);
+                const response = await signedIn.json();
+                if (response.status.toString().startsWith("4")) {
+                    setReason(response.message);
+                } else {
+                    setReason(DEFAULT_ERROR_MESSAGE);
+                }
             }
         } catch (e) {
             setFailed(true);
             console.error(e);
+            setReason(DEFAULT_ERROR_MESSAGE);
         }
     }
 

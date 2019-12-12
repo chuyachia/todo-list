@@ -8,6 +8,7 @@ interface ITodoItemForm {
     onSubmit: (title: string, description: string, priority: string) => void;
     submitError: boolean;
     todo: ITodoItem | undefined;
+    errorMessage: string;
 }
 
 const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
@@ -60,8 +61,8 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
                 <button className={"submit-button primary"} onClick={submitNewTodo}>Submit</button>
                 <button className={"submit-button"} onClick={goBack}>Back</button>
             </div>
-            {submitted && !props.submitError && <i className={"success-text"}>Submit success</i>}
-            {submitted && props.submitError && <i className={"warning-text"}>Submit error</i>}
+            {submitted && !props.submitError && <i className={"success-text"}>Successfully submitted!</i>}
+            {submitted && props.submitError && <i className={"warning-text"}>{props.errorMessage}</i>}
         </div>);
 }
 

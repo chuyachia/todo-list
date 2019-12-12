@@ -25,7 +25,8 @@ public class TodoSecurityConfiguration extends WebSecurityConfigurerAdapter {
     private LoginSuccessHandler loginSuccessHandler;
     @Autowired
     private LogoutSuccessHandler logoutSuccessHandler;
-    private SimpleUrlAuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
+    @Autowired
+    private LoginFailureHandler loginFailureHandler;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -53,7 +54,7 @@ public class TodoSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin()
                 .successHandler(loginSuccessHandler)
-                .failureHandler(failureHandler)
+                .failureHandler(loginFailureHandler)
                 .and()
                 .logout()
                 .invalidateHttpSession(true)

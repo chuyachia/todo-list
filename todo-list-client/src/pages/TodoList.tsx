@@ -11,7 +11,7 @@ interface ITodoListProps {
 }
 
 const TodoList: React.FC<ITodoListProps> = (props) => {
-    const {todos, fetchUserTodos, fetchAllTodos, submitNewTodo, submitError, fetchError, activeTodo, editTodo, updateTodo} = useTodo(
+    const {todos, fetchUserTodos, fetchAllTodos, submitNewTodo, submitError, fetchError, activeTodo, editTodo, updateTodo, errorMessage} = useTodo(
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos',
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/user',
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos'
@@ -48,7 +48,7 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     return (
         <div className={"todo-list"}>{isEdit ?
             <TodoItemForm onBack={handleBack} onSubmit={activeTodo !== undefined ? updateTodo : submitNewTodo}
-                          submitError={submitError} todo={activeTodo}/>
+                          submitError={submitError} todo={activeTodo} errorMessage={errorMessage}/>
             : <>
                 <div>
                     <span onClick={() => setShowAllTodos(false)}
@@ -58,7 +58,7 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
                           className={`clickable ${showAllTodos ? '' : 'inactive-text'}`}>All Todos</span>
                 </div>
                 <button className={"add-new primary"} onClick={() => setIsEdit(true)}>+</button>
-                {fetchError && <i className={"warning-text"}>Cannot fetch todos</i>}
+                {fetchError && <i className={"warning-text"}>{errorMessage}</i>}
                 <div>{todos.map(todo => <TodoItem key={hashCode(todo.title + todo.description + todo.priority)}
                                                   todo={todo} onEdit={handleEditTodo}/>)}</div>
             </>}
