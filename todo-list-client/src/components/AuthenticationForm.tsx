@@ -1,6 +1,7 @@
 import React from 'react';
 import useInput from '../hooks/useInput';
 import useValidation from "../hooks/useValidation";
+import {ENTER_KEY} from '../constants';
 
 interface IAuthenticationFormProps {
     onSubmit: (username: string, password: string) => void;
@@ -12,8 +13,6 @@ interface IAuthenticationFormProps {
     passwordValidationMessage?: string;
     reason?: string;
 }
-
-const ENTER_KEY = 13;
 
 const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
                                                                     onSubmit,
@@ -57,7 +56,7 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
                 {passwordValidation.touched && !passwordValidation.valid ? passwordValidationMessage : ""}
             </small>
             <button
-                className={`submit-button ${(!usernameValidation.valid || !passwordValidation.valid)?"disabled":"primary"}`}
+                className={`submit-button ${(!usernameValidation.valid || !passwordValidation.valid) ? "disabled" : "primary"}`}
                 disabled={!usernameValidation.valid || !passwordValidation.valid}
                 onClick={submitAuthentication}>{submitButtonText}
             </button>

@@ -1,0 +1,31 @@
+.todo-item {
+    position: relative;
+    background: var(--beige);
+    color: #282c34;
+    padding: var(--small-space);
+    margin-top: var(--large-space);
+    min-width: 30vw;
+    max-width: 50vw;
+}
+
+.todo-item.warning {
+    background: var(--light-pink);
+}
+
+.todo-item.disabled {
+    background: var(--light-grey);
+}
+
+.todo-item:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-width: 0 30px 30px 0;
+    border-style: solid;
+    border-color: var(--grey) var(--deep-blue);
+}
+
+.todo-item p {
+    font-weight: lighter;
+}

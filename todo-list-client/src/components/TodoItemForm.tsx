@@ -2,6 +2,8 @@ import React, {useState} from 'react';
 import useInput from '../hooks/useInput';
 import useValidation from "../hooks/useValidation";
 import ITodoItem from "../models/ITodo";
+import {ENTER_KEY} from '../constants';
+
 
 interface ITodoItemForm {
     onBack: () => void;
@@ -36,9 +38,15 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
         if (submitted) setSubmitted(false);
     }
 
+    const handleEnterKey = (e: React.KeyboardEvent) => {
+        if (e.keyCode === ENTER_KEY && titleInputValidation.valid) {
+            submitNewTodo();
+        }
+    }
+
 
     return (
-        <div className={"form edit-todo"} onChange={resetSubmitted}>
+        <div className={"form edit-todo"} onChange={resetSubmitted} onKeyDown={handleEnterKey}>
             <label>Title</label>
             <input className={"form-input"} type={"text"} placeholder={"Enter title"}
                    onChange={titleInputValidation.onChange} onFocus={titleInputValidation.onFocus}

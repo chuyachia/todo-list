@@ -14,7 +14,7 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     const {todos, fetchUserTodos, fetchAllTodos, submitNewTodo, submitError, fetchError, activeTodo, editTodo, updateTodo, errorMessage} = useTodo(
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos',
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/user',
-        process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos'
+        process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos',
     );
     const [isEdit, setIsEdit] = useState(false);
     const [showAllTodos, setShowAllTodos] = useState(false);
@@ -36,7 +36,7 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     }
 
     useEffect(() => {
-        if (props.authenticated && props.username.length > 0) {
+        if (props.username.length > 0) {
             if (!showAllTodos) {
                 fetchUserTodos(props.username);
             } else {
@@ -52,10 +52,10 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
             : <>
                 <div>
                     <span onClick={() => setShowAllTodos(false)}
-                          className={`clickable ${showAllTodos ? 'inactive-text' : ''}`}>My Todos</span>
+                          className={`clickable ${showAllTodos ? 'inactive-text' : 'active-text'}`}>My Todos</span>
                     {" / "}
                     <span onClick={() => setShowAllTodos(true)}
-                          className={`clickable ${showAllTodos ? '' : 'inactive-text'}`}>All Todos</span>
+                          className={`clickable ${showAllTodos ? 'active-text' : 'inactive-text'}`}>All Todos</span>
                 </div>
                 <button className={"add-new primary"} onClick={() => setIsEdit(true)}>+</button>
                 {fetchError && <i className={"warning-text"}>{errorMessage}</i>}

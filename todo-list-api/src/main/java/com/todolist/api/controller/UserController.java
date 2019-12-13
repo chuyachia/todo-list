@@ -13,6 +13,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,10 +46,16 @@ public class UserController {
         service.registerNewUser(newUser);
     }
 
+    @GetMapping("/user-info")
+    @ResponseStatus(HttpStatus.OK)
+    public Resource<TodoUser> getLoggedInUser(Principal principal) {
+        return getOne(principal != null ? principal.getName() : null);
+    }
+
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
     public Resources<Resource<TodoUser>> getAll() {
-        List<Resource<TodoUser>> todoUsers =  repository.findAll().stream()
+        List<Resource<TodoUser>> todoUsers = repository.findAll().stream()
                 .map(todoUser -> assembler.toResource(todoUser))
                 .collect(Collectors.toList());
 
@@ -59,7 +66,7 @@ public class UserController {
     @GetMapping("/users/{username}")
     @ResponseStatus(HttpStatus.OK)
     public Resource<TodoUser> getOne(@PathVariable String username) {
-        TodoUser user =  repository.findByUsername(username);
+        TodoUser user = repository.findByUsername(username);
         if (user == null) {
             throw new UserNotFoundException(username);
         }
@@ -71,7 +78,7 @@ public class UserController {
     @PutMapping("/users/{username}/{role}")
     @ResponseStatus(HttpStatus.OK)
     public Resource<TodoUser> update(@PathVariable String role, @PathVariable String username) {
-        TodoUser todoUser =  service.addUserRole(username, role);
+        TodoUser todoUser = service.addUserRole(username, role);
 
         return assembler.toResource(todoUser);
     }

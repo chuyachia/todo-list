@@ -5,14 +5,17 @@ import Authentication from './pages/Authentication';
 import TodoList from './pages/TodoList';
 
 const App: React.FC = () => {
-    const {authenticated, logIn, register, failed, reason, resetState: resetAuthState, user} = useAuth(
+    const {authenticated, logIn, register, failed, reason, resetState: resetAuthState, user, logOut} = useAuth(
         process.env.REACT_APP_TODO_LIST_API_DEV + '/login',
         process.env.REACT_APP_TODO_LIST_API_DEV + '/register',
+        process.env.REACT_APP_TODO_LIST_API_DEV + '/user-info',
+        process.env.REACT_APP_TODO_LIST_API_DEV + '/logout',
     );
 
     return (
         <main className="App">
             <h3>Todo List App</h3>
+            {authenticated && <small className={"clickable inactive-text"} onClick={() => logOut()}>Logout</small>}
             {authenticated ?
                 <TodoList authenticated={authenticated} username={user}/> :
                 <Authentication register={register} logIn={logIn} failed={failed} reason={reason}

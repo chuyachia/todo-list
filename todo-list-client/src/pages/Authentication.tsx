@@ -20,10 +20,10 @@ const Authentication: React.FC<IAuthenticationProps> = (props) => {
         <div className={"authentication"}>
             <div>
                 <span onClick={() => loginRegisterSwitch(false)}
-                      className={`clickable ${isRegister ? 'inactive-text' : ''}`}>Login</span>
+                      className={`clickable ${isRegister ? 'inactive-text' : 'active-text'}`}>Login</span>
                 {" / "}
                 <span onClick={() => loginRegisterSwitch(true)}
-                      className={`clickable ${isRegister ? '' : 'inactive-text'}`}>Register</span>
+                      className={`clickable ${isRegister ? 'active-text' : 'inactive-text'}`}>Register</span>
             </div>
             {isRegister ?
                 <AuthenticationForm

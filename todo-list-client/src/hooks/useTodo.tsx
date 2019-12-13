@@ -17,7 +17,10 @@ interface ITodos {
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
 
-const useTodo = (fetchAllTodosEndpoint: string, fetchUserTodosEndpoint: string, sumbitNewTodoEndpoint: string): ITodos => {
+const useTodo = (
+    fetchAllTodosEndpoint: string,
+    fetchUserTodosEndpoint: string,
+    sumbitNewTodoEndpoint: string): ITodos => {
     const [todos, setTodos] = React.useState([])
     const [activeTodo, setActiveTodo] = React.useState<ITodoItem | undefined>(undefined);
     const [submitError, setSubmitError] = React.useState(false);

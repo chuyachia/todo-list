@@ -4,6 +4,7 @@ interface IAuth {
     authenticated: boolean;
     failed: boolean;
     logIn: (username: string, password: string) => void;
+    logOut: () => void;
     register: (username: string, password: string) => void;
     reason: string;
     resetState: () => void;
@@ -12,11 +13,31 @@ interface IAuth {
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
 
-const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
+const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoing: string, logoutEndpoint: string): IAuth => {
     const [user, setUser] = React.useState<string>('');
     const [authenticated, setAuthenticated] = React.useState<boolean>(false);
     const [failed, setFailed] = React.useState<boolean>(false);
     const [reason, setReason] = React.useState<string>('');
+
+    React.useEffect(() => {
+        getUserInfo();
+    })
+
+    async function getUserInfo() {
+        try {
+            const response = await fetch(userInfoEndpoing, {method: 'GET', credentials: 'include'})
+            if (response.ok) {
+                const user = await response.json();
+                setAuthenticated(true);
+                setUser(user.username);
+            } else {
+                setAuthenticated(false);
+            }
+        } catch (e) {
+            setAuthenticated(false);
+            console.error(e);
+        }
+    }
 
     async function register(username: string, password: string) {
         const options = _prepareFormData(username, password);
@@ -42,20 +63,30 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
 
     }
 
+    async function logOut() {
+        try {
+            await fetch(logoutEndpoint, {method: 'POST', credentials: 'include'})
+            setAuthenticated(false);
+            setUser('');
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     async function logIn(username: string, password: string) {
         const options = _prepareFormData(username, password);
 
         try {
-            const signedIn = await fetch(loginEndpoint, options);
-            if (signedIn.ok) {
+            const response = await fetch(loginEndpoint, options);
+            if (response.ok) {
                 setAuthenticated(true);
                 setUser(username);
                 setFailed(false);
             } else {
                 setFailed(true);
-                const response = await signedIn.json();
+                const logInInfo = await response.json();
                 if (response.status.toString().startsWith("4")) {
-                    setReason(response.message);
+                    setReason(logInInfo.message);
                 } else {
                     setReason(DEFAULT_ERROR_MESSAGE);
                 }
@@ -66,6 +97,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
             setReason(DEFAULT_ERROR_MESSAGE);
         }
     }
+
 
     function resetState() {
         setFailed(false);
@@ -92,6 +124,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string): IAuth => {
         authenticated,
         failed,
         logIn,
+        logOut,
         register,
         reason,
         resetState,

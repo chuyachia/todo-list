@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
 import ITodo from '../models/ITodo';
 
+import './TodoItem.css';
+
 interface ITodoItem {
     todo: ITodo;
     onEdit: (todo: ITodo) => void;
