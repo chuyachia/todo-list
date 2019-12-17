@@ -10,8 +10,12 @@ import com.todolist.api.model.enums.Status;
 import com.todolist.api.repository.TodoRepository;
 import com.todolist.api.service.TodoService;
 import com.todolist.api.validator.TodoValidator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,17 +26,12 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import javax.validation.Valid;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping("api")
 public class TodoController {
     private final TodoRepository repository;
     private final TodoResourceAssembler assembler;
+    private final PagedResourcesAssembler pagedResourcesAssembler;
     private final TodoService service;
     private final TodoValidator todoValidator;
 
@@ -41,6 +40,7 @@ public class TodoController {
         this.assembler = assembler;
         this.service = service;
         this.todoValidator = todoValidator;
+        this.pagedResourcesAssembler = new PagedResourcesAssembler(null,null);
     }
 
     @InitBinder
@@ -50,26 +50,26 @@ public class TodoController {
 
 
     @GetMapping("/todos")
-    public Resources<Resource<Todo>> getAll() {
-        List<Resource<Todo>> todos =repository.findAll().stream()
-                .map(todo -> assembler.toResource(todo))
-                .collect(Collectors.toList());
+    public PagedResources<Resource<Todo>> getAll(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
+        Pageable pageable = getPageable(page, size);
 
-        return new Resources<>(todos,
-                linkTo(methodOn(TodoController.class).getAll()).withSelfRel());
+        Page<Todo> todosPage = repository.findAll(pageable);
+
+        return pagedResourcesAssembler.toResource(
+                todosPage, assembler);
     }
 
     @GetMapping("/todos/file")
-    public ResponseEntity<StreamingResponseBody> downloadAll()  {
-            StreamingResponseBody stream = outputStream -> {
-                service.streamAll(outputStream);
-                outputStream.flush();
-            };
+    public ResponseEntity<StreamingResponseBody> downloadAll() {
+        StreamingResponseBody stream = outputStream -> {
+            service.streamAll(outputStream);
+            outputStream.flush();
+        };
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.add("Content-disposition", "attachment; filename=todos.csv");
 
-        return new ResponseEntity(stream,headers,HttpStatus.OK);
+        return new ResponseEntity(stream, headers, HttpStatus.OK);
     }
 
     @GetMapping("/todos/id/{id}")
@@ -81,36 +81,35 @@ public class TodoController {
     }
 
     @GetMapping("/todos/user/{username}")
-    public Resources<Resource<Todo>> getByUsername(@PathVariable String username) {
-        List<Resource<Todo>> todos = repository.findByUserUsername(username)
-                .stream().map(t-> assembler.toResource(t))
-                .collect(Collectors.toList());
+    public PagedResources<Resource<Todo>> getByUsername(@PathVariable String username, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
+        Pageable pageable = getPageable(page, size);
 
-        return new Resources<>(todos,
-                linkTo(methodOn(TodoController.class).getAll()).withSelfRel());
+        Page<Todo> todosPage = repository.findByUserUsername(username, pageable);
+
+        return pagedResourcesAssembler.toResource(
+                todosPage, assembler);
     }
 
     @GetMapping("/todos/search")
-    public Resources<Resource<Todo>> getBySearchString(@RequestParam(required = false) String q,
+    public PagedResources<Resource<Todo>> getBySearchString(@RequestParam(required = false) String q,
                                                        @RequestParam(required = false) Priority priority,
                                                        @RequestParam(required = false) Status status,
-                                                       @RequestParam(required = false) String user) {
-        List<Todo> todos = new ArrayList<>();
+                                                       @RequestParam(required = false) String user,
+                                                       @RequestParam(required = false) Integer page,
+                                                       @RequestParam(required = false) Integer size) {
+        Pageable pageable = getPageable(page, size);
+        Page<Todo> todosPage = Page.empty();
 
         if (q != null) {
-            todos = repository.findBySearchString(q.toLowerCase(),user);
+            todosPage = repository.findBySearchString(q.toLowerCase(), user, pageable);
         } else if (priority != null) {
-            todos = user == null ? repository.findByPriority(priority) : repository.findByPriorityAndUserUsername(priority, user);
+            todosPage = user == null ? repository.findByPriority(priority, pageable) : repository.findByPriorityAndUserUsername(priority, user, pageable);
         } else if (status != null) {
-            todos = user == null ? repository.findByStatus(status) : repository.findByStatusAndUserUsername(status, user);
+            todosPage = user == null ? repository.findByStatus(status, pageable) : repository.findByStatusAndUserUsername(status, user, pageable);
         }
 
-        List<Resource<Todo>> todosResource = todos
-                .stream().map(t -> assembler.toResource(t))
-                .collect(Collectors.toList());
-
-        return new Resources<>(todosResource,
-                linkTo(methodOn(TodoController.class).getAll()).withSelfRel());
+        return pagedResourcesAssembler.toResource(
+                todosPage, assembler);
     }
 
 
@@ -193,10 +192,18 @@ public class TodoController {
     public Resource<Todo> update(@RequestBody Todo newTodo, @PathVariable Integer id) {
         Todo updatedTodo = repository.findById(id)
                 .map(todo -> {
-                    if (newTodo.getTitle()!=null) { todo.setTitle(newTodo.getTitle());}
-                    if (newTodo.getStatus()!=null) {todo.setStatus(newTodo.getStatus());}
-                    if (newTodo.getPriority()!=null) {todo.setPriority(newTodo.getPriority());}
-                    if (newTodo.getDescription()!=null) {todo.setDescription(newTodo.getDescription());}
+                    if (newTodo.getTitle() != null) {
+                        todo.setTitle(newTodo.getTitle());
+                    }
+                    if (newTodo.getStatus() != null) {
+                        todo.setStatus(newTodo.getStatus());
+                    }
+                    if (newTodo.getPriority() != null) {
+                        todo.setPriority(newTodo.getPriority());
+                    }
+                    if (newTodo.getDescription() != null) {
+                        todo.setDescription(newTodo.getDescription());
+                    }
                     return repository.save(todo);
                 })
                 .orElseThrow(() -> new TodoNotFoundException(id));
@@ -212,13 +219,24 @@ public class TodoController {
         repository.delete(todo);
     }
 
-    TodoUserDetail getLoggedInUser() {
+    private TodoUserDetail getLoggedInUser() {
         return (TodoUserDetail) SecurityContextHolder.getContext().getAuthentication()
                 .getPrincipal();
     }
 
-    boolean isTodoAuthor(Todo todo) {
+    private boolean isTodoAuthor(Todo todo) {
         TodoUserDetail todoUserDetail = getLoggedInUser();
         return todo.getUser().getId() == todoUserDetail.getTodoUser().getId();
+    }
+
+    private Pageable getPageable(Integer page, Integer size) {
+        Pageable pageable;
+        if (size != null && page != null) {
+            pageable = PageRequest.of(page, size);
+        } else {
+            pageable = Pageable.unpaged();
+        }
+
+        return pageable;
     }
 }
