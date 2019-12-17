@@ -1,4 +1,6 @@
-package com.todolist.api.model.enums;
+package com.todolist.api.converter;
+
+import com.todolist.api.model.enums.Status;
 
 import javax.persistence.AttributeConverter;
 

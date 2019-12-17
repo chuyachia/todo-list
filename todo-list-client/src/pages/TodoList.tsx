@@ -15,8 +15,10 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos',
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/user',
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos',
+        process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/search'
     );
     const [isEdit, setIsEdit] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [showAllTodos, setShowAllTodos] = useState(false);
 
 

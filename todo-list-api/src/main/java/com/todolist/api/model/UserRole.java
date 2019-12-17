@@ -1,7 +1,7 @@
 package com.todolist.api.model;
 
 import com.todolist.api.model.enums.Role;
-import com.todolist.api.model.enums.RoleConverter;
+import com.todolist.api.converter.RoleConverter;
 import lombok.Data;
 
 import javax.persistence.*;

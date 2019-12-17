@@ -5,6 +5,7 @@ import com.todolist.api.exception.UnAuthorizedOperationException;
 import com.todolist.api.model.Todo;
 import com.todolist.api.model.TodoResourceAssembler;
 import com.todolist.api.model.TodoUserDetail;
+import com.todolist.api.model.enums.Priority;
 import com.todolist.api.model.enums.Status;
 import com.todolist.api.repository.TodoRepository;
 import com.todolist.api.service.TodoService;
@@ -19,11 +20,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,12 +81,35 @@ public class TodoController {
     }
 
     @GetMapping("/todos/user/{username}")
-    public Resources<Resource<Todo>> getByUsername(@PathVariable String username, HttpServletRequest request) {
+    public Resources<Resource<Todo>> getByUsername(@PathVariable String username) {
         List<Resource<Todo>> todos = repository.findByUserUsername(username)
                 .stream().map(t-> assembler.toResource(t))
                 .collect(Collectors.toList());
 
         return new Resources<>(todos,
+                linkTo(methodOn(TodoController.class).getAll()).withSelfRel());
+    }
+
+    @GetMapping("/todos/search")
+    public Resources<Resource<Todo>> getBySearchString(@RequestParam(required = false) String q,
+                                                       @RequestParam(required = false) Priority priority,
+                                                       @RequestParam(required = false) Status status,
+                                                       @RequestParam(required = false) String user) {
+        List<Todo> todos = new ArrayList<>();
+
+        if (q != null) {
+            todos = repository.findBySearchString(q.toLowerCase(),user);
+        } else if (priority != null) {
+            todos = user == null ? repository.findByPriority(priority) : repository.findByPriorityAndUserUsername(priority, user);
+        } else if (status != null) {
+            todos = user == null ? repository.findByStatus(status) : repository.findByStatusAndUserUsername(status, user);
+        }
+
+        List<Resource<Todo>> todosResource = todos
+                .stream().map(t -> assembler.toResource(t))
+                .collect(Collectors.toList());
+
+        return new Resources<>(todosResource,
                 linkTo(methodOn(TodoController.class).getAll()).withSelfRel());
     }
 

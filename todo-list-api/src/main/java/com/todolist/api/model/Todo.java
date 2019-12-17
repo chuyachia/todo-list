@@ -3,9 +3,9 @@ package com.todolist.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.todolist.api.model.enums.Priority;
-import com.todolist.api.model.enums.PriorityConverter;
+import com.todolist.api.converter.PriorityConverter;
 import com.todolist.api.model.enums.Status;
-import com.todolist.api.model.enums.StatusConverter;
+import com.todolist.api.converter.StatusConverter;
 import lombok.Data;
 
 import javax.persistence.*;

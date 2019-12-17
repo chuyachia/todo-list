@@ -20,7 +20,8 @@ const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
 const useTodo = (
     fetchAllTodosEndpoint: string,
     fetchUserTodosEndpoint: string,
-    sumbitNewTodoEndpoint: string): ITodos => {
+    sumbitNewTodoEndpoint: string,
+    searchTodosEndpoint: string): ITodos => {
     const [todos, setTodos] = React.useState([])
     const [activeTodo, setActiveTodo] = React.useState<ITodoItem | undefined>(undefined);
     const [submitError, setSubmitError] = React.useState(false);
@@ -54,6 +55,29 @@ const useTodo = (
         try {
             setFetchError(false);
             let url = fetchAllTodosEndpoint;
+            const response = await fetch(url, {
+                method: 'GET',
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                const todos = await response.json();
+                setTodos(safeGet(['_embedded', 'todoList'], todos, []));
+            } else {
+                setFetchError(true);
+                _setErrorMessage(response);
+            }
+        } catch (e) {
+            console.error(e);
+            setFetchError(true);
+            setErrorMessage(DEFAULT_ERROR_MESSAGE);
+        }
+    }
+
+    async function searchTodos(searchValue: string) {
+        try {
+            setFetchError(false);
+            let url = searchTodosEndpoint+`?q=${searchValue.toLowerCase()}`;
             const response = await fetch(url, {
                 method: 'GET',
                 credentials: 'include',

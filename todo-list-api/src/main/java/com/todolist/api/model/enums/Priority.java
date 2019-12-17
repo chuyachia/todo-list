@@ -3,6 +3,7 @@ package com.todolist.api.model.enums;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import javax.persistence.Convert;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Arrays;
