@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Dispatch} from 'react';
 import ITodoItem from '../models/ITodo';
 import safeGet from '../util/safeGet';
 
@@ -7,6 +7,7 @@ interface ITodos {
     fetchUserTodos: (username: string) => void;
     fetchAllTodos: () => void;
     searchTodos: (searchValue: string, user?: string) => void;
+    fetchTodos: (url: string) => void;
     submitNewTodo: (title: string, description: string, priority: string) => Promise<ITodoItem | null>;
     updateTodo: (title: string, description: string, priority: string) => Promise<ITodoItem | null>;
     submitError: boolean;
@@ -14,6 +15,14 @@ interface ITodos {
     editTodo: (todo: ITodoItem | undefined) => void;
     activeTodo: ITodoItem | undefined;
     errorMessage: string;
+    size: number;
+    setSize: Dispatch<number>;
+    currentPage: number;
+    totalPages: number;
+    nextPageUrl: string;
+    prevPageUrl: string;
+    firstPageUrl: string;
+    lastPageUrl: string;
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
@@ -22,17 +31,26 @@ const useTodo = (
     fetchAllTodosEndpoint: string,
     fetchUserTodosEndpoint: string,
     sumbitNewTodoEndpoint: string,
-    searchTodosEndpoint: string): ITodos => {
+    searchTodosEndpoint: string,
+    defaultDisplaySize?: number): ITodos => {
     const [todos, setTodos] = React.useState([])
     const [activeTodo, setActiveTodo] = React.useState<ITodoItem | undefined>(undefined);
     const [submitError, setSubmitError] = React.useState(false);
     const [fetchError, setFetchError] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState(DEFAULT_ERROR_MESSAGE);
+    const [size, setSize] = React.useState(defaultDisplaySize || 5);
+    const [currentPage, setCurrentPage] = React.useState(0);
+    const [totalPages, setTotalPages] = React.useState(0);
+    const [nextPageUrl, setNextPageUrl] = React.useState("");
+    const [prevPageUrl, setPrevPageUrl] = React.useState("");
+    const [firstPageUrl, setFirstPageUrl] = React.useState("");
+    const [lastPageUrl, setLastPageUrl] = React.useState("");
+
 
     async function fetchUserTodos(username: string) {
         try {
             setFetchError(false);
-            let url = `${fetchUserTodosEndpoint}/${username}`;
+            let url = `${fetchUserTodosEndpoint}/${username}?page=0&size=${size}`;
             const response = await fetch(url, {
                 method: 'GET',
                 credentials: 'include',
@@ -41,6 +59,7 @@ const useTodo = (
             if (response.ok) {
                 const todos = await response.json();
                 setTodos(safeGet(['_embedded', 'todoList'], todos, []));
+                _setPaginations(todos);
             } else {
                 setFetchError(true);
                 _setErrorMessage(response);
@@ -55,7 +74,7 @@ const useTodo = (
     async function fetchAllTodos() {
         try {
             setFetchError(false);
-            let url = fetchAllTodosEndpoint;
+            let url = `${fetchAllTodosEndpoint}?page=0&size=${size}`;
             const response = await fetch(url, {
                 method: 'GET',
                 credentials: 'include',
@@ -64,6 +83,7 @@ const useTodo = (
             if (response.ok) {
                 const todos = await response.json();
                 setTodos(safeGet(['_embedded', 'todoList'], todos, []));
+                _setPaginations(todos);
             } else {
                 setFetchError(true);
                 _setErrorMessage(response);
@@ -78,7 +98,7 @@ const useTodo = (
     async function searchTodos(searchValue: string, user?: string) {
         try {
             setFetchError(false);
-            let url = searchTodosEndpoint + `?q=${searchValue.toLowerCase()}`;
+            let url = searchTodosEndpoint + `?q=${searchValue.toLowerCase()}&page=0&size=${size}`;
             if (user !== undefined) url += `&user=${user}`
             const response = await fetch(url, {
                 method: 'GET',
@@ -88,6 +108,30 @@ const useTodo = (
             if (response.ok) {
                 const todos = await response.json();
                 setTodos(safeGet(['_embedded', 'todoList'], todos, []));
+                _setPaginations(todos);
+            } else {
+                setFetchError(true);
+                _setErrorMessage(response);
+            }
+        } catch (e) {
+            console.error(e);
+            setFetchError(true);
+            setErrorMessage(DEFAULT_ERROR_MESSAGE);
+        }
+    }
+
+    async function fetchTodos(url: string) {
+        try {
+            setFetchError(false);
+            const response = await fetch(url, {
+                method: 'GET',
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                const todos = await response.json();
+                setTodos(safeGet(['_embedded', 'todoList'], todos, []));
+                _setPaginations(todos);
             } else {
                 setFetchError(true);
                 _setErrorMessage(response);
@@ -179,11 +223,21 @@ const useTodo = (
         }
     }
 
+    function _setPaginations(todos: any) {
+        setFirstPageUrl(safeGet(['_links', 'first', 'href'], todos, ""));
+        setPrevPageUrl(safeGet(['_links', 'prev', 'href'], todos, ""));
+        setNextPageUrl(safeGet(['_links', 'next', 'href'], todos, ""));
+        setLastPageUrl(safeGet(['_links', 'last', 'href'], todos, ""));
+        setCurrentPage(safeGet(['page', 'number'], todos, 0));
+        setTotalPages(safeGet(['page', 'totalPages'], todos, 0));
+    }
+
     return {
         todos,
         fetchUserTodos,
         fetchAllTodos,
         searchTodos,
+        fetchTodos,
         submitNewTodo,
         submitError,
         fetchError,
@@ -191,6 +245,14 @@ const useTodo = (
         activeTodo,
         updateTodo,
         errorMessage,
+        size,
+        setSize,
+        totalPages,
+        currentPage,
+        prevPageUrl,
+        firstPageUrl,
+        nextPageUrl,
+        lastPageUrl,
     }
 
 }

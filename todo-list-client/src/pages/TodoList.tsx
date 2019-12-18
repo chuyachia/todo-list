@@ -1,13 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faFileDownload, faPlus, faSearch} from '@fortawesome/free-solid-svg-icons'
+import {faFastBackward, faFileDownload, faPlus, faSearch, faStepBackward} from '@fortawesome/free-solid-svg-icons'
 
 import TodoItemForm from '../components/TodoItemForm';
 import TodoItem from '../components/TodoItem';
 import SearchInput from '../components/SearchInput';
+import Pagination from '../components/Pagination';
 import useTodo from "../hooks/useTodo";
 import ITodoItem from "../models/ITodo";
 import hashCode from '../util/hashCode';
+import {faStepForward} from "@fortawesome/free-solid-svg-icons/faStepForward";
+import {faFastForward} from "@fortawesome/free-solid-svg-icons/faFastForward";
 
 interface ITodoListProps {
     authenticated: boolean;
@@ -15,11 +18,16 @@ interface ITodoListProps {
 }
 
 const TodoList: React.FC<ITodoListProps> = (props) => {
-    const {todos, fetchUserTodos, fetchAllTodos, searchTodos, submitNewTodo, submitError, fetchError, activeTodo, editTodo, updateTodo, errorMessage} = useTodo(
+    const {
+        todos, fetchUserTodos, fetchAllTodos, searchTodos, submitNewTodo, fetchTodos,
+        submitError, fetchError, activeTodo, editTodo, updateTodo, errorMessage,
+        size, setSize, totalPages, currentPage, prevPageUrl, firstPageUrl, nextPageUrl, lastPageUrl
+    } = useTodo(
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos',
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/user',
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos',
-        process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/search'
+        process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/search',
+        5,
     );
     const [isEdit, setIsEdit] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -90,6 +98,12 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
                 {fetchError && <i className={"warning-text"}>{errorMessage}</i>}
                 <div>{todos.map(todo => <TodoItem key={hashCode(todo.title + todo.description + todo.priority)}
                                                   todo={todo} onEdit={handleEditTodo}/>)}</div>
+                <Pagination onFirstPageClick={() => fetchTodos(firstPageUrl)}
+                            onPrevPageClick={() => fetchTodos(prevPageUrl)}
+                            onNextPageClick={() => fetchTodos(nextPageUrl)}
+                            onLastPageClick={() => fetchTodos(lastPageUrl)}
+                            currentPage={currentPage + 1}
+                            totalPages={totalPages}/>
             </>}
         </div>)
 }
