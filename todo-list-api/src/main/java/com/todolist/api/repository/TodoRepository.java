@@ -30,7 +30,8 @@ public interface TodoRepository extends JpaRepository<Todo, Integer> {
             "AND (LOWER(t.title) LIKE %:searchString% " +
             "OR LOWER(t.description) LIKE %:searchString% " +
             "OR LOWER(t.priority) LIKE %:searchString% " +
-            "OR LOWER(t.status) LIKE %:searchString%)")
+            "OR LOWER(t.status) LIKE %:searchString% " +
+            "OR LOWER(u.username) LIKE %:searchString%)")
     Page<Todo> findBySearchString(@Param("searchString") String searchString, @Param("username") String username, Pageable pageable);
 
     Page<Todo> findByPriority(Priority priority, Pageable pageable);

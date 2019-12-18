@@ -6,6 +6,7 @@ interface ITodos {
     todos: ITodoItem[];
     fetchUserTodos: (username: string) => void;
     fetchAllTodos: () => void;
+    searchTodos: (searchValue: string, user?: string) => void;
     submitNewTodo: (title: string, description: string, priority: string) => Promise<ITodoItem | null>;
     updateTodo: (title: string, description: string, priority: string) => Promise<ITodoItem | null>;
     submitError: boolean;
@@ -74,10 +75,11 @@ const useTodo = (
         }
     }
 
-    async function searchTodos(searchValue: string) {
+    async function searchTodos(searchValue: string, user?: string) {
         try {
             setFetchError(false);
-            let url = searchTodosEndpoint+`?q=${searchValue.toLowerCase()}`;
+            let url = searchTodosEndpoint + `?q=${searchValue.toLowerCase()}`;
+            if (user !== undefined) url += `&user=${user}`
             const response = await fetch(url, {
                 method: 'GET',
                 credentials: 'include',
@@ -181,6 +183,7 @@ const useTodo = (
         todos,
         fetchUserTodos,
         fetchAllTodos,
+        searchTodos,
         submitNewTodo,
         submitError,
         fetchError,

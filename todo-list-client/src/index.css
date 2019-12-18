@@ -30,10 +30,7 @@ button {
   padding: var(--small-space);
   font-weight: bold;
   cursor: pointer;
-}
-
-button {
-  transition: 0.3s;
+  min-width: 3em;
 }
 
 button.primary {

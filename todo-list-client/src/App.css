@@ -26,13 +26,13 @@
   width: 300px;
 }
 
-.form .submit-button {
+.submit-button {
   align-self: center;
   margin-top: var(--small-space);
   margin-bottom: var(--small-space);
 }
 
-.form .validation-text {
+.validation-text {
   height: var(--base-space);
   align-self: flex-start;
   color: var(--aqua);
@@ -40,7 +40,7 @@
   font-size:0.5em;
 }
 
-.form .form-input {
+.form-input {
   margin-top: var(--small-space);
   margin-bottom: var(--small-space);
   font-size: 1rem;
@@ -50,15 +50,16 @@ textarea.form-input {
   height: 150px;
 }
 
-.add-new {
-  border-radius: 50%;
-  width: 1.5em;
-  height: 1.5em;
+.tools-bar  {
   position: fixed;
   top: var(--small-space);
   right: var(--small-space);
-  font-size: 2em;
-  padding:0px;
+}
+
+.vertical-buttons-wrap {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-end;
 }
 
 .buttons-wrap {
@@ -67,7 +68,8 @@ textarea.form-input {
   justify-content: center;
 }
 
-.buttons-wrap > button {
+.buttons-wrap  button,
+.vertical-buttons-wrap  button {
   margin: var(--small-space);
 }
 
