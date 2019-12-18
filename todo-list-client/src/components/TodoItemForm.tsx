@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import useInput from '../hooks/useInput';
 import useValidation from "../hooks/useValidation";
 import ITodoItem from "../models/ITodo";
+import safeGet from '../util/safeGet';
 import {ENTER_KEY} from '../constants';
 
 
@@ -14,10 +15,10 @@ interface ITodoItemForm {
 }
 
 const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
-    const titleInput = useInput<HTMLInputElement>(props.todo ? props.todo.title : "");
+    const titleInput = useInput<HTMLInputElement>(safeGet(["todo", "title"], props, ""));
     const titleInputValidation = useValidation((value: string) => value.length > 0, titleInput.onChange);
-    const priorityInput = useInput<HTMLSelectElement>(props.todo ? props.todo.priority : "");
-    const descriptionInput = useInput<HTMLTextAreaElement>(props.todo ? props.todo.description : "");
+    const priorityInput = useInput<HTMLSelectElement>(safeGet(["todo", "priority"], props, ""));
+    const descriptionInput = useInput<HTMLTextAreaElement>(safeGet(["todo", "description"], props, ""));
     const [submitted, setSubmitted] = useState(false);
 
 
@@ -43,7 +44,6 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
             submitNewTodo();
         }
     }
-
 
     return (
         <div className={"form edit-todo"} onChange={resetSubmitted} onKeyDown={handleEnterKey}>

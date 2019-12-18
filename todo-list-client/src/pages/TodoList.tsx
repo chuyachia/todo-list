@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faFastBackward, faFileDownload, faPlus, faSearch, faStepBackward} from '@fortawesome/free-solid-svg-icons'
+import {faFileDownload, faPlus, faSearch} from '@fortawesome/free-solid-svg-icons'
 
 import TodoItemForm from '../components/TodoItemForm';
 import TodoItem from '../components/TodoItem';
@@ -9,8 +9,7 @@ import Pagination from '../components/Pagination';
 import useTodo from "../hooks/useTodo";
 import ITodoItem from "../models/ITodo";
 import hashCode from '../util/hashCode';
-import {faStepForward} from "@fortawesome/free-solid-svg-icons/faStepForward";
-import {faFastForward} from "@fortawesome/free-solid-svg-icons/faFastForward";
+import useInput from "../hooks/useInput";
 
 interface ITodoListProps {
     authenticated: boolean;
@@ -21,17 +20,20 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     const {
         todos, fetchUserTodos, fetchAllTodos, searchTodos, submitNewTodo, fetchTodos,
         submitError, fetchError, activeTodo, editTodo, updateTodo, errorMessage,
-        size, setSize, totalPages, currentPage, prevPageUrl, firstPageUrl, nextPageUrl, lastPageUrl
+        size, setSize, totalPages, currentPage, prevPageUrl, firstPageUrl, nextPageUrl, lastPageUrl,
+        currentPageUrl, downloadTodos
     } = useTodo(
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos',
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/user',
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos',
         process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/search',
+        process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/file',
         5,
     );
     const [isEdit, setIsEdit] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [showAllTodos, setShowAllTodos] = useState(false);
+    const {value : searchValue, onChange: onSearchValueChange} = useInput<HTMLInputElement>("");
 
 
     const handleBack = () => {
@@ -57,15 +59,27 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
         }
     }
 
+    const handleShowAllTodosClick = () => {
+        setShowAllTodos(true);
+        fetchAllTodos();
+    }
+
+    const handleShowMyTodosClick = () => {
+        setShowAllTodos(false);
+        fetchUserTodos(props.username);
+    }
+
     useEffect(() => {
         if (props.username.length > 0) {
-            if (!showAllTodos) {
+            if (currentPageUrl.length > 0) {
+                fetchTodos(currentPageUrl);
+            } else if (!showAllTodos) {
                 fetchUserTodos(props.username);
             } else {
                 fetchAllTodos();
             }
         }
-    }, [props.authenticated, props.username, showAllTodos])
+    }, [props.authenticated, props.username, isEdit])
 
     return (
         <div className={"todo-list"}>{isEdit ?
@@ -73,10 +87,10 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
                           submitError={submitError} todo={activeTodo} errorMessage={errorMessage}/>
             : <>
                 <div>
-                    <span onClick={() => setShowAllTodos(false)}
+                    <span onClick={handleShowMyTodosClick}
                           className={`clickable ${showAllTodos ? 'inactive-text' : 'active-text'}`}>My Todos</span>
                     {" / "}
-                    <span onClick={() => setShowAllTodos(true)}
+                    <span onClick={handleShowAllTodosClick}
                           className={`clickable ${showAllTodos ? 'active-text' : 'inactive-text'}`}>All Todos</span>
                 </div>
                 <div className={"tools-bar vertical-buttons-wrap"}>
@@ -85,13 +99,15 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
                     </button>
                     <div>
                         {isSearchOpen && <SearchInput onBlur={() => setIsSearchOpen(false)}
+                                                      value={searchValue}
+                                                      onChange={onSearchValueChange}
                                                       submitSearch={handleSubmitSearch}/>}
                         <button title="Search todos" className={"primary"}
                                 onClick={() => setIsSearchOpen(!isSearchOpen)}>
                             <FontAwesomeIcon icon={faSearch}/>
                         </button>
                     </div>
-                    <button title="Download todos" className={"primary"} onClick={() => setIsEdit(true)}>
+                    <button title="Download todos" className={"primary"} onClick={downloadTodos}>
                         <FontAwesomeIcon icon={faFileDownload}/>
                     </button>
                 </div>

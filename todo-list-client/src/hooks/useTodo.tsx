@@ -23,6 +23,8 @@ interface ITodos {
     prevPageUrl: string;
     firstPageUrl: string;
     lastPageUrl: string;
+    currentPageUrl: string;
+    downloadTodos: () => void;
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
@@ -32,6 +34,7 @@ const useTodo = (
     fetchUserTodosEndpoint: string,
     sumbitNewTodoEndpoint: string,
     searchTodosEndpoint: string,
+    downloadTodosEndPoint: string,
     defaultDisplaySize?: number): ITodos => {
     const [todos, setTodos] = React.useState([])
     const [activeTodo, setActiveTodo] = React.useState<ITodoItem | undefined>(undefined);
@@ -41,6 +44,7 @@ const useTodo = (
     const [size, setSize] = React.useState(defaultDisplaySize || 5);
     const [currentPage, setCurrentPage] = React.useState(0);
     const [totalPages, setTotalPages] = React.useState(0);
+    const [currentPageUrl, setCurrentPageUrl] = React.useState("");
     const [nextPageUrl, setNextPageUrl] = React.useState("");
     const [prevPageUrl, setPrevPageUrl] = React.useState("");
     const [firstPageUrl, setFirstPageUrl] = React.useState("");
@@ -209,6 +213,10 @@ const useTodo = (
         return Promise.resolve(null);
     }
 
+    const downloadTodos = () => {
+        window.location.assign(downloadTodosEndPoint);
+    }
+
     const editTodo = (todo: ITodoItem | undefined) => {
         setActiveTodo(todo);
     }
@@ -226,6 +234,7 @@ const useTodo = (
     function _setPaginations(todos: any) {
         setFirstPageUrl(safeGet(['_links', 'first', 'href'], todos, ""));
         setPrevPageUrl(safeGet(['_links', 'prev', 'href'], todos, ""));
+        setCurrentPageUrl(safeGet(['_links', 'self', 'href'], todos, ""));
         setNextPageUrl(safeGet(['_links', 'next', 'href'], todos, ""));
         setLastPageUrl(safeGet(['_links', 'last', 'href'], todos, ""));
         setCurrentPage(safeGet(['page', 'number'], todos, 0));
@@ -239,6 +248,7 @@ const useTodo = (
         searchTodos,
         fetchTodos,
         submitNewTodo,
+        downloadTodos,
         submitError,
         fetchError,
         editTodo,
@@ -251,6 +261,7 @@ const useTodo = (
         currentPage,
         prevPageUrl,
         firstPageUrl,
+        currentPageUrl,
         nextPageUrl,
         lastPageUrl,
     }
