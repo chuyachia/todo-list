@@ -60,9 +60,10 @@ public class TodoController {
     }
 
     @GetMapping("/todos/file")
-    public ResponseEntity<StreamingResponseBody> downloadAll() {
+    public ResponseEntity<StreamingResponseBody> downloadAll(@RequestParam(required = false) String q,
+                                                             @RequestParam(required = false) String user) {
         StreamingResponseBody stream = outputStream -> {
-            service.streamAll(outputStream);
+            service.streamAll(outputStream,q, user);
             outputStream.flush();
         };
         HttpHeaders headers = new HttpHeaders();

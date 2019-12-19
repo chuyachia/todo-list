@@ -33,7 +33,7 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     const [isEdit, setIsEdit] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [showAllTodos, setShowAllTodos] = useState(false);
-    const {value : searchValue, onChange: onSearchValueChange} = useInput<HTMLInputElement>("");
+    const {value: searchValue, onChange: onSearchValueChange, reset: resetSearchValue} = useInput<HTMLInputElement>("");
 
 
     const handleBack = () => {
@@ -61,12 +61,18 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
 
     const handleShowAllTodosClick = () => {
         setShowAllTodos(true);
+        resetSearchValue();
         fetchAllTodos();
     }
 
     const handleShowMyTodosClick = () => {
         setShowAllTodos(false);
+        resetSearchValue();
         fetchUserTodos(props.username);
+    }
+
+    const handleDownloadTodosClick = () => {
+        downloadTodos(searchValue, showAllTodos ? undefined : props.username);
     }
 
     useEffect(() => {
@@ -98,7 +104,7 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
                         <FontAwesomeIcon icon={faPlus}/>
                     </button>
                     <div>
-                        {isSearchOpen && <SearchInput onBlur={() => setIsSearchOpen(false)}
+                        {isSearchOpen && <SearchInput onClose={() => setIsSearchOpen(false)}
                                                       value={searchValue}
                                                       onChange={onSearchValueChange}
                                                       submitSearch={handleSubmitSearch}/>}
@@ -107,7 +113,7 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
                             <FontAwesomeIcon icon={faSearch}/>
                         </button>
                     </div>
-                    <button title="Download todos" className={"primary"} onClick={downloadTodos}>
+                    <button title="Download todos" className={"primary"} onClick={handleDownloadTodosClick}>
                         <FontAwesomeIcon icon={faFileDownload}/>
                     </button>
                 </div>

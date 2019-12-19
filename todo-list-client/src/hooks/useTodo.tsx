@@ -24,7 +24,7 @@ interface ITodos {
     firstPageUrl: string;
     lastPageUrl: string;
     currentPageUrl: string;
-    downloadTodos: () => void;
+    downloadTodos: (searchValue?: string, user?: string) => void;
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
@@ -213,8 +213,10 @@ const useTodo = (
         return Promise.resolve(null);
     }
 
-    const downloadTodos = () => {
-        window.location.assign(downloadTodosEndPoint);
+    const downloadTodos = (searchValue = "", user?: string) => {
+        let url = downloadTodosEndPoint + `?q=${searchValue.toLowerCase()}`;
+        if (user !== undefined) url += `&user=${user}`
+        window.location.assign(url);
     }
 
     const editTodo = (todo: ITodoItem | undefined) => {

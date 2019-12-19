@@ -39,6 +39,6 @@ public class Todo {
     }
 
     public String toCSVString() {
-        return this.getId()+";"+this.getTitle()+";"+this.getStatus()+";"+this.getPriority()+";"+this.getDescription();
+        return this.getId()+";"+this.getTitle()+";"+this.getStatus()+";"+this.getPriority()+";"+this.getDescription()+";"+this.getUser().getUsername();
     }
 }

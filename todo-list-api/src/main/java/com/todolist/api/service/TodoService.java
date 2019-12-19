@@ -18,8 +18,8 @@ public class TodoService implements ITodoService {
 
     @Override
     @Transactional(readOnly = true)
-    public void streamAll(OutputStream outputStream) {
-        Stream<Todo> todoStream = repository.streamAll();
+    public void streamAll(OutputStream outputStream, String q, String username) {
+        Stream<Todo> todoStream = repository.streamAll(q, username);
         writeCSVHeader(outputStream);
         todoStream.forEach(todo -> writeCSVRow(todo,outputStream));
     }

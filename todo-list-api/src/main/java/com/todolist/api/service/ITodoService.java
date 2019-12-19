@@ -3,5 +3,5 @@ package com.todolist.api.service;
 import java.io.OutputStream;
 
 public interface ITodoService {
-    void streamAll(OutputStream outputStream);
+    void streamAll(OutputStream outputStream, String q, String username);
 }

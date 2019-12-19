@@ -13,7 +13,7 @@ interface IAuth {
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
 
-const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoing: string, logoutEndpoint: string): IAuth => {
+const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoint: string, logoutEndpoint: string): IAuth => {
     const [user, setUser] = React.useState<string>('');
     const [authenticated, setAuthenticated] = React.useState<boolean>(false);
     const [failed, setFailed] = React.useState<boolean>(false);
@@ -25,7 +25,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
 
     async function getUserInfo() {
         try {
-            const response = await fetch(userInfoEndpoing, {method: 'GET', credentials: 'include'})
+            const response = await fetch(userInfoEndpoint, {method: 'GET', credentials: 'include'})
             if (response.ok) {
                 const user = await response.json();
                 setAuthenticated(true);
