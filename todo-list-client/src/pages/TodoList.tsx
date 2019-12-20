@@ -23,11 +23,11 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
         size, setSize, totalPages, currentPage, prevPageUrl, firstPageUrl, nextPageUrl, lastPageUrl,
         currentPageUrl, downloadTodos
     } = useTodo(
-        process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos',
-        process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/user',
-        process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos',
-        process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/search',
-        process.env.REACT_APP_TODO_LIST_API_DEV + '/api/todos/file',
+        process.env.REACT_APP_TODO_LIST_API + '/api/todos',
+        process.env.REACT_APP_TODO_LIST_API + '/api/todos/user',
+        process.env.REACT_APP_TODO_LIST_API + '/api/todos',
+        process.env.REACT_APP_TODO_LIST_API + '/api/todos/search',
+        process.env.REACT_APP_TODO_LIST_API + '/api/todos/file',
         5,
     );
     const [isEdit, setIsEdit] = useState(false);

@@ -6,10 +6,10 @@ import TodoList from './pages/TodoList';
 
 const App: React.FC = () => {
     const {authenticated, logIn, register, failed, reason, resetState: resetAuthState, user, logOut} = useAuth(
-        process.env.REACT_APP_TODO_LIST_API_DEV + '/login',
-        process.env.REACT_APP_TODO_LIST_API_DEV + '/register',
-        process.env.REACT_APP_TODO_LIST_API_DEV + '/user-info',
-        process.env.REACT_APP_TODO_LIST_API_DEV + '/logout',
+        process.env.REACT_APP_TODO_LIST_API + '/login',
+        process.env.REACT_APP_TODO_LIST_API + '/register',
+        process.env.REACT_APP_TODO_LIST_API + '/user-info',
+        process.env.REACT_APP_TODO_LIST_API + '/logout',
     );
 
     return (
