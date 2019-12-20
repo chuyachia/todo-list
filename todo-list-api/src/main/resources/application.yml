@@ -25,7 +25,7 @@ logging:
 spring:
   profiles: local
   datasource:
-    jdbc-url: jdbc:mysql://localhost:3306/TODOLIST?useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/TODOLIST?useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&allowPublicKeyRetrieval=true
     username: user
     password: user
     driver-class-name: com.mysql.cj.jdbc.Driver
