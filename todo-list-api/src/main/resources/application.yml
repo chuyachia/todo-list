@@ -1,6 +1,8 @@
 spring:
   application:
     name: "todo-list-api"
+  datasource:
+    driver-class-name: org.postgresql.Driver
   profiles:
     active:
       - local
@@ -26,15 +28,7 @@ spring:
     jdbc-url: jdbc:mysql://localhost:3306/TODOLIST?useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&allowPublicKeyRetrieval=true
     username: user
     password: user
+    driver-class-name: com.mysql.cj.jdbc.Driver
 todolist:
   cors:
     origin: http://localhost:3000
----
-spring:
-  profiles: prod
-  datasource:
-    jdbc-url: jdbc:mysql://todo-list-db:3306/TODOLIST?useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&allowPublicKeyRetrieval=true
-    username: user
-    password: user
-logging:
-  file: /var/log/${spring.application.name}/${spring.application.name}.log
