@@ -14,6 +14,9 @@ server:
   servlet:
     session:
       timeout: 30m
+todolist:
+  cors:
+    origin: https://todolist-cyc-client.herokuapp.com
 logging:
   level:
     org:

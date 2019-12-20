@@ -13,7 +13,6 @@ import org.springframework.web.filter.CorsFilter;
 import java.util.Arrays;
 import java.util.Collections;
 
-@Profile("local")
 @Configuration
 public class SimpleCorsConfiguration {
     @Value("${todolist.cors.origin:http://localhost:8081}")
