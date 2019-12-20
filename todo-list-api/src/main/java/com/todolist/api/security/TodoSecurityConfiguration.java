@@ -49,7 +49,7 @@ public class TodoSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/todos/**")
                 .authenticated()
-                .antMatchers("/users/**")
+                .antMatchers("/users/**","/user-info")
                 .hasRole(Role.ADMIN.getCode())
                 .and()
                 .formLogin()

@@ -21,7 +21,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
 
     React.useEffect(() => {
         getUserInfo();
-    })
+    }, [])
 
     async function getUserInfo() {
         try {

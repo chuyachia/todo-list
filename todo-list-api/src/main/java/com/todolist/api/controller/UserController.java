@@ -49,7 +49,7 @@ public class UserController {
     @GetMapping("/user-info")
     @ResponseStatus(HttpStatus.OK)
     public Resource<TodoUser> getLoggedInUser(Principal principal) {
-        return getOne(principal != null ? principal.getName() : null);
+        return getOne(principal != null ? principal.getName() : "");
     }
 
     @GetMapping("/users")
