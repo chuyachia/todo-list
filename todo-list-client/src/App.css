@@ -54,6 +54,7 @@ textarea.form-input {
   position: fixed;
   top: var(--small-space);
   right: var(--small-space);
+  z-index: 2;
 }
 
 .vertical-buttons-wrap {
