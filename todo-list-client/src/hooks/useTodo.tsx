@@ -125,25 +125,27 @@ const useTodo = (
     }
 
     async function fetchTodos(url: string) {
-        try {
-            setFetchError(false);
-            const response = await fetch(url, {
-                method: 'GET',
-                credentials: 'include',
-            });
+        if (url.length > 0) {
+            try {
+                setFetchError(false);
+                const response = await fetch(url, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
 
-            if (response.ok) {
-                const todos = await response.json();
-                setTodos(safeGet(['_embedded', 'todoList'], todos, []));
-                _setPaginations(todos);
-            } else {
+                if (response.ok) {
+                    const todos = await response.json();
+                    setTodos(safeGet(['_embedded', 'todoList'], todos, []));
+                    _setPaginations(todos);
+                } else {
+                    setFetchError(true);
+                    _setErrorMessage(response);
+                }
+            } catch (e) {
+                console.error(e);
                 setFetchError(true);
-                _setErrorMessage(response);
+                setErrorMessage(DEFAULT_ERROR_MESSAGE);
             }
-        } catch (e) {
-            console.error(e);
-            setFetchError(true);
-            setErrorMessage(DEFAULT_ERROR_MESSAGE);
         }
     }
 

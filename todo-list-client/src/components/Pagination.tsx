@@ -14,20 +14,21 @@ interface IPagination {
 }
 
 const Pagination: React.FC<IPagination> = (props) => {
-
     return (
         <div className={"buttons-wrap"}>
-            <button className={"primary"} onClick={props.onFirstPageClick}><FontAwesomeIcon
-                icon={faFastBackward}/></button>
+            <button className={"primary"} onClick={props.onFirstPageClick}>
+                <FontAwesomeIcon
+                    icon={faFastBackward}/></button>
             <button className={props.currentPage > 1 ? "primary" : "disabled"}
-                    onClick={() => props.currentPage > 1 && props.onPrevPageClick()}><FontAwesomeIcon
+                    onClick={props.onPrevPageClick}><FontAwesomeIcon
                 icon={faStepBackward}/></button>
             <button className={"disabled"}>{`Page ${props.currentPage} of ${props.totalPages}`}</button>
             <button className={props.currentPage < props.totalPages ? "primary" : "disabled"}
-                    onClick={() => props.currentPage < props.totalPages && props.onNextPageClick()}><FontAwesomeIcon
+                    onClick={props.onNextPageClick}><FontAwesomeIcon
                 icon={faStepForward}/></button>
-            <button className={"primary"} onClick={props.onLastPageClick}><FontAwesomeIcon
-                icon={faFastForward}/></button>
+            <button className={"primary"} onClick={props.onLastPageClick}>
+                <FontAwesomeIcon
+                    icon={faFastForward}/></button>
         </div>
     )
 }
