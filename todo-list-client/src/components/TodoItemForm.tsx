@@ -12,6 +12,7 @@ interface ITodoItemForm {
     submitError: boolean;
     todo: ITodoItem | undefined;
     errorMessage: string;
+    loading: boolean;
 }
 
 const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
@@ -66,7 +67,9 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
                 <option value={"Low"}>Low</option>
             </select>
             <div className={"buttons-wrap"}>
-                <button className={"submit-button primary"} onClick={submitNewTodo}>Submit</button>
+                <button className={`submit-button ${props.loading ? "disabled" : "primary"}`}
+                        onClick={() => !props.loading && submitNewTodo()}>Submit
+                </button>
                 <button className={"submit-button"} onClick={goBack}>Back</button>
             </div>
             {submitted && !props.submitError && <i className={"success-text"}>Successfully submitted!</i>}

@@ -21,7 +21,7 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
         todos, fetchUserTodos, fetchAllTodos, searchTodos, submitNewTodo, fetchTodos,
         submitError, fetchError, activeTodo, editTodo, updateTodo, errorMessage,
         size, setSize, totalPages, currentPage, prevPageUrl, firstPageUrl, nextPageUrl, lastPageUrl,
-        currentPageUrl, downloadTodos
+        currentPageUrl, downloadTodos, loading, changeTodoStatus
     } = useTodo(
         process.env.REACT_APP_TODO_LIST_API + '/api/todos',
         process.env.REACT_APP_TODO_LIST_API + '/api/todos/user',
@@ -72,7 +72,9 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     }
 
     const handleDownloadTodosClick = () => {
-        downloadTodos(searchValue, showAllTodos ? undefined : props.username);
+        if (!loading) {
+            downloadTodos(searchValue, showAllTodos ? undefined : props.username);
+        }
     }
 
     useEffect(() => {
@@ -88,45 +90,51 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     }, [props.authenticated, props.username, isEdit])
 
     return (
-        <div className={"todo-list"}>{isEdit ?
-            <TodoItemForm onBack={handleBack} onSubmit={activeTodo !== undefined ? updateTodo : submitNewTodo}
-                          submitError={submitError} todo={activeTodo} errorMessage={errorMessage}/>
-            : <>
-                <div>
-                    <span onClick={handleShowMyTodosClick}
-                          className={`clickable ${showAllTodos ? 'inactive-text' : 'active-text'}`}>My Todos</span>
-                    {" / "}
-                    <span onClick={handleShowAllTodosClick}
-                          className={`clickable ${showAllTodos ? 'active-text' : 'inactive-text'}`}>All Todos</span>
-                </div>
-                <div className={"tools-bar vertical-buttons-wrap"}>
-                    <button title="Add new todo" className={"primary"} onClick={() => setIsEdit(true)}>
-                        <FontAwesomeIcon icon={faPlus}/>
-                    </button>
+        <div className={"todo-list"}>
+            {loading && <i className={"inactive-text loader"}>Loading...</i>}
+            {isEdit ?
+                <TodoItemForm onBack={handleBack} onSubmit={activeTodo !== undefined ? updateTodo : submitNewTodo}
+                              submitError={submitError} todo={activeTodo} errorMessage={errorMessage}
+                              loading={loading}/>
+                : <>
                     <div>
-                        {isSearchOpen && <SearchInput onClose={() => setIsSearchOpen(false)}
-                                                      value={searchValue}
-                                                      onChange={onSearchValueChange}
-                                                      submitSearch={handleSubmitSearch}/>}
-                        <button title="Search todos" className={"primary"}
-                                onClick={() => setIsSearchOpen(!isSearchOpen)}>
-                            <FontAwesomeIcon icon={faSearch}/>
+                        <span onClick={handleShowMyTodosClick}
+                              className={`clickable ${showAllTodos ? 'inactive-text' : 'active-text'}`}>My Todos</span>
+                        {" / "}
+                        <span onClick={handleShowAllTodosClick}
+                              className={`clickable ${showAllTodos ? 'active-text' : 'inactive-text'}`}>All Todos</span>
+                    </div>
+                    <div className={"tools-bar vertical-buttons-wrap"}>
+                        <button title="Add new todo" className={`${loading ? "disabled" : "primary"}`}
+                                onClick={() => !loading && setIsEdit(true)}>
+                            <FontAwesomeIcon icon={faPlus}/>
+                        </button>
+                        <div>
+                            {isSearchOpen && <SearchInput onClose={() => setIsSearchOpen(false)}
+                                                          value={searchValue}
+                                                          onChange={onSearchValueChange}
+                                                          submitSearch={handleSubmitSearch}/>}
+                            <button title="Search todos" className={`${loading ? "disabled" : "primary"}`}
+                                    onClick={() => !loading && setIsSearchOpen(!isSearchOpen)}>
+                                <FontAwesomeIcon icon={faSearch}/>
+                            </button>
+                        </div>
+                        <button title="Download todos" className={`${loading ? "disabled" : "primary"}`}
+                                onClick={handleDownloadTodosClick}>
+                            <FontAwesomeIcon icon={faFileDownload}/>
                         </button>
                     </div>
-                    <button title="Download todos" className={"primary"} onClick={handleDownloadTodosClick}>
-                        <FontAwesomeIcon icon={faFileDownload}/>
-                    </button>
-                </div>
-                {fetchError && <i className={"warning-text"}>{errorMessage}</i>}
-                <div>{todos.map(todo => <TodoItem key={hashCode(todo.title + todo.description + todo.priority)}
-                                                  todo={todo} onEdit={handleEditTodo}/>)}</div>
-                <Pagination onFirstPageClick={() => fetchTodos(firstPageUrl)}
-                            onPrevPageClick={() => fetchTodos(prevPageUrl)}
-                            onNextPageClick={() => fetchTodos(nextPageUrl)}
-                            onLastPageClick={() => fetchTodos(lastPageUrl)}
-                            currentPage={currentPage + 1}
-                            totalPages={totalPages}/>
-            </>}
+                    {fetchError && <i className={"warning-text"}>{errorMessage}</i>}
+                    <div>{todos.map(todo => <TodoItem key={hashCode(todo.title + todo.description + todo.priority)}
+                                                      todo={todo} onEdit={handleEditTodo} loading={loading}
+                                                      onChangeStatus={changeTodoStatus}/>)}</div>
+                    <Pagination onFirstPageClick={() => fetchTodos(firstPageUrl)}
+                                onPrevPageClick={() => fetchTodos(prevPageUrl)}
+                                onNextPageClick={() => fetchTodos(nextPageUrl)}
+                                onLastPageClick={() => fetchTodos(lastPageUrl)}
+                                currentPage={currentPage + 1}
+                                totalPages={totalPages}/>
+                </>}
         </div>)
 }
 

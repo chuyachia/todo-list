@@ -77,3 +77,9 @@ textarea.form-input {
 .edit-todo {
   align-self: flex-start;
 }
+
+.todo-list .loader {
+  position: fixed;
+  right: var(--small-space);
+  bottom: var(--small-space);
+}

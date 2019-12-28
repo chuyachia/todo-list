@@ -4,8 +4,10 @@ import ITodo from '../models/ITodo';
 import './TodoItem.css';
 
 interface ITodoItem {
+    loading: boolean;
     todo: ITodo;
     onEdit: (todo: ITodo) => void;
+    onChangeStatus: (url: string) => Promise<ITodo | null>;
 }
 
 const TodoItem: React.FC<ITodoItem> = (props) => {
@@ -15,16 +17,10 @@ const TodoItem: React.FC<ITodoItem> = (props) => {
     const isHighPriority = todo.priority === 'High';
     const isDone = todo.status === "Won't Do" || todo.status === 'Done';
 
-    async function changeTodoStatus(link: string) {
-        const changeStatus = await fetch(link, {
-            method: 'POST',
-            mode: 'cors',
-            credentials: 'include',
-        })
-
-        if (changeStatus.ok) {
-            const todoResource = await changeStatus.json();
-            setTodo(todoResource);
+    async function changeTodoStatus(url: string) {
+        const todo = await props.onChangeStatus(url);
+        if (todo !== null) {
+            setTodo(todo);
         }
     }
 
@@ -37,7 +33,9 @@ const TodoItem: React.FC<ITodoItem> = (props) => {
             <p>{todo.description}</p>
             <div className={"buttons-wrap"}>
                 {(Object.keys(links) as Array<keyof typeof links>).map((link) =>
-                    <button key={link} onClick={() => changeTodoStatus(links[link].href)}>
+                    <button key={link} className={`${props.loading ? 'disabled' : ''}`}
+                            onClick={() => !props.loading && changeTodoStatus(links[link].href)}
+                            disabled={props.loading}>
                         {links[link].title}
                     </button>)}
                 {edit !== undefined && <button onClick={() => props.onEdit(todo)}>{edit.title}</button>}

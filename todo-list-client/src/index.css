@@ -50,7 +50,7 @@ button.disabled {
 }
 
 .active-text {
-  text-decoration: underline;
+  /*text-decoration: underline;*/
 }
 
 .warning-text {

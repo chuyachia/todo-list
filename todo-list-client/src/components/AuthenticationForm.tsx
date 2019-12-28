@@ -12,12 +12,14 @@ interface IAuthenticationFormProps {
     usernameValidationMessage?: string;
     passwordValidationMessage?: string;
     reason?: string;
+    loading: boolean;
 }
 
 const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
                                                                     onSubmit,
                                                                     failed,
                                                                     reason,
+                                                                    loading,
                                                                     submitButtonText = "Submit",
                                                                     usernameValidationFunction = (value: string) => value.length > 0,
                                                                     passwordValidationFunction = (value: string) => value.length > 0,
@@ -36,11 +38,12 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
     }
 
     const submitAuthentication = () => {
-        onSubmit(username, password);
-        resetUsername();
-        resetPassword();
+        if (!loading) {
+            onSubmit(username, password);
+            resetUsername();
+            resetPassword();
+        }
     }
-
     return (
         <div className={"form"} onKeyDown={handleEnterKey}>
             <input className={"form-input"} type={"text"} placeholder={"Enter Username"}
@@ -56,8 +59,8 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
                 {passwordValidation.touched && !passwordValidation.valid ? passwordValidationMessage : ""}
             </small>
             <button
-                className={`submit-button ${(!usernameValidation.valid || !passwordValidation.valid) ? "disabled" : "primary"}`}
-                disabled={!usernameValidation.valid || !passwordValidation.valid}
+                className={`submit-button ${(!usernameValidation.valid || !passwordValidation.valid || loading) ? "disabled" : "primary"}`}
+                disabled={!usernameValidation.valid || !passwordValidation.valid || loading}
                 onClick={submitAuthentication}>{submitButtonText}
             </button>
             {failed && reason && <i className={"warning-text"}>{reason}</i>}

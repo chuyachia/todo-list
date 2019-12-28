@@ -1,19 +1,19 @@
 import React, {Dispatch} from 'react';
-import ITodoItem from '../models/ITodo';
+import ITodo from '../models/ITodo';
 import safeGet from '../util/safeGet';
 
 interface ITodos {
-    todos: ITodoItem[];
+    todos: ITodo[];
     fetchUserTodos: (username: string) => void;
     fetchAllTodos: () => void;
     searchTodos: (searchValue: string, user?: string) => void;
     fetchTodos: (url: string) => void;
-    submitNewTodo: (title: string, description: string, priority: string) => Promise<ITodoItem | null>;
-    updateTodo: (title: string, description: string, priority: string) => Promise<ITodoItem | null>;
+    submitNewTodo: (title: string, description: string, priority: string) => Promise<ITodo | null>;
+    updateTodo: (title: string, description: string, priority: string) => Promise<ITodo | null>;
     submitError: boolean;
     fetchError: boolean;
-    editTodo: (todo: ITodoItem | undefined) => void;
-    activeTodo: ITodoItem | undefined;
+    editTodo: (todo: ITodo | undefined) => void;
+    activeTodo: ITodo | undefined;
     errorMessage: string;
     size: number;
     setSize: Dispatch<number>;
@@ -25,6 +25,8 @@ interface ITodos {
     lastPageUrl: string;
     currentPageUrl: string;
     downloadTodos: (searchValue?: string, user?: string) => void;
+    loading: boolean;
+    changeTodoStatus: (url:string)=> Promise<ITodo|null>;
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
@@ -37,7 +39,7 @@ const useTodo = (
     downloadTodosEndPoint: string,
     defaultDisplaySize?: number): ITodos => {
     const [todos, setTodos] = React.useState([])
-    const [activeTodo, setActiveTodo] = React.useState<ITodoItem | undefined>(undefined);
+    const [activeTodo, setActiveTodo] = React.useState<ITodo | undefined>(undefined);
     const [submitError, setSubmitError] = React.useState(false);
     const [fetchError, setFetchError] = React.useState(false);
     const [errorMessage, setErrorMessage] = React.useState(DEFAULT_ERROR_MESSAGE);
@@ -49,10 +51,13 @@ const useTodo = (
     const [prevPageUrl, setPrevPageUrl] = React.useState("");
     const [firstPageUrl, setFirstPageUrl] = React.useState("");
     const [lastPageUrl, setLastPageUrl] = React.useState("");
+    const [loading, setLoading] = React.useState(false);
+
 
 
     async function fetchUserTodos(username: string) {
         try {
+            setLoading(true);
             setFetchError(false);
             let url = `${fetchUserTodosEndpoint}/${username}?page=0&size=${size}`;
             const response = await fetch(url, {
@@ -72,11 +77,14 @@ const useTodo = (
             console.error(e);
             setFetchError(true);
             setErrorMessage(DEFAULT_ERROR_MESSAGE);
+        } finally {
+            setLoading(false);
         }
     }
 
     async function fetchAllTodos() {
         try {
+            setLoading(true);
             setFetchError(false);
             let url = `${fetchAllTodosEndpoint}?page=0&size=${size}`;
             const response = await fetch(url, {
@@ -96,11 +104,14 @@ const useTodo = (
             console.error(e);
             setFetchError(true);
             setErrorMessage(DEFAULT_ERROR_MESSAGE);
+        } finally {
+            setLoading(false);
         }
     }
 
     async function searchTodos(searchValue: string, user?: string) {
         try {
+            setLoading(true);
             setFetchError(false);
             let url = searchTodosEndpoint + `?q=${searchValue.toLowerCase()}&page=0&size=${size}`;
             if (user !== undefined) url += `&user=${user}`
@@ -121,12 +132,15 @@ const useTodo = (
             console.error(e);
             setFetchError(true);
             setErrorMessage(DEFAULT_ERROR_MESSAGE);
+        } finally {
+            setLoading(false);
         }
     }
 
     async function fetchTodos(url: string) {
         if (url.length > 0) {
             try {
+                setLoading(true);
                 setFetchError(false);
                 const response = await fetch(url, {
                     method: 'GET',
@@ -145,12 +159,15 @@ const useTodo = (
                 console.error(e);
                 setFetchError(true);
                 setErrorMessage(DEFAULT_ERROR_MESSAGE);
+            } finally {
+                setLoading(false);
             }
         }
     }
 
-    async function submitNewTodo(title: string, description: string, priority: string): Promise<ITodoItem | null> {
+    async function submitNewTodo(title: string, description: string, priority: string): Promise<ITodo | null> {
         try {
+            setLoading(true);
             setSubmitError(false);
             const response = await fetch(sumbitNewTodoEndpoint, {
                 method: 'POST',
@@ -177,13 +194,16 @@ const useTodo = (
             console.error(e);
             setSubmitError(true);
             setErrorMessage(DEFAULT_ERROR_MESSAGE);
+        } finally {
+            setLoading(false);
         }
         return Promise.resolve(null);
     }
 
-    async function updateTodo(title: string, description: string, priority: string): Promise<ITodoItem | null> {
+    async function updateTodo(title: string, description: string, priority: string): Promise<ITodo | null> {
         if (activeTodo !== undefined) {
             try {
+                setLoading(true);
                 setSubmitError(false);
                 const response = await fetch(activeTodo._links.edit.href, {
                     method: 'PUT',
@@ -210,9 +230,36 @@ const useTodo = (
                 console.error(e);
                 setSubmitError(true);
                 setErrorMessage(DEFAULT_ERROR_MESSAGE);
+            } finally {
+                setLoading(false);
             }
         }
         return Promise.resolve(null);
+    }
+
+    async function changeTodoStatus(link: string): Promise<ITodo|null> {
+        let todo = null;
+        try {
+            setLoading(true);
+            const changeStatus = await fetch(link, {
+                method: 'POST',
+                mode: 'cors',
+                credentials: 'include',
+            })
+
+            if (changeStatus.ok) {
+                todo = changeStatus.json();
+            }
+        } catch (e) {
+            console.error(e);
+            setSubmitError(true);
+            setErrorMessage(DEFAULT_ERROR_MESSAGE);
+        } finally {
+            console.log('hi');
+            setLoading(false);
+        }
+        
+        return todo;
     }
 
     const downloadTodos = (searchValue = "", user?: string) => {
@@ -221,7 +268,7 @@ const useTodo = (
         window.location.assign(url);
     }
 
-    const editTodo = (todo: ITodoItem | undefined) => {
+    const editTodo = (todo: ITodo | undefined) => {
         setActiveTodo(todo);
     }
 
@@ -268,6 +315,8 @@ const useTodo = (
         currentPageUrl,
         nextPageUrl,
         lastPageUrl,
+        loading,
+        changeTodoStatus
     }
 
 }

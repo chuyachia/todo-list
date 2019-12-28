@@ -7,6 +7,7 @@ interface IAuthenticationProps {
     failed: boolean;
     reason: string;
     resetAuthState: () => void;
+    loading: boolean;
 }
 
 const Authentication: React.FC<IAuthenticationProps> = (props) => {
@@ -29,15 +30,17 @@ const Authentication: React.FC<IAuthenticationProps> = (props) => {
                 <AuthenticationForm
                     onSubmit={props.register}
                     failed={props.failed}
-                    submitButtonText={"Register"}
+                    submitButtonText={props.loading ? "Registeringq ..." : "Register"}
                     passwordValidationFunction={(value: string) => value.length > 5}
                     passwordValidationMessage={"Password must contain more than 5 characters"}
-                    reason={props.reason}/> :
+                    reason={props.reason}
+                    loading={props.loading}/> :
                 <AuthenticationForm
                     onSubmit={props.logIn}
                     failed={props.failed}
-                    submitButtonText={"Login"}
-                    reason={props.reason}/>}
+                    submitButtonText={props.loading ? "Logging..." :"Login"}
+                    reason={props.reason}
+                    loading={props.loading}/>}
         </div>
     )
 }

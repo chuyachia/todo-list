@@ -9,6 +9,7 @@ interface IAuth {
     reason: string;
     resetState: () => void;
     user: string;
+    loading: boolean;
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
@@ -18,6 +19,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
     const [authenticated, setAuthenticated] = React.useState<boolean>(false);
     const [failed, setFailed] = React.useState<boolean>(false);
     const [reason, setReason] = React.useState<string>('');
+    const [loading, setLoading] = React.useState(false);
 
     React.useEffect(() => {
         getUserInfo();
@@ -25,6 +27,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
 
     async function getUserInfo() {
         try {
+            setLoading(true);
             const response = await fetch(userInfoEndpoint, {method: 'GET', credentials: 'include'})
             if (response.ok) {
                 const user = await response.json();
@@ -36,6 +39,8 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
         } catch (e) {
             setAuthenticated(false);
             console.error(e);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -43,6 +48,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
         const options = _prepareFormData(username, password);
 
         try {
+            setLoading(true);
             const registered = await fetch(registerEndpoint, options);
             if (registered.ok) {
                 logIn(username, password);
@@ -59,6 +65,8 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
             setFailed(true);
             console.error(e);
             setReason(DEFAULT_ERROR_MESSAGE);
+        } finally {
+            setLoading(false);
         }
 
     }
@@ -77,6 +85,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
         const options = _prepareFormData(username, password);
 
         try {
+            setLoading(true);
             const response = await fetch(loginEndpoint, options);
             if (response.ok) {
                 setAuthenticated(true);
@@ -95,6 +104,8 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
             setFailed(true);
             console.error(e);
             setReason(DEFAULT_ERROR_MESSAGE);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -129,6 +140,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
         reason,
         resetState,
         user,
+        loading,
     }
 }
 
