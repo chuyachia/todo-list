@@ -10,6 +10,7 @@ interface IAuth {
     resetState: () => void;
     user: string;
     loading: boolean;
+    getUserInfo: () => void;
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
@@ -20,10 +21,6 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
     const [failed, setFailed] = React.useState<boolean>(false);
     const [reason, setReason] = React.useState<string>('');
     const [loading, setLoading] = React.useState(false);
-
-    React.useEffect(() => {
-        getUserInfo();
-    }, [])
 
     async function getUserInfo() {
         try {
@@ -141,6 +138,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
         resetState,
         user,
         loading,
+        getUserInfo,
     }
 }
 

@@ -11,6 +11,10 @@
   box-sizing: border-box;
 }
 
+.App > .loader {
+  flex: 1 1 auto;
+}
+
 .authentication,
 .todo-list {
   flex: 1 1 auto;
@@ -78,7 +82,7 @@ textarea.form-input {
   align-self: flex-start;
 }
 
-.todo-list .loader {
+.todo-list > .loader {
   position: fixed;
   right: var(--small-space);
   bottom: var(--small-space);
