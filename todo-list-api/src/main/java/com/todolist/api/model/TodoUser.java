@@ -15,17 +15,18 @@ import java.util.List;
 @ToString(exclude = {"roles", "todos"}) // To avoid infinite loop
 @Entity
 @Table(name = "users")
-@JsonIgnoreProperties({"password"})
 public class TodoUser {
 
     @Id
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Column(nullable = false, unique = true)
     private String username;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     private String password;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @ManyToMany(cascade=CascadeType.ALL)
     @JoinTable(
         name = "users_roles",
@@ -33,6 +34,7 @@ public class TodoUser {
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private List<UserRole> roles = new ArrayList<>();
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonBackReference
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     private List<Todo> todos = new ArrayList<>();

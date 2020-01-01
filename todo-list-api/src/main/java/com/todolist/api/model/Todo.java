@@ -16,6 +16,7 @@ import javax.persistence.*;
 public class Todo {
 
     @Id
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String title;
@@ -26,6 +27,7 @@ public class Todo {
     private Priority priority;
     private String description;
     @ManyToOne
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JoinColumn(name="user_id", nullable = false)
     private TodoUser user;
 

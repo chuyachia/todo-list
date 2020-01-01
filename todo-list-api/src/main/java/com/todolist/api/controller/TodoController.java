@@ -114,7 +114,7 @@ public class TodoController {
     }
 
 
-    @PostMapping("/todos")
+    @PostMapping(value = "/todos", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public Resource<Todo> create(@Valid @RequestBody Todo newTodo) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

@@ -30,6 +30,7 @@ interface ITodos {
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
+const fetchOptions: RequestInit = {credentials: 'include', mode: 'cors'};
 
 const useTodo = (
     fetchAllTodosEndpoint: string,
@@ -61,8 +62,8 @@ const useTodo = (
             setFetchError(false);
             let url = `${fetchUserTodosEndpoint}/${username}?page=0&size=${size}`;
             const response = await fetch(url, {
+                ...fetchOptions,
                 method: 'GET',
-                credentials: 'include',
             });
 
             if (response.ok) {
@@ -88,8 +89,8 @@ const useTodo = (
             setFetchError(false);
             let url = `${fetchAllTodosEndpoint}?page=0&size=${size}`;
             const response = await fetch(url, {
+                ...fetchOptions,
                 method: 'GET',
-                credentials: 'include',
             });
 
             if (response.ok) {
@@ -116,8 +117,8 @@ const useTodo = (
             let url = searchTodosEndpoint + `?q=${searchValue.toLowerCase()}&page=0&size=${size}`;
             if (user !== undefined) url += `&user=${user}`
             const response = await fetch(url, {
+                ...fetchOptions,
                 method: 'GET',
-                credentials: 'include',
             });
 
             if (response.ok) {
@@ -143,8 +144,8 @@ const useTodo = (
                 setLoading(true);
                 setFetchError(false);
                 const response = await fetch(url, {
+                    ...fetchOptions,
                     method: 'GET',
-                    credentials: 'include',
                 });
 
                 if (response.ok) {
@@ -170,8 +171,8 @@ const useTodo = (
             setLoading(true);
             setSubmitError(false);
             const response = await fetch(sumbitNewTodoEndpoint, {
+                ...fetchOptions,
                 method: 'POST',
-                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -206,8 +207,8 @@ const useTodo = (
                 setLoading(true);
                 setSubmitError(false);
                 const response = await fetch(activeTodo._links.edit.href, {
+                    ...fetchOptions,
                     method: 'PUT',
-                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -242,9 +243,8 @@ const useTodo = (
         try {
             setLoading(true);
             const changeStatus = await fetch(link, {
+                ...fetchOptions,
                 method: 'POST',
-                mode: 'cors',
-                credentials: 'include',
             })
 
             if (changeStatus.ok) {
@@ -255,7 +255,6 @@ const useTodo = (
             setSubmitError(true);
             setErrorMessage(DEFAULT_ERROR_MESSAGE);
         } finally {
-            console.log('hi');
             setLoading(false);
         }
         

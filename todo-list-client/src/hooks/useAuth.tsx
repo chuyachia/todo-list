@@ -14,6 +14,7 @@ interface IAuth {
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
+const fetchOptions: RequestInit = {credentials: 'include', mode: 'cors'};
 
 const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoint: string, logoutEndpoint: string): IAuth => {
     const [user, setUser] = React.useState<string>('');
@@ -25,7 +26,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
     async function getUserInfo() {
         try {
             setLoading(true);
-            const response = await fetch(userInfoEndpoint, {method: 'GET', credentials: 'include'})
+            const response = await fetch(userInfoEndpoint, {...fetchOptions, method: 'GET'})
             if (response.ok) {
                 const user = await response.json();
                 setAuthenticated(true);
@@ -42,11 +43,19 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
     }
 
     async function register(username: string, password: string) {
-        const options = _prepareFormData(username, password);
-
         try {
             setLoading(true);
-            const registered = await fetch(registerEndpoint, options);
+            const registered = await fetch(registerEndpoint, {
+                ...fetchOptions,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username,
+                    password,
+                })
+            });
             if (registered.ok) {
                 logIn(username, password);
             } else {
@@ -70,7 +79,7 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
 
     async function logOut() {
         try {
-            await fetch(logoutEndpoint, {method: 'POST', credentials: 'include'})
+            await fetch(logoutEndpoint, {...fetchOptions, method: 'POST'})
             setAuthenticated(false);
             setUser('');
         } catch (e) {
@@ -119,10 +128,9 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
         formData.append('password', password);
 
         const options: RequestInit = {
+            ...fetchOptions,
             method: 'POST',
             body: formData,
-            mode: 'cors',
-            credentials: 'include',
         }
 
         return options;

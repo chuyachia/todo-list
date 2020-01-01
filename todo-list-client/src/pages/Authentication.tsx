@@ -30,7 +30,7 @@ const Authentication: React.FC<IAuthenticationProps> = (props) => {
                 <AuthenticationForm
                     onSubmit={props.register}
                     failed={props.failed}
-                    submitButtonText={props.loading ? "Registeringq ..." : "Register"}
+                    submitButtonText={props.loading ? "Registering ..." : "Register"}
                     passwordValidationFunction={(value: string) => value.length > 5}
                     passwordValidationMessage={"Password must contain more than 5 characters"}
                     reason={props.reason}

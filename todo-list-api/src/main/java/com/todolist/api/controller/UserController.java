@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,9 +41,9 @@ public class UserController {
         webDataBinder.addValidators(todoUserValidator);
     }
 
-    @PostMapping("/register")
+    @PostMapping(value ="/register",  consumes = MediaType.APPLICATION_JSON_VALUE )
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@Valid TodoUser newUser) {
+    public void create(@Valid @RequestBody TodoUser newUser) {
         service.registerNewUser(newUser);
     }
 
