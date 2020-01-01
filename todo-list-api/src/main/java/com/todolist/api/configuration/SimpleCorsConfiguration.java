@@ -19,7 +19,7 @@ public class SimpleCorsConfiguration {
     private String accessControlAllowOrigin;
 
     @Bean
-    public FilterRegistrationBean<CorsFilter> simpleCorsFilter() {
+    FilterRegistrationBean<CorsFilter> simpleCorsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);

@@ -1,6 +1,10 @@
-package com.todolist.api.security;
+package com.todolist.api.configuration;
 
 import com.todolist.api.model.enums.Role;
+import com.todolist.api.security.LoginFailureHandler;
+import com.todolist.api.security.LoginSuccessHandler;
+import com.todolist.api.security.LogoutSuccessHandler;
+import com.todolist.api.security.TodoAuthenticationEntryPoint;
 import com.todolist.api.service.TodoUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +15,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -63,7 +66,7 @@ public class TodoSecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

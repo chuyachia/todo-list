@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class CachingConfiguration {
 
     @Bean
-    public CacheManager cacheManager(){
+    CacheManager cacheManager(){
         return new ConcurrentMapCacheManager("todos") {
 
           @Override

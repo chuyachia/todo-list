@@ -11,7 +11,7 @@ import javax.sql.DataSource;
 @Configuration
 public class DataSourceConfiguration {
     @Bean
-    public HikariDataSource dataSource(DataSourceProperties properties) {
+    HikariDataSource dataSource(DataSourceProperties properties) {
         return properties.initializeDataSourceBuilder().type(HikariDataSource.class)
                 .build();
     }
