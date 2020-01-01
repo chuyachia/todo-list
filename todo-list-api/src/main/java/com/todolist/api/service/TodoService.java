@@ -34,6 +34,11 @@ public class TodoService implements ITodoService {
                          outputStream.write("\n".getBytes());
                      } catch (IOException e) {
                          e.printStackTrace();
+                         try {
+                             outputStream.close();
+                         } catch (IOException ex) {
+                             ex.printStackTrace();
+                         }
                      }
                  });
     }
@@ -44,6 +49,11 @@ public class TodoService implements ITodoService {
             outputStream.write("\n".getBytes());
         } catch (IOException e) {
             e.printStackTrace();
+            try {
+                outputStream.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 }
