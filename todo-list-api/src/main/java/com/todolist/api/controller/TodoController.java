@@ -120,14 +120,15 @@ public class TodoController {
 
     @PostMapping(value = "/todos", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public Resource<Todo> create(@Valid @RequestBody Todo newTodo) {
+    public Resource<Todo> create(@Valid @RequestBody Todo todo) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         TodoUserDetail todoUserDetail = (TodoUserDetail) auth.getPrincipal();
-        newTodo.setStatus(Status.TODO);
-        newTodo.setUser(todoUserDetail.getTodoUser());
-        Todo todo = repository.save(newTodo);
+        Todo newTodo = new Todo.Builder(todo)
+                .status(Status.TODO)
+                .user(todoUserDetail.getTodoUser())
+                .build();
 
-        return assembler.toResource(todo);
+        return assembler.toResource(repository.save(newTodo));
     }
 
     @PostMapping("/todos/{id}/done")
@@ -136,8 +137,10 @@ public class TodoController {
         return repository.findById(id)
                 .map(todo -> {
                     if (isTodoAuthorOrAdmin(todo)) {
-                        todo.setStatus(Status.DONE);
-                        return update(todo, id);
+                        Todo newTodo = new Todo.Builder(todo)
+                                .status(Status.DONE)
+                                .build();
+                        return update(newTodo, id);
                     } else {
                         throw new UnAuthorizedOperationException("Modifying other users' todos are not allowed");
                     }
@@ -151,8 +154,10 @@ public class TodoController {
         return repository.findById(id)
                 .map(todo -> {
                     if (isTodoAuthorOrAdmin(todo)) {
-                        todo.setStatus(Status.INPROGRESS);
-                        return update(todo, id);
+                        Todo newTodo = new Todo.Builder(todo)
+                                .status(Status.INPROGRESS)
+                                .build();
+                        return update(newTodo, id);
                     } else {
                         throw new UnAuthorizedOperationException("Modifying other users' todos are not allowed");
                     }
@@ -166,8 +171,10 @@ public class TodoController {
         return repository.findById(id)
                 .map(todo -> {
                     if (isTodoAuthorOrAdmin(todo)) {
-                        todo.setStatus(Status.WONTDO);
-                        return update(todo, id);
+                        Todo newTodo = new Todo.Builder(todo)
+                                .status(Status.WONTDO)
+                                .build();
+                        return update(newTodo, id);
                     } else {
                         throw new UnAuthorizedOperationException("Modifying other users' todos are not allowed");
                     }
@@ -182,8 +189,10 @@ public class TodoController {
         return repository.findById(id)
                 .map(todo -> {
                     if (isTodoAuthorOrAdmin(todo)) {
-                        todo.setStatus(Status.TODO);
-                        return update(todo, id);
+                        Todo newTodo = new Todo.Builder(todo)
+                                .status(Status.TODO)
+                                .build();
+                        return update(newTodo, id);
                     } else {
                         throw new UnAuthorizedOperationException("Modifying other users' todos are not allowed");
                     }
@@ -194,23 +203,17 @@ public class TodoController {
 
     @PutMapping("/todos/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Resource<Todo> update(@RequestBody Todo newTodo, @PathVariable Integer id) {
+    public Resource<Todo> update(@RequestBody Todo todoUpdates, @PathVariable Integer id) {
         Todo updatedTodo = repository.findById(id)
                 .map(todo -> {
                     if (isTodoAuthorOrAdmin(todo)) {
-                        if (newTodo.getTitle() != null) {
-                            todo.setTitle(newTodo.getTitle());
-                        }
-                        if (newTodo.getStatus() != null) {
-                            todo.setStatus(newTodo.getStatus());
-                        }
-                        if (newTodo.getPriority() != null) {
-                            todo.setPriority(newTodo.getPriority());
-                        }
-                        if (newTodo.getDescription() != null) {
-                            todo.setDescription(newTodo.getDescription());
-                        }
-                        return repository.save(todo);
+                          Todo newTodo = new Todo.Builder(todo)
+                                  .title(todoUpdates.getTitle())
+                                  .status(todoUpdates.getStatus())
+                                  .priority(todoUpdates.getPriority())
+                                  .description(todoUpdates.getDescription())
+                                  .build();
+                        return repository.save(newTodo);
                     } else {
                         throw new UnAuthorizedOperationException("Modifying other users' todos are not allowed");
                     }
