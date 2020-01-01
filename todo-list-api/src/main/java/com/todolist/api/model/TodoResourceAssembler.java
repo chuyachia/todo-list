@@ -13,6 +13,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 @Component
 public class TodoResourceAssembler implements ResourceAssembler<Todo, Resource> {
+    private final String ADMIN_ROLE = "ROLE_A";
+    private final SimpleGrantedAuthority adminGrant =  new SimpleGrantedAuthority(ADMIN_ROLE);
 
     @Override
     public Resource<Todo> toResource(Todo todo) {
@@ -22,7 +24,7 @@ public class TodoResourceAssembler implements ResourceAssembler<Todo, Resource> 
         Resource<Todo> todoResource = new Resource<>(todo,
                 linkTo(methodOn(TodoController.class).getOne(todo.getId())).withSelfRel());
 
-        if (auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_A")) ||
+        if (auth.getAuthorities().contains(adminGrant) ||
                 todoUserDetail.getTodoUser().getId() == todo.getUser().getId()) {
             todoResource.add(
                     linkTo(methodOn(TodoController.class)
@@ -33,17 +35,17 @@ public class TodoResourceAssembler implements ResourceAssembler<Todo, Resource> 
                 case TODO:
                     todoResource.add(
                             linkTo(methodOn(TodoController.class)
-                                    .inProgress(todo.getId())).withRel("inProgress").withTitle("In Progress")
+                                    .inProgress(todo.getId())).withRel("inProgress").withTitle(Status.INPROGRESS.getName())
                     );
                     break;
                 case INPROGRESS:
                     todoResource.add(
                             linkTo(methodOn(TodoController.class)
-                                    .done(todo.getId())).withRel("done").withTitle("Done")
+                                    .done(todo.getId())).withRel("done").withTitle(Status.DONE.getName())
                     );
                     todoResource.add(
                             linkTo(methodOn(TodoController.class)
-                                    .wontDo(todo.getId())).withRel("wontDo").withTitle("Won't Do")
+                                    .wontDo(todo.getId())).withRel("wontDo").withTitle(Status.WONTDO.getName())
                     );
                     break;
                 case DONE:
@@ -55,7 +57,7 @@ public class TodoResourceAssembler implements ResourceAssembler<Todo, Resource> 
                 case WONTDO:
                     todoResource.add(
                             linkTo(methodOn(TodoController.class)
-                                    .unDo(todo.getId())).withRel("unDo").withTitle("To Do")
+                                    .unDo(todo.getId())).withRel("unDo").withTitle(Status.TODO.getName())
                     );
             }
         }

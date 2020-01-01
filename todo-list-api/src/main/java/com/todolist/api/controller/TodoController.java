@@ -18,6 +18,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,9 @@ public class TodoController {
     private final PagedResourcesAssembler pagedResourcesAssembler;
     private final TodoService service;
     private final TodoValidator todoValidator;
+
+    private final String ADMIN_ROLE = "ROLE_A";
+    private final SimpleGrantedAuthority adminGrant =  new SimpleGrantedAuthority(ADMIN_ROLE);
 
     TodoController(TodoRepository repository, TodoResourceAssembler assembler, TodoService service, TodoValidator todoValidator) {
         this.repository = repository;
@@ -131,7 +135,7 @@ public class TodoController {
     public Resource<Todo> done(@PathVariable Integer id) {
         return repository.findById(id)
                 .map(todo -> {
-                    if (isTodoAuthor(todo)) {
+                    if (isTodoAuthorOrAdmin(todo)) {
                         todo.setStatus(Status.DONE);
                         return update(todo, id);
                     } else {
@@ -146,7 +150,7 @@ public class TodoController {
     public Resource<Todo> inProgress(@PathVariable Integer id) {
         return repository.findById(id)
                 .map(todo -> {
-                    if (isTodoAuthor(todo)) {
+                    if (isTodoAuthorOrAdmin(todo)) {
                         todo.setStatus(Status.INPROGRESS);
                         return update(todo, id);
                     } else {
@@ -161,7 +165,7 @@ public class TodoController {
     public Resource<Todo> wontDo(@PathVariable Integer id) {
         return repository.findById(id)
                 .map(todo -> {
-                    if (isTodoAuthor(todo)) {
+                    if (isTodoAuthorOrAdmin(todo)) {
                         todo.setStatus(Status.WONTDO);
                         return update(todo, id);
                     } else {
@@ -177,7 +181,7 @@ public class TodoController {
     public Resource<Todo> unDo(@PathVariable Integer id) {
         return repository.findById(id)
                 .map(todo -> {
-                    if (isTodoAuthor(todo)) {
+                    if (isTodoAuthorOrAdmin(todo)) {
                         todo.setStatus(Status.TODO);
                         return update(todo, id);
                     } else {
@@ -193,19 +197,23 @@ public class TodoController {
     public Resource<Todo> update(@RequestBody Todo newTodo, @PathVariable Integer id) {
         Todo updatedTodo = repository.findById(id)
                 .map(todo -> {
-                    if (newTodo.getTitle() != null) {
-                        todo.setTitle(newTodo.getTitle());
+                    if (isTodoAuthorOrAdmin(todo)) {
+                        if (newTodo.getTitle() != null) {
+                            todo.setTitle(newTodo.getTitle());
+                        }
+                        if (newTodo.getStatus() != null) {
+                            todo.setStatus(newTodo.getStatus());
+                        }
+                        if (newTodo.getPriority() != null) {
+                            todo.setPriority(newTodo.getPriority());
+                        }
+                        if (newTodo.getDescription() != null) {
+                            todo.setDescription(newTodo.getDescription());
+                        }
+                        return repository.save(todo);
+                    } else {
+                        throw new UnAuthorizedOperationException("Modifying other users' todos are not allowed");
                     }
-                    if (newTodo.getStatus() != null) {
-                        todo.setStatus(newTodo.getStatus());
-                    }
-                    if (newTodo.getPriority() != null) {
-                        todo.setPriority(newTodo.getPriority());
-                    }
-                    if (newTodo.getDescription() != null) {
-                        todo.setDescription(newTodo.getDescription());
-                    }
-                    return repository.save(todo);
                 })
                 .orElseThrow(() -> new TodoNotFoundException(id));
 
@@ -220,14 +228,11 @@ public class TodoController {
         repository.delete(todo);
     }
 
-    private TodoUserDetail getLoggedInUser() {
-        return (TodoUserDetail) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
-    }
-
-    private boolean isTodoAuthor(Todo todo) {
-        TodoUserDetail todoUserDetail = getLoggedInUser();
-        return todo.getUser().getId() == todoUserDetail.getTodoUser().getId();
+    private boolean isTodoAuthorOrAdmin(Todo todo) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth.getAuthorities().contains(adminGrant);
+        TodoUserDetail todoUserDetail = (TodoUserDetail) auth.getPrincipal();
+        return isAdmin || todo.getUser().getId() == todoUserDetail.getTodoUser().getId();
     }
 
     private Pageable getPageable(Integer page, Integer size) {
