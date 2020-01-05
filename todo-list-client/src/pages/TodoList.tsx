@@ -2,14 +2,17 @@ import React, {useEffect, useState} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faFileDownload, faPlus, faSearch} from '@fortawesome/free-solid-svg-icons'
 
-import TodoItemForm from '../components/TodoItemForm';
 import TodoItem from '../components/TodoItem';
-import SearchInput from '../components/SearchInput';
 import Pagination from '../components/Pagination';
+
 import useTodo from "../hooks/useTodo";
+import useInput from "../hooks/useInput";
 import ITodoItem from "../models/ITodo";
 import hashCode from '../util/hashCode';
-import useInput from "../hooks/useInput";
+
+// dynamic imports
+const TodoItemForm = React.lazy(() => import('../components/TodoItemForm'));
+const SearchInput = React.lazy(() => import('../components/SearchInput'));
 
 interface ITodoListProps {
     authenticated: boolean;
@@ -39,11 +42,6 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     const handleBack = () => {
         setIsEdit(false);
         editTodo(undefined);
-        if (showAllTodos) {
-            fetchAllTodos();
-        } else {
-            fetchUserTodos(props.username);
-        }
     }
 
     const handleEditTodo = (todo: ITodoItem) => {
@@ -78,7 +76,7 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     }
 
     useEffect(() => {
-        if (props.username.length > 0) {
+        if (props.username.length > 0 && !isEdit) {
             if (currentPageUrl.length > 0) {
                 fetchTodos(currentPageUrl);
             } else if (!showAllTodos) {
@@ -93,9 +91,11 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
         <div className={"todo-list"}>
             {loading && <i className={"inactive-text loader"}>Loading...</i>}
             {isEdit ?
-                <TodoItemForm onBack={handleBack} onSubmit={activeTodo !== undefined ? updateTodo : submitNewTodo}
+                <React.Suspense fallback={<i className={"inactive-text loader"}>Loading...</i>}>
+                    <TodoItemForm onBack={handleBack} onSubmit={activeTodo !== undefined ? updateTodo : submitNewTodo}
                               submitError={submitError} todo={activeTodo} errorMessage={errorMessage}
                               loading={loading}/>
+                </React.Suspense>
                 : <>
                     <div>
                         <span onClick={handleShowMyTodosClick}
@@ -110,10 +110,13 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
                             <FontAwesomeIcon icon={faPlus}/>
                         </button>
                         <div>
-                            {isSearchOpen && <SearchInput onClose={() => setIsSearchOpen(false)}
-                                                          value={searchValue}
-                                                          onChange={onSearchValueChange}
-                                                          submitSearch={handleSubmitSearch}/>}
+                            {isSearchOpen &&
+                            <React.Suspense fallback={<i className={"inactive-text loader"}>Loading...</i>}>
+                                <SearchInput onClose={() => setIsSearchOpen(false)}
+                                             value={searchValue}
+                                             onChange={onSearchValueChange}
+                                             submitSearch={handleSubmitSearch}/>
+                            </React.Suspense>}
                             <button title="Search todos" className={`${loading ? "disabled" : "primary"}`}
                                     onClick={() => !loading && setIsSearchOpen(!isSearchOpen)}>
                                 <FontAwesomeIcon icon={faSearch}/>

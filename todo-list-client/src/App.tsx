@@ -1,8 +1,10 @@
 import React from 'react';
 import './App.css';
 import useAuth from './hooks/useAuth';
-import Authentication from './pages/Authentication';
-import TodoList from './pages/TodoList';
+
+// dynamic imports
+const Authentication = React.lazy(()=>import('./pages/Authentication'));
+const TodoList = React.lazy(() => import('./pages/TodoList'));
 
 const App: React.FC = () => {
     const {authenticated, logIn, register, failed, reason, resetState: resetAuthState, user, logOut, loading, getUserInfo} = useAuth(
@@ -27,10 +29,11 @@ const App: React.FC = () => {
             <h3>Todo List App</h3>
             {initialized ? <>
                 {authenticated && <small className={"clickable inactive-text"} onClick={() => logOut()}>Logout</small>}
-                {authenticated ?
+                <React.Suspense fallback={<i className={"inactive-text loader"}>Loading...</i>}>{authenticated ?
                     <TodoList authenticated={authenticated} username={user}/> :
                     <Authentication register={register} logIn={logIn} failed={failed} reason={reason}
                                     resetAuthState={resetAuthState} loading={loading}/>}
+                </React.Suspense>
             </> : <i className={"inactive-text loader"}>Loading...</i>}
         </main>
     );
