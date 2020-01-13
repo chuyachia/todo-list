@@ -61,7 +61,7 @@ public class SwaggerConfiguration {
         return new CustomApiListingScanner(apiDescriptionReader, apiModelReader, pluginsManager);
     }
 
-    private class CustomApiListingScanner extends ApiListingScanner {
+    static private class CustomApiListingScanner extends ApiListingScanner {
         @Autowired
         private TypeResolver typeResolver;
 
