@@ -20,7 +20,7 @@
     "build": "react-scripts build && npm run custom-sw",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "custom-sw": "./appendServiceWorker.sh"
+    "custom-sw": "cat src/serviceWorkerCacheAjax.js >> build/service-worker.js"
   },
   "eslintConfig": {
     "extends": "react-app"
