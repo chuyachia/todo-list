@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+echo "$REACT_APP_TODO_LIST_API"
 API_URL=$REACT_APP_TODO_LIST_API
 
 if [ -f .env ]; then
