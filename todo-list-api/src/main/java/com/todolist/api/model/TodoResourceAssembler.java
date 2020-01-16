@@ -4,6 +4,7 @@ import com.todolist.api.controller.TodoController;
 import com.todolist.api.model.enums.Status;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,18 +15,20 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 @Component
 public class TodoResourceAssembler implements ResourceAssembler<Todo, Resource> {
     private final String ADMIN_ROLE = "ROLE_A";
-    private final SimpleGrantedAuthority adminGrant =  new SimpleGrantedAuthority(ADMIN_ROLE);
+    private final SimpleGrantedAuthority adminGrant = new SimpleGrantedAuthority(ADMIN_ROLE);
 
     @Override
     public Resource<Todo> toResource(Todo todo) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        TodoUserDetail todoUserDetail = (TodoUserDetail) auth.getPrincipal();
+        boolean isAnonymous = auth instanceof AnonymousAuthenticationToken;
+        TodoUserDetail todoUserDetail = isAnonymous ? null : (TodoUserDetail) auth.getPrincipal();
 
         Resource<Todo> todoResource = new Resource<>(todo,
                 linkTo(methodOn(TodoController.class).getOne(todo.getId())).withSelfRel());
 
-        if (auth.getAuthorities().contains(adminGrant) ||
-                todoUserDetail.getTodoUser().getId() == todo.getUser().getId()) {
+        if (!isAnonymous &&
+                (auth.getAuthorities().contains(adminGrant) ||
+                todoUserDetail.getTodoUser().getId() == todo.getUser().getId())) {
             todoResource.add(
                     linkTo(methodOn(TodoController.class)
                             .update(null, todo.getId())).withRel("edit").withTitle("Edit"));

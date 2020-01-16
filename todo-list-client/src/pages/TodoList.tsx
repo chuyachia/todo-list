@@ -17,6 +17,7 @@ const SearchInput = React.lazy(() => import('../components/SearchInput'));
 interface ITodoListProps {
     authenticated: boolean;
     username: string;
+    showLogin: () => void;
 }
 
 const TodoList: React.FC<ITodoListProps> = (props) => {
@@ -35,7 +36,7 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     );
     const [isEdit, setIsEdit] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [showAllTodos, setShowAllTodos] = useState(false);
+    const [showAllTodos, setShowAllTodos] = useState(true);
     const {value: searchValue, onChange: onSearchValueChange, reset: resetSearchValue} = useInput<HTMLInputElement>("");
 
 
@@ -69,6 +70,16 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
         fetchUserTodos(props.username);
     }
 
+    const handleEditTodoClick = () => {
+        if (!loading) {
+            if (props.authenticated) {
+                setIsEdit(true);
+            } else {
+                props.showLogin();
+            }
+        }
+    }
+
     const handleDownloadTodosClick = () => {
         if (!loading) {
             downloadTodos(searchValue, showAllTodos ? undefined : props.username);
@@ -76,16 +87,19 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
     }
 
     useEffect(() => {
-        if (props.username.length > 0 && !isEdit) {
-            if (currentPageUrl.length > 0) {
-                fetchTodos(currentPageUrl);
-            } else if (!showAllTodos) {
-                fetchUserTodos(props.username);
-            } else {
-                fetchAllTodos();
-            }
+        if (!props.authenticated || showAllTodos) {
+            fetchAllTodos();
+        } else if (props.username.length > 0) {
+            fetchUserTodos(props.username);
         }
-    }, [props.authenticated, props.username, isEdit])
+    }, [props.authenticated, props.username])
+
+    useEffect(() => {
+        if (!isEdit && currentPageUrl.length > 0) {
+            console.log('fetch todos');
+            fetchTodos(currentPageUrl);
+        }
+    }, [isEdit])
 
     return (
         <div className={"todo-list"}>
@@ -93,20 +107,20 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
             {isEdit ?
                 <React.Suspense fallback={<i className={"inactive-text loader"}>Loading...</i>}>
                     <TodoItemForm onBack={handleBack} onSubmit={activeTodo !== undefined ? updateTodo : submitNewTodo}
-                              submitError={submitError} todo={activeTodo} errorMessage={errorMessage}
-                              loading={loading}/>
+                                  submitError={submitError} todo={activeTodo} errorMessage={errorMessage}
+                                  loading={loading}/>
                 </React.Suspense>
                 : <>
-                    <div>
+                    {props.authenticated && <div>
                         <span onClick={handleShowMyTodosClick}
                               className={`clickable ${showAllTodos ? 'inactive-text' : 'active-text'}`}>My Todos</span>
                         {" / "}
                         <span onClick={handleShowAllTodosClick}
                               className={`clickable ${showAllTodos ? 'active-text' : 'inactive-text'}`}>All Todos</span>
-                    </div>
+                    </div>}
                     <div className={"tools-bar vertical-buttons-wrap"}>
                         <button title="Add new todo" className={`${loading ? "disabled" : "primary"}`}
-                                onClick={() => !loading && setIsEdit(true)}>
+                                onClick={handleEditTodoClick}>
                             <FontAwesomeIcon icon={faPlus}/>
                         </button>
                         <div>
@@ -128,9 +142,10 @@ const TodoList: React.FC<ITodoListProps> = (props) => {
                         </button>
                     </div>
                     {fetchError && <i className={"warning-text"}>{errorMessage}</i>}
-                    <div>{todos.map(todo => <TodoItem key={hashCode(todo.title + todo.description + todo.priority)}
-                                                      todo={todo} onEdit={handleEditTodo} loading={loading}
-                                                      onChangeStatus={changeTodoStatus}/>)}</div>
+                    <div>{todos.map(todo => <TodoItem
+                        key={hashCode(todo.title + todo.description + todo.priority + Object.keys(todo._links).length)}
+                        todo={todo} onEdit={handleEditTodo} loading={loading}
+                        onChangeStatus={changeTodoStatus}/>)}</div>
                     <Pagination onFirstPageClick={() => fetchTodos(firstPageUrl)}
                                 onPrevPageClick={() => fetchTodos(prevPageUrl)}
                                 onNextPageClick={() => fetchTodos(nextPageUrl)}

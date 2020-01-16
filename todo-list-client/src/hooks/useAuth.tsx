@@ -3,9 +3,9 @@ import React from "react";
 interface IAuth {
     authenticated: boolean;
     failed: boolean;
-    logIn: (username: string, password: string) => void;
-    logOut: () => void;
-    register: (username: string, password: string) => void;
+    logIn: (username: string, password: string) => Promise<boolean>;
+    logOut: () => Promise<boolean>;
+    register: (username: string, password: string) => Promise<boolean>;
     reason: string;
     resetState: () => void;
     user: string;
@@ -17,34 +17,55 @@ const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
 const fetchOptions: RequestInit = {credentials: 'include', mode: 'cors'};
 
 const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoint: string, logoutEndpoint: string): IAuth => {
-    const [user, setUser] = React.useState<string>('');
-    const [authenticated, setAuthenticated] = React.useState<boolean>(false);
-    const [failed, setFailed] = React.useState<boolean>(false);
-    const [reason, setReason] = React.useState<string>('');
-    const [loading, setLoading] = React.useState(false);
+    const [state, setState] = React.useState({
+        user: '',
+        authenticated: false,
+        failed: false,
+        reason: '',
+        loading: false,
+    })
 
     async function getUserInfo() {
         try {
-            setLoading(true);
+            setState(prev => ({
+                ...prev,
+                loading: true,
+            }));
+
             const response = await fetch(userInfoEndpoint, {...fetchOptions, method: 'GET'})
             if (response.ok) {
                 const user = await response.json();
-                setAuthenticated(true);
-                setUser(user.username);
+                setState(prev => ({
+                    ...prev,
+                    authenticated: true,
+                    user: user.username,
+                }));
             } else {
-                setAuthenticated(false);
+                setState(prev => ({
+                    ...prev,
+                    authenticated: false,
+                }));
             }
         } catch (e) {
-            setAuthenticated(false);
+            setState(prev => ({
+                ...prev,
+                authenticated: false,
+            }));
             console.error(e);
         } finally {
-            setLoading(false);
+            setState(prev => ({
+                ...prev,
+                loading: false,
+            }));
         }
     }
 
     async function register(username: string, password: string) {
         try {
-            setLoading(true);
+            setState(prev => ({
+                ...prev,
+                loading: true,
+            }));
             const registered = await fetch(registerEndpoint, {
                 ...fetchOptions,
                 method: 'POST',
@@ -57,22 +78,38 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
                 })
             });
             if (registered.ok) {
-                logIn(username, password);
+                return logIn(username, password);
             } else {
                 const response = await registered.json();
                 if (response.status.toString().startsWith("4")) {
-                    setReason(response.message);
+                    setState(prev => ({
+                        ...prev,
+                        reason: response.message,
+                        failed: true,
+                    }));
                 } else {
-                    setReason(DEFAULT_ERROR_MESSAGE);
+                    setState(prev => ({
+                        ...prev,
+                        reason: DEFAULT_ERROR_MESSAGE,
+                        failed: true,
+                    }));
                 }
-                setFailed(true);
+
+                return false;
             }
         } catch (e) {
-            setFailed(true);
+            setState(prev => ({
+                ...prev,
+                reason: DEFAULT_ERROR_MESSAGE,
+                failed: true,
+            }));
             console.error(e);
-            setReason(DEFAULT_ERROR_MESSAGE);
+            return false;
         } finally {
-            setLoading(false);
+            setState(prev => ({
+                ...prev,
+                loading: false,
+            }));
         }
 
     }
@@ -80,10 +117,17 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
     async function logOut() {
         try {
             await fetch(logoutEndpoint, {...fetchOptions, method: 'POST'})
-            setAuthenticated(false);
-            setUser('');
+            setState(prev => ({
+                ...prev,
+                user: '',
+                authenticated: false,
+            }));
+
+            return true;
         } catch (e) {
             console.error(e);
+
+            return false;
         }
     }
 
@@ -91,38 +135,70 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
         const options = _prepareFormData(username, password);
 
         try {
-            setLoading(true);
+            setState(prev => ({
+                ...prev,
+                loading: true,
+            }));
             const response = await fetch(loginEndpoint, options);
             if (response.ok) {
-                setAuthenticated(true);
-                setUser(username);
-                setFailed(false);
+                setState(prev => ({
+                    ...prev,
+                    authenticated: true,
+                    user: username,
+                    failed: false,
+                }));
+
+                return true;
             } else {
-                setFailed(true);
+
                 const logInInfo = await response.json();
                 if (response.status.toString().startsWith("4")) {
-                    setReason(logInInfo.message);
+                    setState(prev => ({
+                        ...prev,
+                        failed: true,
+                        reason: logInInfo.message,
+                    }));
                 } else {
-                    setReason(DEFAULT_ERROR_MESSAGE);
+                    setState(prev => ({
+                        ...prev,
+                        failed: true,
+                        reason: DEFAULT_ERROR_MESSAGE,
+                    }));
                 }
+
+                return false;
             }
         } catch (e) {
-            setFailed(true);
+            setState(prev => ({
+                ...prev,
+                failed: true,
+                reason: DEFAULT_ERROR_MESSAGE,
+            }));
             console.error(e);
-            setReason(DEFAULT_ERROR_MESSAGE);
+
+            return false;
         } finally {
-            setLoading(false);
+            setState(prev => ({
+                ...prev,
+                loading: false,
+            }));
         }
     }
 
 
     function resetState() {
-        setFailed(false);
-        setAuthenticated(false);
+        setState(prev => ({
+            ...prev,
+            failed: false,
+            authenticated: false,
+        }));
     }
 
     function _prepareFormData(username: string, password: string) {
-        setFailed(false);
+        setState(prev => ({
+            ...prev,
+            failed: false,
+        }));
         const formData = new FormData()
         formData.append('username', username);
         formData.append('password', password);
@@ -137,15 +213,15 @@ const useAuth = (loginEndpoint: string, registerEndpoint: string, userInfoEndpoi
     }
 
     return {
-        authenticated,
-        failed,
+        authenticated: state.authenticated,
+        failed: state.failed,
         logIn,
         logOut,
         register,
-        reason,
+        reason:state.reason,
         resetState,
-        user,
-        loading,
+        user:state.user,
+        loading:state.loading,
         getUserInfo,
     }
 }

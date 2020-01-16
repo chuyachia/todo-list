@@ -26,7 +26,8 @@ interface ITodos {
     currentPageUrl: string;
     downloadTodos: (searchValue?: string, user?: string) => void;
     loading: boolean;
-    changeTodoStatus: (url:string)=> Promise<ITodo|null>;
+    changeTodoStatus: (url: string) => Promise<ITodo | null>;
+    resetPaginations: () => void;
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
@@ -53,7 +54,6 @@ const useTodo = (
     const [firstPageUrl, setFirstPageUrl] = React.useState("");
     const [lastPageUrl, setLastPageUrl] = React.useState("");
     const [loading, setLoading] = React.useState(false);
-
 
 
     async function fetchUserTodos(username: string) {
@@ -238,7 +238,7 @@ const useTodo = (
         return Promise.resolve(null);
     }
 
-    async function changeTodoStatus(link: string): Promise<ITodo|null> {
+    async function changeTodoStatus(link: string): Promise<ITodo | null> {
         let todo = null;
         try {
             setLoading(true);
@@ -257,7 +257,7 @@ const useTodo = (
         } finally {
             setLoading(false);
         }
-        
+
         return todo;
     }
 
@@ -291,6 +291,10 @@ const useTodo = (
         setTotalPages(safeGet(['page', 'totalPages'], todos, 0));
     }
 
+    function resetPaginations() {
+        _setPaginations(null);
+    }
+
     return {
         todos,
         fetchUserTodos,
@@ -315,7 +319,8 @@ const useTodo = (
         nextPageUrl,
         lastPageUrl,
         loading,
-        changeTodoStatus
+        changeTodoStatus,
+        resetPaginations,
     }
 
 }

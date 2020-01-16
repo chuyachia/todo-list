@@ -7,7 +7,9 @@ interface IValidation {
     onFocus: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const useValidation = (validation: (value: string) => boolean, onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void): IValidation => {
+const useValidation = (validation: (value: string) => boolean,
+                       onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void,
+                       reset?: () => void): IValidation => {
     const [valid, setValid] = React.useState(false);
     const [touched, setTouched] = React.useState(false);
 

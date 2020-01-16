@@ -2,12 +2,13 @@ import React, {useState} from 'react';
 import AuthenticationForm from "../components/AuthenticationForm";
 
 interface IAuthenticationProps {
-    register: (username: string, password: string) => void;
-    logIn: (username: string, password: string) => void;
+    register: (username: string, password: string) => Promise<boolean>;
+    logIn: (username: string, password: string) => Promise<boolean>;
     failed: boolean;
     reason: string;
     resetAuthState: () => void;
     loading: boolean;
+    hideLogin: ()=> void;
 }
 
 const Authentication: React.FC<IAuthenticationProps> = (props) => {
@@ -16,6 +17,8 @@ const Authentication: React.FC<IAuthenticationProps> = (props) => {
         setIsRegister(isRegister);
         props.resetAuthState();
     }
+
+
 
     return (
         <div className={"authentication"}>
@@ -34,13 +37,19 @@ const Authentication: React.FC<IAuthenticationProps> = (props) => {
                     passwordValidationFunction={(value: string) => value.length > 5}
                     passwordValidationMessage={"Password must contain more than 5 characters"}
                     reason={props.reason}
-                    loading={props.loading}/> :
+                    loading={props.loading}
+                    hideLogin = {props.hideLogin}
+                    resetAuthState = {props.resetAuthState}
+                /> :
                 <AuthenticationForm
                     onSubmit={props.logIn}
                     failed={props.failed}
                     submitButtonText={props.loading ? "Logging..." :"Login"}
                     reason={props.reason}
-                    loading={props.loading}/>}
+                    loading={props.loading}
+                    hideLogin = {props.hideLogin}
+                    resetAuthState = {props.resetAuthState}
+                />}
         </div>
     )
 }

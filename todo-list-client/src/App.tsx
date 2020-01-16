@@ -3,7 +3,7 @@ import './App.css';
 import useAuth from './hooks/useAuth';
 
 // dynamic imports
-const Authentication = React.lazy(()=>import('./pages/Authentication'));
+const Authentication = React.lazy(() => import('./pages/Authentication'));
 const TodoList = React.lazy(() => import('./pages/TodoList'));
 
 const App: React.FC = () => {
@@ -14,10 +14,15 @@ const App: React.FC = () => {
         process.env.REACT_APP_TODO_LIST_API + '/logout',
     );
     const [initialized, setInitialized] = React.useState(false);
+    const [showLogin, setShowLogin] = React.useState(false);
 
     async function getLoggedInUser() {
         await getUserInfo();
         setInitialized(true);
+    }
+
+    async function handleLogOut() {
+        await logOut();
     }
 
     React.useEffect(() => {
@@ -28,11 +33,15 @@ const App: React.FC = () => {
         <main className="App">
             <h3>Todo List App</h3>
             {initialized ? <>
-                {authenticated && <small className={"clickable inactive-text"} onClick={() => logOut()}>Logout</small>}
-                <React.Suspense fallback={<i className={"inactive-text loader"}>Loading...</i>}>{authenticated ?
-                    <TodoList authenticated={authenticated} username={user}/> :
-                    <Authentication register={register} logIn={logIn} failed={failed} reason={reason}
-                                    resetAuthState={resetAuthState} loading={loading}/>}
+                {!showLogin && (authenticated ?
+                    <small className={"clickable inactive-text"} onClick={handleLogOut}>Logout</small> :
+                    <small className={"clickable"} onClick={() => setShowLogin(true)}>Login</small>)}
+                <React.Suspense fallback={<i className={"inactive-text loader"}>Loading...</i>}>
+                    {showLogin?
+                        <Authentication register={register} logIn={logIn} failed={failed} reason={reason}
+                                        resetAuthState={resetAuthState} loading={loading}
+                                        hideLogin={() => setShowLogin(false)}/> :
+                        <TodoList authenticated={authenticated} username={user} showLogin={() => setShowLogin(true)}/>}
                 </React.Suspense>
             </> : <i className={"inactive-text loader"}>Loading...</i>}
         </main>

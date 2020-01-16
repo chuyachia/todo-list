@@ -4,7 +4,7 @@ import useValidation from "../hooks/useValidation";
 import {ENTER_KEY} from '../constants';
 
 interface IAuthenticationFormProps {
-    onSubmit: (username: string, password: string) => void;
+    onSubmit: (username: string, password: string) => Promise<boolean>;
     failed: boolean;
     submitButtonText?: string;
     usernameValidationFunction?: (value: string) => boolean;
@@ -13,6 +13,8 @@ interface IAuthenticationFormProps {
     passwordValidationMessage?: string;
     reason?: string;
     loading: boolean;
+    hideLogin: ()=> void;
+    resetAuthState: () => void;
 }
 
 const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
@@ -25,6 +27,8 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
                                                                     passwordValidationFunction = (value: string) => value.length > 0,
                                                                     usernameValidationMessage = "Username can not be empty",
                                                                     passwordValidationMessage = "Password must not be empty",
+                                                                    hideLogin,
+                                                                    resetAuthState,
                                                                 }) => {
     const {value: username, onChange: onUsernameChange, reset: resetUsername} = useInput<HTMLInputElement>();
     const {value: password, onChange: onPasswordChange, reset: resetPassword} = useInput<HTMLInputElement>();
@@ -37,13 +41,26 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
         }
     }
 
-    const submitAuthentication = () => {
+    async function submitAuthentication() {
         if (!loading) {
-            onSubmit(username, password);
-            resetUsername();
-            resetPassword();
+            let success = await onSubmit(username, password);
+            clearAuthentication();
+            if (success) hideLogin();
         }
     }
+
+    const back = () => {
+        clearAuthentication();
+        resetAuthState();
+        hideLogin();
+    }
+
+    const clearAuthentication =() => {
+        resetUsername();
+        resetPassword();
+    }
+
+
     return (
         <div className={"form"} onKeyDown={handleEnterKey}>
             <input className={"form-input"} type={"text"} placeholder={"Enter Username"}
@@ -58,11 +75,14 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
             <small className={"validation-text"}>
                 {passwordValidation.touched && !passwordValidation.valid ? passwordValidationMessage : ""}
             </small>
-            <button
-                className={`submit-button ${(!usernameValidation.valid || !passwordValidation.valid || loading) ? "disabled" : "primary"}`}
-                disabled={!usernameValidation.valid || !passwordValidation.valid || loading}
-                onClick={submitAuthentication}>{submitButtonText}
-            </button>
+            <div className={"buttons-wrap"}>
+                <button
+                    className={`submit-button ${(!usernameValidation.valid || !passwordValidation.valid || loading) ? "disabled" : "primary"}`}
+                    disabled={!usernameValidation.valid || !passwordValidation.valid || loading}
+                    onClick={submitAuthentication}>{submitButtonText}
+                </button>
+                <button onClick={back}>Back</button>
+            </div>
             {failed && reason && <i className={"warning-text"}>{reason}</i>}
         </div>
     )
