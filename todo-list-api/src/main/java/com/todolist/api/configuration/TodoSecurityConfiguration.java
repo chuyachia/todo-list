@@ -1,71 +1,72 @@
 package com.todolist.api.configuration;
 
 import com.todolist.api.model.enums.Role;
-import com.todolist.api.security.LoginFailureHandler;
-import com.todolist.api.security.LoginSuccessHandler;
-import com.todolist.api.security.LogoutSuccessHandler;
-import com.todolist.api.security.TodoAuthenticationEntryPoint;
 import com.todolist.api.service.TodoUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.AccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticationConverter;
+import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
+import org.springframework.security.oauth2.provider.token.UserAuthenticationConverter;
 
 @Configuration
-@EnableWebSecurity
-public class TodoSecurityConfiguration extends WebSecurityConfigurerAdapter {
+@EnableResourceServer
+public class TodoSecurityConfiguration extends ResourceServerConfigurerAdapter {
+    @Value("${oauth.client-id:}")
+    String clientId;
+    @Value("${oauth.client-secret:}")
+    String clientSecret;
+    @Value("${oauth.check-token-endpoint:}")
+    String checkTokenEndpoint;
 
     @Autowired
     private TodoUserDetailsService userDetailsService;
-    @Autowired
-    private TodoAuthenticationEntryPoint entryPoint;
-    @Autowired
-    private LoginSuccessHandler loginSuccessHandler;
-    @Autowired
-    private LogoutSuccessHandler logoutSuccessHandler;
-    @Autowired
-    private LoginFailureHandler loginFailureHandler;
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    @Bean
+    public UserAuthenticationConverter userAuthenticationConverter () {
+        DefaultUserAuthenticationConverter userAuthenticationConverter = new DefaultUserAuthenticationConverter();
+        // So that username returned from auth server can be convert to user details
+        userAuthenticationConverter.setUserDetailsService(userDetailsService);
+        return userAuthenticationConverter;
+    }
 
-        auth
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder());
+    @Bean
+    public AccessTokenConverter accessTokenConverter() {
+        DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
+        accessTokenConverter.setUserTokenConverter(userAuthenticationConverter());
+        return accessTokenConverter;
     }
 
     @Override
-    protected void configure(HttpSecurity http)
-            throws Exception {
+    public void configure(ResourceServerSecurityConfigurer resources) {
+        RemoteTokenServices remoteTokenServices = new RemoteTokenServices();
+        remoteTokenServices.setCheckTokenEndpointUrl(checkTokenEndpoint);
+        remoteTokenServices.setClientId(clientId);
+        remoteTokenServices.setClientSecret(clientSecret);
+        remoteTokenServices.setAccessTokenConverter(accessTokenConverter());
 
+        resources.tokenServices(remoteTokenServices);
+    }
+
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
         http
-                .csrf()
-                .disable()
-                .exceptionHandling()
-                .authenticationEntryPoint(entryPoint)
-                .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET)
-                .permitAll()
+//                .antMatchers(HttpMethod.GET)
+//                .permitAll()
                 .antMatchers("/api/todos/**")
                 .authenticated()
                 .antMatchers("/users/**","/user-info")
-                .hasRole(Role.ADMIN.getCode())
-                .and()
-                .formLogin()
-                .successHandler(loginSuccessHandler)
-                .failureHandler(loginFailureHandler)
-                .and()
-                .logout()
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .logoutSuccessHandler(logoutSuccessHandler);
+                .hasRole(Role.ADMIN.getCode());
     }
 
     @Bean

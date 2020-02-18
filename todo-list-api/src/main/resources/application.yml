@@ -9,14 +9,19 @@ spring:
   cache:
     caffeine:
       spec: maximumSize=500,expireAfterAccess=1m
+oauth:
+  client-id: todo-list-api
+
 server:
   port: 8088
   servlet:
     session:
       timeout: 30m
+
 todolist:
   cors:
     origin: https://todolist-cyc-client.herokuapp.com
+
 logging:
   level:
     org:
@@ -32,6 +37,11 @@ spring:
     username: user
     password: user
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+oauth:
+  client-secret: dev-secret
+  check-token-endpoint: http://localhost:8089/oauth/check_token
+
 todolist:
   cors:
     origin: http://localhost:3000

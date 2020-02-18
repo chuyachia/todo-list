@@ -13,7 +13,6 @@ import java.io.IOException;
 public class LogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        response.setStatus(204); // 204 seems more right but 200 is more common
-        return;
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }
