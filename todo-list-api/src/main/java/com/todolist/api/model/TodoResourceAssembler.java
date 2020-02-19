@@ -28,7 +28,7 @@ public class TodoResourceAssembler implements ResourceAssembler<Todo, Resource> 
 
         if (!isAnonymous &&
                 (auth.getAuthorities().contains(adminGrant) ||
-                todoUserDetail.getTodoUser().getId() == todo.getUser().getId())) {
+                todoUserDetail.getTodoUser().getUsername() == todo.getUser().getUsername())) {
             todoResource.add(
                     linkTo(methodOn(TodoController.class)
                             .update(null, todo.getId())).withRel("edit").withTitle("Edit"));

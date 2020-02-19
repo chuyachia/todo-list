@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServiceConfiguration extends AuthorizationServerConfigurerAdapter {
-// client_id=todo-list-api&grant_type=authorization_code&response_type=code&scope=read_profile_info
+// client_id=todo-list-api&grant_type=authorization_code&response_type=code&scope=any
 @Autowired
 private BCryptPasswordEncoder passwordEncoder;
     @Override
@@ -23,7 +23,8 @@ private BCryptPasswordEncoder passwordEncoder;
                 .checkTokenAccess("isAuthenticated()")
                 .allowFormAuthenticationForClients();
     }
-
+    //localhost:8089/oauth/authorize?client_id=todo-list-api&response_type=code&scope=any
+    //http://localhost:8089/oauth/token?code=Oy4a34&grant_type=authorization_code
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients
@@ -31,10 +32,10 @@ private BCryptPasswordEncoder passwordEncoder;
                 .withClient("todo-list-api").secret(passwordEncoder.encode("dev-secret"))
                 .authorizedGrantTypes("password", "authorization_code", "refresh_token")
                 .authorities("READ_ONLY_CLIENT")
-                .scopes("read_profile_info")
+                .scopes("any")
                 .resourceIds("oauth2-resource")
                 .redirectUris("http://localhost:8089/login")
-                .accessTokenValiditySeconds(120)
+                .accessTokenValiditySeconds(120000)
                 .refreshTokenValiditySeconds(240000);
     }
 }

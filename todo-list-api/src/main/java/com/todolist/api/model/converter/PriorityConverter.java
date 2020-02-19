@@ -1,4 +1,4 @@
-package com.todolist.api.converter;
+package com.todolist.api.model.converter;
 
 import com.todolist.api.model.enums.Priority;
 

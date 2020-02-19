@@ -235,7 +235,7 @@ public class TodoController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().contains(adminGrant);
         TodoUserDetail todoUserDetail = (TodoUserDetail) auth.getPrincipal();
-        return isAdmin || todo.getUser().getId() == todoUserDetail.getTodoUser().getId();
+        return isAdmin || todo.getUser().getUsername() == todoUserDetail.getTodoUser().getUsername();
     }
 
     private Pageable getPageable(Integer page, Integer size) {

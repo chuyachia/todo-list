@@ -13,10 +13,11 @@ logging:
           filter:
             CommonsRequestLoggingFilter: DEBUG
 ---
+debug: true
 spring:
   profiles: local
   datasource:
-    url: jdbc:mysql://localhost:3306/TODOLIST?useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&allowPublicKeyRetrieval=true
-    username: user
-    password: user
+    url: jdbc:mysql://localhost:3306/SECURITY?useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&allowPublicKeyRetrieval=true
+    username: security
+    password: security
     driver-class-name: com.mysql.cj.jdbc.Driver

@@ -2,9 +2,9 @@ package com.todolist.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.todolist.api.model.enums.Priority;
-import com.todolist.api.converter.PriorityConverter;
+import com.todolist.api.model.converter.PriorityConverter;
 import com.todolist.api.model.enums.Status;
-import com.todolist.api.converter.StatusConverter;
+import com.todolist.api.model.converter.StatusConverter;
 
 import javax.persistence.*;
 
@@ -25,7 +25,7 @@ public class Todo {
     private String description;
     @ManyToOne
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "username", nullable = false)
     private TodoUser user;
 
     public Integer getId() {

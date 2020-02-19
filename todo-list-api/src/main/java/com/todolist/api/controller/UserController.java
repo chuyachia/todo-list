@@ -41,6 +41,7 @@ public class UserController {
         webDataBinder.addValidators(todoUserValidator);
     }
 
+    // TODO Move to todo-list-security
     @PostMapping(value ="/register",  consumes = MediaType.APPLICATION_JSON_VALUE )
     @ResponseStatus(HttpStatus.CREATED)
     public void create(@Valid @RequestBody TodoUser newUser) {

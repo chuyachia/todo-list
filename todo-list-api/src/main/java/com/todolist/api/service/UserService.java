@@ -4,7 +4,6 @@ import com.todolist.api.exception.InvalidInputException;
 import com.todolist.api.exception.UserAlreadyExistsException;
 import com.todolist.api.exception.UserNotFoundException;
 import com.todolist.api.model.TodoUser;
-import com.todolist.api.model.UserRole;
 import com.todolist.api.model.enums.Role;
 import com.todolist.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +30,7 @@ public class UserService implements IUserService{
         if (existingUser != null ) {
             throw new UserAlreadyExistsException(existingUser.getUsername());
         } else {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            UserRole role = new UserRole();
-            role.setRole(Role.USER);
-//            role.setUser(user);
-            user.getRoles().add(role);
+            user.getRoles().add(Role.USER);
             repository.save(user);
         }
     }
@@ -47,19 +42,12 @@ public class UserService implements IUserService{
             throw new UserNotFoundException(username);
         } else {
             Role newRole = Role.getValue(role);
+            // TODO can be check in controller validation
             if (newRole == null) {
                 throw new InvalidInputException(role+" is not a valid role");
             }
 
-            List<String> existingRoles = user.getRoles().stream()
-                    .map(userRole->userRole.getRole().toString())
-                    .collect(Collectors.toList());
-            if (!existingRoles.contains(role)) {
-                UserRole newUserRole = new UserRole();
-                newUserRole.setRole(newRole);
-//                newUserRole.setUser(user);
-                user.getRoles().add(newUserRole);
-            }
+            user.getRoles().add(newRole);
             repository.save(user);
 
             return user;
@@ -72,12 +60,10 @@ public class UserService implements IUserService{
         if (user == null) {
             throw new UserNotFoundException(username);
         } else if (Role.getValue(role)==null){
+            // TODO can be check in controller validation
             throw new InvalidInputException(role+" is not a valid role");
         } else {
-            List<UserRole> filteredRoles = user.getRoles().stream()
-                    .filter(userRole->userRole.getRole().toString().equals(role))
-                    .collect(Collectors.toList());
-            user.getRoles().remove(filteredRoles.get(0));
+            user.getRoles().remove(Role.getValue(role));
             repository.save(user);
 
             return user;

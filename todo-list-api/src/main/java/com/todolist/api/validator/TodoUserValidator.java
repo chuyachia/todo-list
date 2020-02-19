@@ -21,12 +21,12 @@ public class TodoUserValidator implements Validator {
             throw new InvalidInputException("Username must not contain whitespace");
         }
 
-        if (todoUser.getPassword().contains(" ")) {
-            throw new InvalidInputException("Password must not contain whitespace");
-        }
-
-        if (todoUser.getPassword().length()<5) {
-            throw new InvalidInputException("Password must contain at least five characters");
-        }
+//        if (todoUser.getPassword().contains(" ")) {
+//            throw new InvalidInputException("Password must not contain whitespace");
+//        }
+//
+//        if (todoUser.getPassword().length()<5) {
+//            throw new InvalidInputException("Password must contain at least five characters");
+//        }
     }
 }

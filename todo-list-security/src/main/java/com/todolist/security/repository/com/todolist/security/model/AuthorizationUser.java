@@ -16,11 +16,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "users")
 public class AuthorizationUser {
-    @Id
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
 
+    @Id
     @Column(nullable = false, unique = true)
     private String username;
 

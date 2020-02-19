@@ -19,9 +19,9 @@ public class TodoUserResoucreAssembler implements ResourceAssembler<TodoUser, Re
                 linkTo(methodOn(UserController.class).getOne(todoUser.getUsername())).withSelfRel(),
                 linkTo(methodOn(UserController.class).getAll()).withRel("users"));
 
-        List<String> roles = todoUser.getRoles().stream()
-        .map(userRole -> userRole.getRole().toString())
-        .collect(Collectors.toList());
+//        List<String> roles = todoUser.getRoles().stream()
+//        .map(userRole -> userRole.getRole().toString())
+//        .collect(Collectors.toList());
 
         // TODO how to express post, put ,delete methods in HATEOS?
 //        if (roles.contains("A")) {
