@@ -1,6 +1,6 @@
 package com.todolist.security.configuration;
 
-import com.todolist.security.service.AuthorizationUserDetailsService;
+import com.todolist.security.service.AuthUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
@@ -15,20 +15,23 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    AuthorizationUserDetailsService userDetailsService;
+    AuthUserDetailsService userDetailsService;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .antMatcher("/**")
                 .authorizeRequests()
-                .antMatchers("/oauth/authorize**", "/login**", "/error**")
+                .antMatchers("/oauth/authorize**", "/login**", "/register**", "/error**")
                 .permitAll()
                 .and()
                 .authorizeRequests()
                 .anyRequest().authenticated()
                 .and()
-                .formLogin().permitAll();
+                .formLogin().permitAll()
+                .and()
+                .csrf()
+                .disable();
     }
 
     @Override

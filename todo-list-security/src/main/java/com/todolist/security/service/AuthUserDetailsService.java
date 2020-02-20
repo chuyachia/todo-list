@@ -1,7 +1,7 @@
 package com.todolist.security.service;
 
 import com.todolist.security.repository.UserRepository;
-import com.todolist.security.repository.com.todolist.security.model.AuthorizationUser;
+import com.todolist.security.model.AuthUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,22 +14,20 @@ import java.util.Collections;
 
 
 @Service
-public class AuthorizationUserDetailsService implements UserDetailsService {
+public class AuthUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository repository;
 
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) {
-        AuthorizationUser user = repository.findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException(username);
-        }
+        AuthUser user = repository.findById(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
 
         return buildUserDetails(user);
     }
 
-    private UserDetails buildUserDetails(AuthorizationUser user) {
+    private UserDetails buildUserDetails(AuthUser user) {
         User userDetail = new User(user.getUsername(), user.getPassword(), Collections.emptyList());
 
         return userDetail;

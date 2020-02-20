@@ -2,7 +2,7 @@ package com.todolist.api.controller;
 
 import com.todolist.api.exception.UserNotFoundException;
 import com.todolist.api.model.*;
-import com.todolist.api.repository.UserRepository;
+import com.todolist.api.model.enums.Role;
 import com.todolist.api.service.IUserService;
 import com.todolist.api.validator.TodoUserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +25,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 public class UserController {
 
     @Autowired
-    private UserRepository repository;
-
-    @Autowired
     private IUserService service;
 
     @Autowired
@@ -41,13 +38,6 @@ public class UserController {
         webDataBinder.addValidators(todoUserValidator);
     }
 
-    // TODO Move to todo-list-security
-    @PostMapping(value ="/register",  consumes = MediaType.APPLICATION_JSON_VALUE )
-    @ResponseStatus(HttpStatus.CREATED)
-    public void create(@Valid @RequestBody TodoUser newUser) {
-        service.registerNewUser(newUser);
-    }
-
     @GetMapping("/user-info")
     @ResponseStatus(HttpStatus.OK)
     public Resource<TodoUser> getLoggedInUser(Principal principal) {
@@ -57,7 +47,7 @@ public class UserController {
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
     public Resources<Resource<TodoUser>> getAll() {
-        List<Resource<TodoUser>> todoUsers = repository.findAll().stream()
+        List<Resource<TodoUser>> todoUsers = service.findAll().stream()
                 .map(todoUser -> assembler.toResource(todoUser))
                 .collect(Collectors.toList());
 
@@ -68,7 +58,7 @@ public class UserController {
     @GetMapping("/users/{username}")
     @ResponseStatus(HttpStatus.OK)
     public Resource<TodoUser> getOne(@PathVariable String username) {
-        TodoUser user = repository.findByUsername(username);
+        TodoUser user = service.findById(username);
         if (user == null) {
             throw new UserNotFoundException(username);
         }
@@ -79,7 +69,7 @@ public class UserController {
 
     @PutMapping("/users/{username}/{role}")
     @ResponseStatus(HttpStatus.OK)
-    public Resource<TodoUser> update(@PathVariable String role, @PathVariable String username) {
+    public Resource<TodoUser> update(@PathVariable Role role, @PathVariable String username) {
         TodoUser todoUser = service.addUserRole(username, role);
 
         return assembler.toResource(todoUser);
@@ -87,7 +77,7 @@ public class UserController {
 
     @DeleteMapping("/users/{username}/{role}")
     @ResponseStatus(HttpStatus.OK)
-    public Resource<TodoUser> delete(@PathVariable String role, @PathVariable String username) {
+    public Resource<TodoUser> delete(@PathVariable Role role, @PathVariable String username) {
         TodoUser todoUser = service.removeUserRole(username, role);
 
         return assembler.toResource(todoUser);

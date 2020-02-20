@@ -1,10 +1,8 @@
 package com.todolist.api.service;
 
-import com.todolist.api.exception.UserNotFoundException;
 import com.todolist.api.model.TodoUser;
 import com.todolist.api.model.TodoUserDetail;
 import com.todolist.api.model.enums.Role;
-import com.todolist.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,14 +22,12 @@ public class TodoUserDetailsService implements UserDetailsService {
     private String rolePrefix = "ROLE_";
 
     @Autowired
-    private UserRepository repository;
-    @Autowired
     private UserService userService;
 
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) {
-        TodoUser user = repository.findByUsername(username);
+        TodoUser user = userService.findById(username);
         if (user == null) {
             user = new TodoUser();
             user.setUsername(username);

@@ -61,12 +61,13 @@ public class TodoSecurityConfiguration extends ResourceServerConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
+                .antMatchers("**")
 //                .antMatchers(HttpMethod.GET)
-//                .permitAll()
-                .antMatchers("/api/todos/**")
-                .authenticated()
-                .antMatchers("/users/**","/user-info")
-                .hasRole(Role.ADMIN.getCode());
+                .permitAll();
+//                .antMatchers("/api/todos/**")
+//                .authenticated()
+//                .antMatchers("/users/**","/user-info")
+//                .hasRole(Role.ADMIN.getCode());
     }
 
     @Bean

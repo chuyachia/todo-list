@@ -1,4 +1,4 @@
-package com.todolist.security.repository.com.todolist.security.model;
+package com.todolist.security.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "users")
-public class AuthorizationUser {
+public class AuthUser {
 
     @Id
     @Column(nullable = false, unique = true)

@@ -1,5 +1,8 @@
 package com.todolist.api.model.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -24,14 +27,13 @@ public enum Role {
 
     Role(String role) { this.code = role; }
 
-    public String getCode() { return code; }
-
+    @JsonCreator
     public static Role getValue(String code) {
         return VALUES_MAP.get(code);
     }
 
-    @Override
-    public String toString() {
+    @JsonValue
+    public String getName() {
         return code;
     }
 
