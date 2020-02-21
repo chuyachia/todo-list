@@ -3,17 +3,13 @@ package com.todolist.api.controller;
 import com.todolist.api.exception.UserNotFoundException;
 import com.todolist.api.model.*;
 import com.todolist.api.model.enums.Role;
-import com.todolist.api.service.IUserService;
-import com.todolist.api.validator.TodoUserValidator;
+import com.todolist.api.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,18 +21,10 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 public class UserController {
 
     @Autowired
-    private IUserService service;
+    private UserService service;
 
     @Autowired
     private TodoUserResoucreAssembler assembler;
-
-    @Autowired
-    private TodoUserValidator todoUserValidator;
-
-    @InitBinder
-    private void initBinder(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(todoUserValidator);
-    }
 
     @GetMapping("/user-info")
     @ResponseStatus(HttpStatus.OK)

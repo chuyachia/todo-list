@@ -5,9 +5,7 @@ import com.todolist.api.model.TodoResourceAssembler;
 import com.todolist.api.model.TodoUserDetail;
 import com.todolist.api.model.enums.Priority;
 import com.todolist.api.model.enums.Status;
-import com.todolist.api.repository.TodoRepository;
-import com.todolist.api.service.TodoService;
-import com.todolist.api.validator.TodoValidator;
+import com.todolist.api.service.impl.TodoServiceImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
@@ -15,33 +13,21 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-
-
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("api")
 public class TodoController {
     private final TodoResourceAssembler assembler;
     private final PagedResourcesAssembler pagedResourcesAssembler;
-    private final TodoService service;
-    private final TodoValidator todoValidator;
+    private final TodoServiceImpl service;
 
-    TodoController(TodoResourceAssembler assembler, TodoService service, TodoValidator todoValidator) {
+    TodoController(TodoResourceAssembler assembler, TodoServiceImpl service) {
         this.assembler = assembler;
         this.service = service;
-        this.todoValidator = todoValidator;
         this.pagedResourcesAssembler = new PagedResourcesAssembler(null,null);
     }
-
-    @InitBinder
-    private void initBinder(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(todoValidator);
-    }
-
 
     @GetMapping("/todos")
     public PagedResources<Resource<Todo>> getAll(@RequestParam(required = false) int page, @RequestParam(required = false) int size) {
@@ -96,7 +82,7 @@ public class TodoController {
 
     @PostMapping(value = "/todos", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public Resource<Todo> create(@Valid @RequestBody Todo todo) {
+    public Resource<Todo> create(@RequestBody Todo todo) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         TodoUserDetail todoUserDetail = (TodoUserDetail) auth.getPrincipal();
         Todo newTodo = new Todo.Builder(todo)

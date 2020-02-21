@@ -20,7 +20,7 @@ public class AuthUserService implements IAuthUserService {
     public void registerNewUser(AuthUser user) {
         Optional<AuthUser> existingUser = repository.findById(user.getUsername());
         if (existingUser.isPresent()) {
-            throw new EntityExistsException(existingUser.get().getUsername());
+            throw new EntityExistsException(String.format("User %s already exists", existingUser.get().getUsername()));
         } else {
             repository.save(user);
         }

@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +23,7 @@ public class TodoUser {
 
     @Id
     @Column(nullable = false, unique = true)
+    @NotBlank(message = "Username must not be empty")
     private String username;
     @ElementCollection
     @Convert(converter = RoleConverter.class)

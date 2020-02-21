@@ -7,6 +7,8 @@ import com.todolist.api.model.enums.Status;
 import com.todolist.api.model.converter.StatusConverter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "todos")
@@ -16,6 +18,8 @@ public class Todo {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @NotNull(message = "Title must not be empty")
+    @Size(min = 1, message = "Title must not be empty")
     private String title;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Convert(converter = StatusConverter.class)

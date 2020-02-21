@@ -1,11 +1,12 @@
 package com.todolist.api.configuration;
 
 import com.todolist.api.model.enums.Role;
-import com.todolist.api.service.TodoUserDetailsService;
+import com.todolist.api.service.impl.TodoUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -61,13 +62,12 @@ public class TodoSecurityConfiguration extends ResourceServerConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("**")
-//                .antMatchers(HttpMethod.GET)
-                .permitAll();
-//                .antMatchers("/api/todos/**")
-//                .authenticated()
-//                .antMatchers("/users/**","/user-info")
-//                .hasRole(Role.ADMIN.getCode());
+                .antMatchers(HttpMethod.GET)
+                .permitAll()
+                .antMatchers("/api/todos/**")
+                .authenticated()
+                .antMatchers("/users/**","/user-info")
+                .hasRole(Role.ADMIN.getName());
     }
 
     @Bean

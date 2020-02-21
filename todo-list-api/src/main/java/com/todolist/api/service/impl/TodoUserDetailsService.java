@@ -1,4 +1,4 @@
-package com.todolist.api.service;
+package com.todolist.api.service.impl;
 
 import com.todolist.api.model.TodoUser;
 import com.todolist.api.model.TodoUserDetail;
@@ -22,7 +22,7 @@ public class TodoUserDetailsService implements UserDetailsService {
     private String rolePrefix = "ROLE_";
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @Override
     @Transactional
