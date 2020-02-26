@@ -18,6 +18,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     AuthUserDetailsService userDetailsService;
 
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -37,22 +42,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .disable();
     }
 
-    @Autowired
-    protected void globalConfigure(AuthenticationManagerBuilder auth) throws Exception {
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
                 auth
                 .userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder());
     }
-
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
-
 }
