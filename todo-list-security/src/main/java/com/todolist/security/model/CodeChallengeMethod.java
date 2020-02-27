@@ -10,13 +10,13 @@ public enum CodeChallengeMethod {
     S256 {
         @Override
         public String transform(String codeVerifier) {
-            String transformedCodeVerifier = null;
+            String transformedCodeVerifier;
             try {
-                MessageDigest digest =MessageDigest.getInstance("SHA-256");
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
                 byte[] hash = digest.digest(codeVerifier.getBytes(StandardCharsets.UTF_8));
                 transformedCodeVerifier = Base64.getUrlEncoder().encodeToString(hash);
             } catch (NoSuchAlgorithmException e) {
-                // TODO throw appropriate exception
+                throw new InternalError(e.getMessage());
             }
 
             return transformedCodeVerifier;
@@ -25,7 +25,7 @@ public enum CodeChallengeMethod {
     PLAIN {
         @Override
         public String transform(String codeVerifier) {
-            return  codeVerifier;
+            return codeVerifier;
         }
     },
     NONE {

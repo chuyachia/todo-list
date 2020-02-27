@@ -23,14 +23,28 @@ public class AuthController {
 
     @PostMapping(value ="/register",  consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE )
     public RedirectView create(@Valid AuthUser newUser) {
-        service.registerNewUser(newUser);
-
         RedirectView redirectView = new RedirectView();
-        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        HttpSession session = attr.getRequest().getSession();
-        DefaultSavedRequest request =  (DefaultSavedRequest) session.getAttribute(SPRING_SECURITY_SAVED_REQUEST);
-        redirectView.setUrl(request.getRedirectUrl());
+            try {
+                service.registerNewUser(newUser);
+            } catch (RuntimeException e) {
+                redirectView.setUrl("/login?error=registrationError");
 
-        return redirectView;
+                return redirectView;
+            }
+
+            ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            HttpSession session = attr.getRequest().getSession();
+            DefaultSavedRequest request = (DefaultSavedRequest) session.getAttribute(SPRING_SECURITY_SAVED_REQUEST);
+
+            if (request == null) {
+                redirectView.setUrl("/login?success=registered");
+                return redirectView;
+            } else {
+                redirectView.setUrl(request.getRedirectUrl());
+                return redirectView;
+            }
+
+            // TODO handle register error display on login html
+
     }
 }

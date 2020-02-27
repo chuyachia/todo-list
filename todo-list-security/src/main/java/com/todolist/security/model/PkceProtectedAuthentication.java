@@ -20,10 +20,9 @@ public class PkceProtectedAuthentication {
         this.codeChallenge = codeChallenge;
     }
 
-    public OAuth2Authentication getAuthentication(String codeVerifier) {
-        if (codeChallengeMethod == CodeChallengeMethod.NONE) {
-            return authentication;
-        } else if (codeChallengeMethod.transform(codeVerifier).equals(codeChallenge)) {
+    public OAuth2Authentication verifierCodeAndGetAuthentication(String codeVerifier) {
+        if (codeChallengeMethod == CodeChallengeMethod.NONE ||
+                codeChallengeMethod.transform(codeVerifier).equals(codeChallenge)) {
             return authentication;
         } else {
             throw new InvalidGrantException("Invalid code verifier");

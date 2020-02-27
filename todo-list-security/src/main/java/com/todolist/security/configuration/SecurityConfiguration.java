@@ -28,11 +28,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
                 .antMatcher("/**")
                 .authorizeRequests()
-                .antMatchers("/oauth/authorize**", "/register**", "/error**")
+                .antMatchers("/oauth/authorize**", "/login**", "/register**", "/error**", "/css/**", "/js/**")
                 .permitAll()
                 .and()
                 .formLogin()
                 .loginPage("/login")
+                .failureUrl("/login?error=loginError")
                 .permitAll()
                 .and()
                 .authorizeRequests()

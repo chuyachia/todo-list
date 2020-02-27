@@ -44,7 +44,7 @@ public class PkceAuthorizationCodeServices implements AuthorizationCodeServices 
 
     public OAuth2Authentication consumeAuthorizationCodeAndCodeVerifier(String code, String codeVerifier) throws InvalidGrantException {
         PkceProtectedAuthentication auth = this.authorizationCodeStore.remove(code);
-        return auth.getAuthentication(codeVerifier);
+        return auth.verifierCodeAndGetAuthentication(codeVerifier);
     }
 
     private PkceProtectedAuthentication convertOauth2ToPkceProtected(OAuth2Authentication authentication) {
@@ -58,6 +58,7 @@ public class PkceAuthorizationCodeServices implements AuthorizationCodeServices 
 
         if (codeChallenge != null) {
             CodeChallengeMethod codeChallengeMethod = getCodeChallengeMethod(requestParams.get("code_challenge_method"));
+
             return new PkceProtectedAuthentication(authentication, codeChallengeMethod, codeChallenge);
         } else {
             return new PkceProtectedAuthentication(authentication);
@@ -71,9 +72,13 @@ public class PkceAuthorizationCodeServices implements AuthorizationCodeServices 
     }
 
     private CodeChallengeMethod getCodeChallengeMethod(String codeChallengeMethod) {
-        return Optional.ofNullable(codeChallengeMethod)
-                .map(String::toUpperCase)
-                .map(CodeChallengeMethod::valueOf)
-                .orElse(CodeChallengeMethod.PLAIN);
+       try {
+           return Optional.ofNullable(codeChallengeMethod)
+                   .map(String::toUpperCase)
+                   .map(CodeChallengeMethod::valueOf)
+                   .orElse(CodeChallengeMethod.PLAIN);
+       } catch(IllegalArgumentException e) {
+           throw new InvalidRequestException("Invalid code challenge method: "+ codeChallengeMethod);
+       }
     }
 }

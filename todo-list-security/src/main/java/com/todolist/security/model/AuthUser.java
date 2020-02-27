@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @Data
@@ -23,7 +24,8 @@ public class AuthUser {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     @NotBlank(message = "Password must not be empty")
-    @Size(min = 5, message = "Password should have minimun 5 letters")
+    @Pattern(regexp = "(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{5,}",
+            message = "Must contain at least one number and one uppercase and lowercase letter, and at least 5 or more characters")
     private String password;
 
 }

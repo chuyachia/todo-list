@@ -23,7 +23,7 @@ public class AuthUserService implements IAuthUserService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public void registerNewUser(AuthUser user) {
+    public void registerNewUser(AuthUser user) throws EntityExistsException {
         Optional<AuthUser> existingUser = repository.findById(user.getUsername());
         if (existingUser.isPresent()) {
             throw new EntityExistsException(String.format("User %s already exists", existingUser.get().getUsername()));
