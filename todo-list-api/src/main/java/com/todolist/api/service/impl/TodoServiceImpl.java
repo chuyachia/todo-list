@@ -25,28 +25,28 @@ import java.util.stream.Stream;
 
 @Service
 public class TodoServiceImpl implements TodoService {
-    private static final String ADMIN_ROLE = "ROLE_A";
+    private static final String ADMIN_ROLE = "ROLE_ADMIN";
     private static final SimpleGrantedAuthority adminGrant =  new SimpleGrantedAuthority(ADMIN_ROLE);
 
     @Autowired
     private TodoRepository repository;
 
     @Override
-    public Page<Todo> findAll(int page, int size) {
+    public Page<Todo> findAll(Integer page, Integer size) {
         Pageable pageable = getPageable(page, size);
 
         return repository.findAll(pageable);
     }
 
     @Override
-    public Page<Todo> findByUserUsername(String username, int page, int size) {
+    public Page<Todo> findByUserUsername(String username, Integer page, Integer size) {
         Pageable pageable = getPageable(page, size);
 
         return repository.findByUserUsername(username, pageable);
     }
 
     @Override
-    public Page<Todo> findByCriteria(String q, Priority p, Status s, String user, int page, int size) {
+    public Page<Todo> findByCriteria(String q, Priority p, Status s, String user, Integer page, Integer size) {
         Pageable pageable = getPageable(page, size);
         Page<Todo> todos = Page.empty();
 
@@ -74,7 +74,7 @@ public class TodoServiceImpl implements TodoService {
         Todo todo = findById(id);
         if (isTodoAuthorOrAdmin(todo)) {
             Todo newTodo = new Todo.Builder(todo)
-                    .status(Status.DONE)
+                    .status(status)
                     .build();
 
             return repository.save(newTodo);
@@ -117,12 +117,12 @@ public class TodoServiceImpl implements TodoService {
         writeCSVHeader(outputStream);
         todoStream.forEach(todo -> writeCSVRow(todo,outputStream));
     }
-    private Pageable getPageable(int page, int size) {
+    private Pageable getPageable(Integer page, Integer size) {
         Pageable pageable;
-        if (size == 0 && page == 0) {
-            pageable = PageRequest.of(page, size);
-        } else {
+        if (size == null || page == null) {
             pageable = Pageable.unpaged();
+        } else {
+            pageable = PageRequest.of(page, size);
         }
 
         return pageable;
@@ -165,6 +165,7 @@ public class TodoServiceImpl implements TodoService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = auth.getAuthorities().contains(adminGrant);
         TodoUserDetail todoUserDetail = (TodoUserDetail) auth.getPrincipal();
-        return isAdmin || todo.getUser().getUsername() == todoUserDetail.getTodoUser().getUsername();
+        boolean isTodoAuthor = todo.getUser().getUsername().equals(todoUserDetail.getTodoUser().getUsername());
+        return isAdmin || isTodoAuthor;
     }
 }

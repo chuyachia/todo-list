@@ -62,11 +62,11 @@ public class TodoSecurityConfiguration extends ResourceServerConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET)
+                .antMatchers(HttpMethod.GET, "/api/todos/**")
                 .permitAll()
-                .antMatchers("/api/todos/**")
+                .antMatchers("/api/todos/**", "/user-info")
                 .authenticated()
-                .antMatchers("/users/**","/user-info")
+                .antMatchers("/users/**")
                 .hasRole(Role.ADMIN.getName());
     }
 

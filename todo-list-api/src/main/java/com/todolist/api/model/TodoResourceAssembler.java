@@ -14,7 +14,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 @Component
 public class TodoResourceAssembler implements ResourceAssembler<Todo, Resource> {
-    private final String ADMIN_ROLE = "ROLE_A";
+    private final String ADMIN_ROLE = "ROLE_ADMIN";
     private final SimpleGrantedAuthority adminGrant = new SimpleGrantedAuthority(ADMIN_ROLE);
 
     @Override
@@ -26,9 +26,9 @@ public class TodoResourceAssembler implements ResourceAssembler<Todo, Resource> 
         Resource<Todo> todoResource = new Resource<>(todo,
                 linkTo(methodOn(TodoController.class).getOne(todo.getId())).withSelfRel());
 
-        if (!isAnonymous &&
-                (auth.getAuthorities().contains(adminGrant) ||
-                todoUserDetail.getTodoUser().getUsername() == todo.getUser().getUsername())) {
+        boolean isAdmin = auth.getAuthorities().contains(adminGrant);
+        boolean isTodoAuthor =  !isAnonymous && todoUserDetail.getTodoUser().getUsername().equals(todo.getUser().getUsername());
+        if (isAdmin || isTodoAuthor) {
             todoResource.add(
                     linkTo(methodOn(TodoController.class)
                             .update(null, todo.getId())).withRel("edit").withTitle("Edit"));

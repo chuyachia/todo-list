@@ -30,7 +30,7 @@ public class TodoController {
     }
 
     @GetMapping("/todos")
-    public PagedResources<Resource<Todo>> getAll(@RequestParam(required = false) int page, @RequestParam(required = false) int size) {
+    public PagedResources<Resource<Todo>> getAll(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
         Page<Todo> todosPage = service.findAll(page, size);
 
         return pagedResourcesAssembler.toResource(
@@ -59,7 +59,7 @@ public class TodoController {
     }
 
     @GetMapping("/todos/user/{username}")
-    public PagedResources<Resource<Todo>> getByUsername(@PathVariable String username, @RequestParam(required = false) int page, @RequestParam(required = false) int size) {
+    public PagedResources<Resource<Todo>> getByUsername(@PathVariable String username, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
         Page<Todo> todosPage = service.findByUserUsername(username, page, size);
 
         return pagedResourcesAssembler.toResource(
@@ -71,8 +71,8 @@ public class TodoController {
                                                        @RequestParam(required = false) Priority priority,
                                                        @RequestParam(required = false) Status status,
                                                        @RequestParam(required = false) String user,
-                                                       @RequestParam(required = false) int page,
-                                                       @RequestParam(required = false) int size) {
+                                                       @RequestParam(required = false) Integer page,
+                                                       @RequestParam(required = false) Integer size) {
         Page<Todo> todosPage = service.findByCriteria(q, priority, status, user, page, size);
 
         return pagedResourcesAssembler.toResource(

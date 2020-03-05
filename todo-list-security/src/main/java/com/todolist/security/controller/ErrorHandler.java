@@ -1,4 +1,4 @@
-package com.todolist.security.error;
+package com.todolist.security.controller;
 
 import lombok.Data;
 import org.springframework.http.HttpStatus;
@@ -14,25 +14,25 @@ public class ErrorHandler {
 
     @Data
     private static class ErrorResponse {
-        final String title;
-        final String message;
+        final String error;
+        final String error_description;
 
-        public ErrorResponse(String title, String message) {
-            this.title = title;
-            this.message = message;
+        public ErrorResponse(String error, String error_description) {
+            this.error = error;
+            this.error_description = error_description;
         }
     }
 
     @ExceptionHandler(EntityExistsException.class)
     public ResponseEntity<ErrorResponse> alreadyExists(Exception e) {
-        ErrorResponse error = new ErrorResponse("Already exists", e.getMessage());
+        ErrorResponse error = new ErrorResponse("already exists", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> invalidInput(Exception e) {
-        ErrorResponse error = new ErrorResponse("Invalid input", e.getMessage());
+        ErrorResponse error = new ErrorResponse("invalid input", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }

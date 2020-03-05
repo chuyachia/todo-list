@@ -8,9 +8,9 @@ import org.springframework.data.domain.Page;
 import java.io.OutputStream;
 
 public interface TodoService {
-    Page<Todo> findAll(int page, int size);
-    Page<Todo> findByUserUsername(String username, int page, int size);
-    Page<Todo> findByCriteria(String q, Priority p, Status s, String user, int page, int size);
+    Page<Todo> findAll(Integer page, Integer size);
+    Page<Todo> findByUserUsername(String username, Integer page, Integer size);
+    Page<Todo> findByCriteria(String q, Priority p, Status s, String user, Integer page, Integer size);
     Todo findById(Integer id);
     Todo updateStatus(Integer id, Status status);
     Todo update(Integer id, Todo todo);
