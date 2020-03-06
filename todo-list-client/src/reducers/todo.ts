@@ -5,7 +5,7 @@ import {
     LOAD_TODOS_REQUEST,
     NEW_ACTIVE_TODO,
     NEW_PAGING_INFO,
-    NEW_TODOS, SUBMIT_TODO_FAILURE,
+    NEW_TODOS, RESET_ERROR_STATE, SUBMIT_TODO_FAILURE,
     SUBMIT_TODO_REQUEST, SUBMIT_TODO_SUCCESS
 } from "../actions/constants";
 
@@ -47,7 +47,7 @@ export default (state: ITodoState, action: IAction): ITodoState => {
             return {
                 ...state,
                 submitTodoError: false,
-                activeTodo: undefined,
+                submitTodoSuccess: false,
                 loading: true,
             }
         case SUBMIT_TODO_FAILURE:
@@ -61,6 +61,16 @@ export default (state: ITodoState, action: IAction): ITodoState => {
             return {
                 ...state,
                 loading: false,
+                submitTodoSuccess: true,
+                activeTodo: undefined,
+            }
+        case RESET_ERROR_STATE:
+            return {
+                ...state,
+                submitTodoError: false,
+                submitTodoSuccess: false,
+                loadTodoError: false,
+                errorMessage: '',
             }
         default:
             return {...state};

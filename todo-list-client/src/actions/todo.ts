@@ -6,7 +6,7 @@ import {
     LOAD_TODOS_REQUEST,
     NEW_ACTIVE_TODO,
     NEW_PAGING_INFO,
-    NEW_TODOS, SUBMIT_TODO_FAILURE,
+    NEW_TODOS, RESET_ERROR_STATE, SUBMIT_TODO_FAILURE,
     SUBMIT_TODO_REQUEST, SUBMIT_TODO_SUCCESS
 } from "./constants";
 import {IPagingInfo} from "../models/IPagingInfo";
@@ -53,6 +53,10 @@ export const TodoActionCreater = () => {
         payload: message,
     });
 
+    const resetErrorState = () => dispatch({
+        type: RESET_ERROR_STATE,
+    })
+
     return {
         loadTodosRequest,
         loadTodos,
@@ -62,6 +66,7 @@ export const TodoActionCreater = () => {
         submitTodoRequest,
         submitTodoFailure,
         submitTodoSuccess,
+        resetErrorState,
     }
 
 };

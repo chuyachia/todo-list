@@ -12,12 +12,14 @@ export interface ITodoState {
     lastPageUrl: string;
     currentPageUrl: string;
     submitTodoError: boolean;
+    submitTodoSuccess: boolean;
     loadTodoError: boolean;
     loading: boolean;
     errorMessage: string;
 }
 
 export const initialTodoState: ITodoState = {
+    submitTodoSuccess: false,
     errorMessage: "",
     loadTodoError: false,
     loading: true,

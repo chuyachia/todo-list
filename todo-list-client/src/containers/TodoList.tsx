@@ -14,16 +14,16 @@ import {IState} from "../states";
 import {IAuthState} from "../states/authState";
 import ITodo from "../models/ITodo";
 import queryString from "query-string";
+import {TodoActionCreater} from "../actions";
 
 const TodoItemForm = React.lazy(() => import('../components/TodoItemForm'));
 const SearchInput = React.lazy(() => import('../components/SearchInput'));
 
 const TodoList: React.FC<{}> = () => {
     const [{auth, todo}, dispatch] = useStateValue();
-
     const {
         fetchUserTodos, fetchAllTodos, searchTodos, submitNewTodo, fetchTodos,
-        editTodo, updateTodo, downloadTodos, changeTodoStatus, getUserInfo
+        updateTodo, downloadTodos, changeTodoStatus, getUserInfo
     } = useApi(
         process.env.REACT_APP_TODO_LIST_API + '/api/todos',
         process.env.REACT_APP_TODO_LIST_API + '/api/todos/user',
@@ -32,6 +32,7 @@ const TodoList: React.FC<{}> = () => {
         process.env.REACT_APP_TODO_LIST_API + '/api/todos/file',
         process.env.REACT_APP_TODO_LIST_API + '/user-info'
     );
+    const {resetErrorState, setActiveTodo} = TodoActionCreater();
     const [isEdit, setIsEdit] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [showAllTodos, setShowAllTodos] = useState(true);
@@ -57,11 +58,11 @@ const TodoList: React.FC<{}> = () => {
 
     const handleBack = () => {
         setIsEdit(false);
-        editTodo(undefined);
+        setActiveTodo(undefined);
     }
 
     const handleEditTodo = (todo: ITodoItem) => {
-        editTodo(todo);
+        setActiveTodo(todo);
         setIsEdit(true);
     }
 
@@ -97,17 +98,18 @@ const TodoList: React.FC<{}> = () => {
         }
     }
 
-    useEffect(()=> {
-        getUserInfo();
-    },[])
-
-    useEffect(() => {
+    const loadInitialData = async () => {
+        await getUserInfo();
         if (!auth.authenticated) {
             fetchAllTodos();
         } else if (auth.username.length > 0) {
             fetchUserTodos(auth.username);
         }
-    }, [])
+    }
+
+    useEffect(()=> {
+        loadInitialData();
+    },[])
 
     useEffect(() => {
         if (!isEdit && todo.currentPageUrl.length > 0) {
@@ -123,9 +125,16 @@ const TodoList: React.FC<{}> = () => {
             {todo.loading && <i className={"inactive-text loader"}>Loading...</i>}
             {isEdit ?
                 <React.Suspense fallback={<i className={"inactive-text loader"}>Loading...</i>}>
-                    <TodoItemForm onBack={handleBack} onSubmit={todo.activeTodo !== undefined ? updateTodo : submitNewTodo}
-                                  submitError={todo.submitTodoError} todo={todo.activeTodo} errorMessage={todo.errorMessage}
-                                  loading={todo.loading}/>
+                    <TodoItemForm
+                        onBack={handleBack}
+                        onSubmit={todo.activeTodo !== undefined ? updateTodo : submitNewTodo}
+                        submitError={todo.submitTodoError}
+                        todo={todo.activeTodo}
+                        submitSuccess={todo.submitTodoSuccess}
+                        errorMessage={todo.errorMessage}
+                        loading={todo.loading}
+                        resetErrorState={resetErrorState}
+                    />
                 </React.Suspense>
                 : <>
                     {auth.authenticated && <div>
@@ -144,10 +153,12 @@ const TodoList: React.FC<{}> = () => {
                         <div>
                             {isSearchOpen &&
                             <React.Suspense fallback={<i className={"inactive-text loader"}>Loading...</i>}>
-                                <SearchInput onClose={() => setIsSearchOpen(false)}
-                                             value={searchValue}
-                                             onChange={onSearchValueChange}
-                                             submitSearch={handleSubmitSearch}/>
+                                <SearchInput
+                                    onClose={() => setIsSearchOpen(false)}
+                                    value={searchValue}
+                                    onChange={onSearchValueChange}
+                                    submitSearch={handleSubmitSearch}
+                                />
                             </React.Suspense>}
                             <button title="Search todos" className={`${todo.loading ? "disabled" : "primary"}`}
                                     onClick={() => !todo.loading && setIsSearchOpen(!isSearchOpen)}>
@@ -160,16 +171,23 @@ const TodoList: React.FC<{}> = () => {
                         </button>
                     </div>
                     {todo.loadTodoError && <i className={"warning-text"}>{todo.errorMessage}</i>}
-                    <div>{todo.todos.map((t: ITodo) => <TodoItem
-                        key={hashCode(t.title + t.description + t.priority + Object.keys(t._links).length)}
-                        todo={t} onEdit={handleEditTodo} loading={todo.loading}
-                        onChangeStatus={changeTodoStatus}/>)}</div>
-                    <Pagination onFirstPageClick={() => fetchTodos(todo.firstPageUrl)}
-                                onPrevPageClick={() => fetchTodos(todo.prevPageUrl)}
-                                onNextPageClick={() => fetchTodos(todo.nextPageUrl)}
-                                onLastPageClick={() => fetchTodos(todo.lastPageUrl)}
-                                currentPage={todo.currentPage + 1}
-                                totalPages={todo.totalPages}/>
+                    <div>{todo.todos.map((t: ITodo) => (
+                        <TodoItem
+                            key={hashCode(t.title + t.description + t.priority + Object.keys(t._links).length)}
+                            todo={t}
+                            onEdit={handleEditTodo}
+                            loading={todo.loading}
+                            onChangeStatus={changeTodoStatus}
+                        />))}
+                    </div>
+                    <Pagination
+                        onFirstPageClick={() => fetchTodos(todo.firstPageUrl)}
+                        onPrevPageClick={() => fetchTodos(todo.prevPageUrl)}
+                        onNextPageClick={() => fetchTodos(todo.nextPageUrl)}
+                        onLastPageClick={() => fetchTodos(todo.lastPageUrl)}
+                        currentPage={todo.currentPage + 1}
+                        totalPages={todo.totalPages}
+                    />
                 </>}
         </div>)
 }

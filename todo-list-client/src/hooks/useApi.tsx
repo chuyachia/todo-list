@@ -5,14 +5,13 @@ import {AuthActionCreater, TodoActionCreater} from "../actions";
 import {useStateValue} from "../state";
 import {IPagingInfo} from "../models/IPagingInfo";
 
-interface ITodos {
+interface ITodoApis {
     fetchUserTodos: (username: string) => void;
     fetchAllTodos: () => void;
     searchTodos: (searchValue: string, user?: string) => void;
     fetchTodos: (url: string) => void;
     submitNewTodo: (title: string, description: string, priority: string) => Promise<ITodo | null>;
     updateTodo: (title: string, description: string, priority: string) => Promise<ITodo | null>;
-    editTodo: (todo: ITodo | undefined) => void;
     downloadTodos: (searchValue?: string, user?: string) => void;
     changeTodoStatus: (url: string) => Promise<ITodo | null>;
     resetPaginations: () => void;
@@ -28,7 +27,7 @@ const useApi = (
     sumbitNewTodoEndpoint: string,
     searchTodosEndpoint: string,
     downloadTodosEndPoint: string,
-    userInfoEndpoint: string): ITodos => {
+    userInfoEndpoint: string): ITodoApis => {
 
     const token = sessionStorage.getItem('token');
 
@@ -195,10 +194,6 @@ const useApi = (
         window.location.assign(url);
     }
 
-    const editTodo = (todo: ITodo | undefined) => {
-        todoActions.setActiveTodo(todo);
-    }
-
     async function _getErrorMessage(response: Response): Promise<string> {
         if (response.status.toString().startsWith("4")) {
             const res = await response.json();
@@ -244,7 +239,6 @@ const useApi = (
         fetchTodos,
         submitNewTodo,
         downloadTodos,
-        editTodo,
         updateTodo,
         changeTodoStatus,
         resetPaginations,

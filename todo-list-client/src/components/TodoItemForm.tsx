@@ -1,18 +1,20 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import useInput from '../hooks/useInput';
 import useValidation from "../hooks/useValidation";
 import ITodoItem from "../models/ITodo";
 import safeGet from '../util/safeGet';
 import {ENTER_KEY} from '../constants';
-
+import ITodo from '../models/ITodo';
 
 interface ITodoItemForm {
     onBack: () => void;
-    onSubmit: (title: string, description: string, priority: string) => void;
+    onSubmit: (title: string, description: string, priority: string) => Promise<ITodo | null>;
     submitError: boolean;
+    submitSuccess: boolean;
     todo: ITodoItem | undefined;
     errorMessage: string;
     loading: boolean;
+    resetErrorState: ()=> void;
 }
 
 const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
@@ -20,24 +22,29 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
     const titleInputValidation = useValidation((value: string) => value.length > 0, titleInput.onChange);
     const priorityInput = useInput<HTMLSelectElement>(safeGet(["todo", "priority"], props, ""));
     const descriptionInput = useInput<HTMLTextAreaElement>(safeGet(["todo", "description"], props, ""));
-    const [submitted, setSubmitted] = useState(false);
+    const [disableEdit, setDisableEdit] = useState(false);
 
+    let timeout: number;
 
-    const submitNewTodo = () => {
-        props.onSubmit(titleInput.value, descriptionInput.value, priorityInput.value);
-        setSubmitted(true);
-        titleInput.reset();
-        descriptionInput.reset();
-        priorityInput.reset();
+    useEffect(()=> {
+        return () => console.log('clear time out');
+    }, [])
+
+    const submitNewTodo = async () => {
+        const todo = await props.onSubmit(titleInput.value, descriptionInput.value, priorityInput.value);
+        if (todo) {
+            setDisableEdit(true);
+            timeout = window.setTimeout(() => goBack(), 1000);
+        }
     }
 
     const goBack = () => {
         props.onBack();
-        setSubmitted(false);
+        props.resetErrorState();
     }
 
     const resetSubmitted = () => {
-        if (submitted) setSubmitted(false);
+        props.resetErrorState();
     }
 
     const handleEnterKey = (e: React.KeyboardEvent) => {
@@ -51,16 +58,16 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
             <label>Title</label>
             <input className={"form-input"} type={"text"} placeholder={"Enter title"}
                    onChange={titleInputValidation.onChange} onFocus={titleInputValidation.onFocus}
-                   value={titleInput.value}/>
+                   value={titleInput.value} disabled={disableEdit}/>
             <small className={"validation-text"}>
                 {titleInputValidation.touched && !titleInputValidation.valid && "Title must not be empty"}
             </small>
             <label>Description</label>
             <textarea maxLength={200} className={"form-input"} placeholder={"Enter description"}
-                      onChange={descriptionInput.onChange} value={descriptionInput.value}/>
+                      onChange={descriptionInput.onChange} value={descriptionInput.value} disabled={disableEdit}/>
             <label>Priority</label>
             <select className={"form-input"} value={priorityInput.value}
-                    onChange={priorityInput.onChange}>
+                    onChange={priorityInput.onChange} disabled={disableEdit}>
                 <option disabled={true} value={""}>Select priority</option>
                 <option value={"High"}>High</option>
                 <option value={"Medium"}>Medium</option>
@@ -72,8 +79,8 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
                 </button>
                 <button className={"submit-button"} onClick={goBack}>Back</button>
             </div>
-            {submitted && !props.submitError && <i className={"success-text"}>Successfully submitted!</i>}
-            {submitted && props.submitError && <i className={"warning-text"}>{props.errorMessage}</i>}
+            {props.submitSuccess&& <i className={"success-text"}>Successfully submitted! Directing back...</i>}
+            {props.submitError && <i className={"warning-text"}>{props.errorMessage}</i>}
         </div>);
 }
 
