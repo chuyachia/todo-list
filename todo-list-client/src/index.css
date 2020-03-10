@@ -45,14 +45,6 @@ button.disabled {
   border-color: #999999;
 }
 
-.inactive-text {
-  color: var(--grey);
-}
-
-.active-text {
-  /*text-decoration: underline;*/
-}
-
 .warning-text {
   color: var(--red);
 }
@@ -63,4 +55,9 @@ button.disabled {
 
 .clickable {
   cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
 }

@@ -1,15 +1,19 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import ITodo from '../models/ITodo';
 import safeGet from '../util/safeGet';
 import {AuthActionCreater, TodoActionCreater} from "../actions";
 import {useStateValue} from "../state";
 import {IPagingInfo} from "../models/IPagingInfo";
+import queryString from "query-string";
 
 interface ITodoApis {
-    fetchUserTodos: (username: string) => void;
-    fetchAllTodos: () => void;
+    authenticate: () => void;
+    getToken: (code: string) => void;
+    fetchUserTodos: (username: string, page: number) => void;
+    fetchAllTodos: (page: number) => void;
     searchTodos: (searchValue: string, user?: string) => void;
     fetchTodos: (url: string) => void;
+    fetchOneTodo: (id: string) => Promise<ITodo | null>;
     submitNewTodo: (title: string, description: string, priority: string) => Promise<ITodo | null>;
     updateTodo: (title: string, description: string, priority: string) => Promise<ITodo | null>;
     downloadTodos: (searchValue?: string, user?: string) => void;
@@ -19,21 +23,68 @@ interface ITodoApis {
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
+const UNAUTHORIZED_MESSAGE = "Unauthorized operation.";
 
-
-const useApi = (
-    fetchAllTodosEndpoint: string,
-    fetchUserTodosEndpoint: string,
-    sumbitNewTodoEndpoint: string,
-    searchTodosEndpoint: string,
-    downloadTodosEndPoint: string,
-    userInfoEndpoint: string): ITodoApis => {
+const useApi = (): ITodoApis => {
+    const fetchAllTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos',
+        fetchOneTodoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/id',
+        fetchUserTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/user',
+        sumbitNewTodoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos',
+        searchTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/search',
+        downloadTodosEndPoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/file',
+        userInfoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/user-info',
+        authorizeEndpoint = process.env.REACT_APP_OAUTH_SERVER_AUTHORIZE,
+        getTokenEndpoint = process.env.REACT_APP_OAUTH_SERVER_TOKEN;
 
     const token = sessionStorage.getItem('token');
 
-    const [{todo: todoState}, _] = useStateValue();
+    const [{todo: todoState, auth: authState}, _] = useStateValue();
     const authActions = AuthActionCreater();
     const todoActions = TodoActionCreater();
+
+    const authenticate = () => {
+        const randomString = Math.random().toString(36).substring(7);
+        sessionStorage.setItem('code_challenge', randomString);
+        sessionStorage.setItem('redirect_path', window.location.pathname);
+
+        const url = queryString.stringifyUrl({
+            url: authorizeEndpoint as string,
+            query: {
+                client_id: process.env.REACT_APP_CLIENT_ID,
+                grant_type: 'authorization_code',
+                response_type: 'code',
+                scope: 'any',
+                code_challenge: randomString,
+            }
+        });
+
+        window.location.assign(url);
+    }
+
+    const getToken = async (code: string) => {
+        const codeChallenge = sessionStorage.getItem('code_challenge');
+        sessionStorage.removeItem('code_challenge');
+
+        const url = queryString.stringifyUrl({
+            url: getTokenEndpoint as string,
+            query: {
+                code,
+                grant_type: 'authorization_code',
+                scope: 'any',
+                code_verifier: codeChallenge,
+            }
+        })
+        let headers = new Headers();
+        headers.set('Authorization', 'Basic ' + btoa(process.env.REACT_APP_CLIENT_ID + ':'));
+
+        const response = await fetch(url, {method: 'POST', headers});
+        const tokenResponse = await response.json();
+        sessionStorage.setItem('token', tokenResponse.access_token);
+        const redirectPath = sessionStorage.getItem('redirect_path') || "/";
+        sessionStorage.removeItem('redirect_path');
+
+        window.location.href = redirectPath;
+    }
 
     async function getUserInfo() {
         let headers = _getHeaders();
@@ -49,14 +100,30 @@ const useApi = (
         }
     }
 
-    async function fetchUserTodos(username: string) {
-        let url = `${fetchUserTodosEndpoint}/${username}?page=0&size=${todoState.pageSize}`;
+    async function fetchUserTodos(username: string, page: number) {
+        let url = `${fetchUserTodosEndpoint}/${username}?page=${page}&size=${todoState.pageSize}`;
         await fetchTodos(url);
     }
 
-    async function fetchAllTodos() {
-        let url = `${fetchAllTodosEndpoint}?page=0&size=${todoState.pageSize}`;
+    async function fetchAllTodos(page: number) {
+        let url = `${fetchAllTodosEndpoint}?page=${page}&size=${todoState.pageSize}`;
         await fetchTodos(url);
+    }
+
+    async function fetchOneTodo(id: string): Promise<ITodo | null> {
+        let url = `${fetchOneTodoEndpoint}/${id}`;
+        let headers = _getHeaders();
+        const response = await fetch(url, {
+            credentials: 'include',
+            method: 'GET',
+            headers
+        });
+
+        if (response.ok) {
+            return await response.json();
+        } else {
+            return null;
+        }
     }
 
     async function searchTodos(searchValue: string, user?: string) {
@@ -195,9 +262,11 @@ const useApi = (
     }
 
     async function _getErrorMessage(response: Response): Promise<string> {
-        if (response.status.toString().startsWith("4")) {
+        if (response.status.toString() === "401") {
+            return UNAUTHORIZED_MESSAGE;
+        } else if (response.status.toString().startsWith("4")) {
             const res = await response.json();
-            return res.message || res.error_description || res.error || DEFAULT_ERROR_MESSAGE;
+            return res.message || DEFAULT_ERROR_MESSAGE;
         } else {
             return DEFAULT_ERROR_MESSAGE;
         }
@@ -233,8 +302,11 @@ const useApi = (
     }
 
     return {
+        authenticate,
+        getToken,
         fetchUserTodos,
         fetchAllTodos,
+        fetchOneTodo,
         searchTodos,
         fetchTodos,
         submitNewTodo,

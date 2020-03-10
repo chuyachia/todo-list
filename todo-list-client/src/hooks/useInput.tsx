@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 
 interface IInput<T> {
     value: string;
@@ -11,8 +11,11 @@ const useInput = <T extends HTMLInputElement | HTMLTextAreaElement| HTMLSelectEl
 
     const onChange = (e: React.ChangeEvent<T>) => setValue(e.target.value);
 
-
     const reset = () => setValue("");
+
+    useEffect(() => {
+        setValue(initValue);
+    }, [initValue])
 
     return {
         value,

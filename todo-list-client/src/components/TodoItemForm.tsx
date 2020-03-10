@@ -27,7 +27,7 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
     let timeout: number;
 
     useEffect(()=> {
-        return () => console.log('clear time out');
+        return () => window.clearTimeout(timeout);
     }, [])
 
     const submitNewTodo = async () => {

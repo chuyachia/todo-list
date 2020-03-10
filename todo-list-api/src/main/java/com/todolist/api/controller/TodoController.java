@@ -13,9 +13,11 @@ import org.springframework.hateoas.Resource;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+@Validated
 @RestController
 @RequestMapping("api")
 public class TodoController {

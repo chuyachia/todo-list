@@ -39,12 +39,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public TodoUser findById(String username) {
         return repository.findById(username)
-                .orElseThrow(()-> new UserNotFoundException(username));
+                .orElse(null);
     }
 
     @Override
     public TodoUser addUserRole(String username, Role role) {
         TodoUser user = findById(username);
+        if (user == null) {
+            throw new UserNotFoundException(username);
+        }
         user.getRoles().add(role);
         repository.save(user);
 
@@ -54,6 +57,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public TodoUser removeUserRole(String username, Role role) {
         TodoUser user = findById(username);
+        if (user == null) {
+            throw new UserNotFoundException(username);
+        }
         user.getRoles().remove(role);
         repository.save(user);
 

@@ -22,7 +22,7 @@ export const initialTodoState: ITodoState = {
     submitTodoSuccess: false,
     errorMessage: "",
     loadTodoError: false,
-    loading: true,
+    loading: false,
     submitTodoError: false,
     activeTodo: undefined,
     currentPage: 0,
