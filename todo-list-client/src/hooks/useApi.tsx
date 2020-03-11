@@ -1,10 +1,11 @@
-import React, {useEffect} from 'react';
+import React from 'react';
+import queryString from "query-string";
+
 import ITodo from '../models/ITodo';
 import safeGet from '../util/safeGet';
 import {AuthActionCreater, TodoActionCreater} from "../actions";
 import {useStateValue} from "../state";
 import {IPagingInfo} from "../models/IPagingInfo";
-import queryString from "query-string";
 
 interface ITodoApis {
     authenticate: () => void;
@@ -36,8 +37,6 @@ const useApi = (): ITodoApis => {
         authorizeEndpoint = process.env.REACT_APP_OAUTH_SERVER_AUTHORIZE,
         getTokenEndpoint = process.env.REACT_APP_OAUTH_SERVER_TOKEN;
 
-    const token = sessionStorage.getItem('token');
-
     const [{todo: todoState, auth: authState}, _] = useStateValue();
     const authActions = AuthActionCreater();
     const todoActions = TodoActionCreater();
@@ -45,7 +44,7 @@ const useApi = (): ITodoApis => {
     const authenticate = () => {
         const randomString = Math.random().toString(36).substring(7);
         sessionStorage.setItem('code_challenge', randomString);
-        sessionStorage.setItem('redirect_path', window.location.pathname);
+        sessionStorage.setItem('redirect_path', window.location.pathname + window.location.search);
 
         const url = queryString.stringifyUrl({
             url: authorizeEndpoint as string,
@@ -80,6 +79,8 @@ const useApi = (): ITodoApis => {
         const response = await fetch(url, {method: 'POST', headers});
         const tokenResponse = await response.json();
         sessionStorage.setItem('token', tokenResponse.access_token);
+        const expiry = Date.now() + tokenResponse.expires_in * 1000;
+        sessionStorage.setItem('expiry', expiry.toString());
         const redirectPath = sessionStorage.getItem('redirect_path') || "/";
         sessionStorage.removeItem('redirect_path');
 
@@ -87,7 +88,9 @@ const useApi = (): ITodoApis => {
     }
 
     async function getUserInfo() {
-        let headers = _getHeaders();
+        getNewTokenIfNeeded();
+
+        let headers = getHeaders();
 
         const response = await fetch(userInfoEndpoint, {
             credentials: 'include',
@@ -110,9 +113,19 @@ const useApi = (): ITodoApis => {
         await fetchTodos(url);
     }
 
+
+    async function searchTodos(searchValue: string, user?: string) {
+        let url = searchTodosEndpoint + `?q=${searchValue.toLowerCase()}&page=0&size=${todoState.pageSize}`;
+        if (user !== undefined) url += `&user=${user}`
+        await fetchTodos(url);
+    }
+
+
     async function fetchOneTodo(id: string): Promise<ITodo | null> {
+        getNewTokenIfNeeded();
+
         let url = `${fetchOneTodoEndpoint}/${id}`;
-        let headers = _getHeaders();
+        let headers = getHeaders();
         const response = await fetch(url, {
             credentials: 'include',
             method: 'GET',
@@ -126,17 +139,13 @@ const useApi = (): ITodoApis => {
         }
     }
 
-    async function searchTodos(searchValue: string, user?: string) {
-        let url = searchTodosEndpoint + `?q=${searchValue.toLowerCase()}&page=0&size=${todoState.pageSize}`;
-        if (user !== undefined) url += `&user=${user}`
-        await fetchTodos(url);
-    }
-
     async function fetchTodos(url: string) {
+        getNewTokenIfNeeded();
+
         if (url.length > 0) {
             try {
                 todoActions.loadTodosRequest();
-                let headers = _getHeaders();
+                let headers = getHeaders();
 
                 const response = await fetch(url, {
                     credentials: 'include',
@@ -148,9 +157,9 @@ const useApi = (): ITodoApis => {
                     const res = await response.json();
                     const todos = safeGet(['_embedded', 'todoList'], res, []);
                     todoActions.loadTodos(todos);
-                    _setPaginations(res);
+                    setPaginations(res);
                 } else {
-                    const errorMessage = await _getErrorMessage(response);
+                    const errorMessage = await getErrorMessage(response);
                     todoActions.loadTodosFailure(errorMessage);
                 }
             } catch (e) {
@@ -161,9 +170,11 @@ const useApi = (): ITodoApis => {
     }
 
     async function submitNewTodo(title: string, description: string, priority: string): Promise<ITodo | null> {
+        getNewTokenIfNeeded();
+
         try {
             todoActions.submitTodoRequest()
-            let headers = _getHeaders('application/json');
+            let headers = getHeaders('application/json');
 
             const response = await fetch(sumbitNewTodoEndpoint, {
                 credentials: 'include',
@@ -182,7 +193,7 @@ const useApi = (): ITodoApis => {
                 todoActions.submitTodoSuccess(todo);
                 return todo;
             } else {
-                const errorMessage = await _getErrorMessage(response);
+                const errorMessage = await getErrorMessage(response);
                 todoActions.submitTodoFailure(errorMessage);
             }
 
@@ -196,9 +207,11 @@ const useApi = (): ITodoApis => {
 
     async function updateTodo(title: string, description: string, priority: string): Promise<ITodo | null> {
         if (todoState.activeTodo !== undefined) {
+            getNewTokenIfNeeded();
+
             try {
                 todoActions.submitTodoRequest();
-                let headers = _getHeaders('application/json');
+                let headers = getHeaders('application/json');
 
                 const response = await fetch(todoState.activeTodo._links.edit.href, {
                     credentials: 'include',
@@ -217,7 +230,7 @@ const useApi = (): ITodoApis => {
                     todoActions.submitTodoSuccess(todo);
                     return todo;
                 } else {
-                    const errorMessage = await _getErrorMessage(response);
+                    const errorMessage = await getErrorMessage(response);
                     todoActions.submitTodoFailure(errorMessage);
                 }
 
@@ -230,10 +243,12 @@ const useApi = (): ITodoApis => {
     }
 
     async function changeTodoStatus(link: string): Promise<ITodo | null> {
+        getNewTokenIfNeeded();
+
         let todo = null;
         try {
             todoActions.submitTodoRequest();
-            let headers = _getHeaders('application/json');
+            let headers = getHeaders('application/json');
 
             const response = await fetch(link, {
                 credentials: 'include',
@@ -256,12 +271,18 @@ const useApi = (): ITodoApis => {
     }
 
     const downloadTodos = (searchValue = "", user?: string) => {
+        getNewTokenIfNeeded();
+
         let url = downloadTodosEndPoint + `?q=${searchValue.toLowerCase()}`;
         if (user !== undefined) url += `&user=${user}`
         window.location.assign(url);
     }
 
-    async function _getErrorMessage(response: Response): Promise<string> {
+    function resetPaginations() {
+        setPaginations(null);
+    }
+
+    async function getErrorMessage(response: Response): Promise<string> {
         if (response.status.toString() === "401") {
             return UNAUTHORIZED_MESSAGE;
         } else if (response.status.toString().startsWith("4")) {
@@ -272,7 +293,7 @@ const useApi = (): ITodoApis => {
         }
     }
 
-    function _setPaginations(res: any) {
+    function setPaginations(res: any) {
         const pagingInfo: IPagingInfo = {
             first: safeGet(['_links', 'first', 'href'], res, ""),
             prev: safeGet(['_links', 'prev', 'href'], res, ""),
@@ -285,8 +306,9 @@ const useApi = (): ITodoApis => {
         todoActions.setTodoPagingInfo(pagingInfo);
     }
 
-    function _getHeaders(contentType?: string) {
+    function getHeaders(contentType?: string) {
         const headers = new Headers();
+        const token = sessionStorage.getItem('token');
         if (token) {
             headers.append('Authorization', `Bearer ${token}`);
         }
@@ -297,8 +319,15 @@ const useApi = (): ITodoApis => {
         return headers;
     }
 
-    function resetPaginations() {
-        _setPaginations(null);
+    function getNewTokenIfNeeded() {
+        const token = sessionStorage.getItem('token');
+        if (token) {
+            const expiry = parseInt(sessionStorage.getItem('expiry') as string);
+            if (isNaN(expiry) || expiry < Date.now()) {
+                console.info('Token expired. Fetching new token');
+                authenticate();
+            }
+        }
     }
 
     return {

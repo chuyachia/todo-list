@@ -40,15 +40,17 @@ public class AuthorizationServiceConfiguration extends AuthorizationServerConfig
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         // TODO put client details in DB
+        // TODO externalize configs
         clients
                 .inMemory()
                 .withClient("todo-list-app") // public client
+                .autoApprove("any")
+                .accessTokenValiditySeconds(1800)
                 .authorizedGrantTypes("authorization_code")
                 .redirectUris("http://localhost:3000/oauth-callback")
                 .and()
-                .withClient("todo-list-api").secret(this.passwordEncoder.encode("dev-secret"))
-                .accessTokenValiditySeconds(120000)
-                .refreshTokenValiditySeconds(240000);
+                .withClient("todo-list-api")
+                .secret(this.passwordEncoder.encode("dev-secret"));
     }
 
     @Override

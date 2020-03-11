@@ -1,8 +1,23 @@
-export default (func: any, delay: number) => {
-    let timeout: ReturnType<typeof setTimeout>;
+const debounce =  (func: Function, wait:number, leading: boolean): Function => {
+    let timeout:number;
 
-    return function (...args: any[]) {
-        if (timeout !== undefined) clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(null, args), delay);
+    return function(this:Function) {
+        const args = arguments;
+
+        // Apply immediately
+        if (!timeout && leading) {
+            func.apply(this, args);
+        }
+        clearTimeout(timeout); // is this needed?
+        // Apply later
+        timeout = window.setTimeout(() => {
+            timeout = 0;
+            if (!leading) {
+                func.apply(this, args);
+            }
+        }, wait);
+
     }
 }
+
+export default debounce;

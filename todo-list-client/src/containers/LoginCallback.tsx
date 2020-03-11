@@ -7,11 +7,15 @@ const LoginCallback: React.FC<RouteChildrenProps> = ({location}) => {
     const {getToken} = useApi();
 
     useEffect(() => {
+        callGetTokenEndpoint();
+    }, [])
+
+    const callGetTokenEndpoint  = async () => {
         const valueMap = queryString.parse(location.search);
         const code = valueMap.code as string;
 
-        getToken(code)
-    }, [])
+        await getToken(code);
+    }
 
     return null;
 }

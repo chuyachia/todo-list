@@ -24,20 +24,19 @@ interface IRouteProps {
 }
 
 const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location}) => {
-    const [{auth, todo}, dispatch] = useStateValue();
+    const [{auth: authState, todo: todoState}, _] = useStateValue();
     const {
         fetchUserTodos, fetchAllTodos, searchTodos, submitNewTodo, fetchTodos,
         updateTodo, downloadTodos, changeTodoStatus, getUserInfo, authenticate
     } = useApi();
-    const {resetErrorState, setActiveTodo} = TodoActionCreater();
+    const {setActiveTodo} = TodoActionCreater();
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const {value: searchValue, onChange: onSearchValueChange, reset: resetSearchValue} = useInput<HTMLInputElement>("");
 
     const history = useHistory();
     const {search} = useLocation();
     const page = parsePageNumber(search);
-    const showUser = match.params.username;
-
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const {value: searchValue, onChange: onSearchValueChange, reset: resetSearchValue} = useInput<HTMLInputElement>("");
+    const showTodoUser = match.params.username;
 
     const handleEditTodo = (todo: ITodoItem) => {
         setActiveTodo(todo);
@@ -45,24 +44,24 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
     }
 
     const handleSubmitSearch = (value: string) => {
-        if (showUser === undefined) {
+        if (showTodoUser === undefined) {
             searchTodos(value);
         } else {
-            searchTodos(value, showUser);
+            searchTodos(value, showTodoUser);
         }
     }
 
     const handleDownloadTodosClick = () => {
-        if (!todo.loading) {
-            downloadTodos(searchValue, showUser);
+        if (!todoState.loading) {
+            downloadTodos(searchValue, showTodoUser);
         }
     }
 
-    const loadData = async (username: string) => {
-        if (!auth.authenticated) {
+    const loadData = async (username: string, page: number) => {
+        if (!authState.authenticated) {
             await getUserInfo();
         }
-        if (!auth.authenticated || !username) {
+        if (!authState.authenticated || !username) {
             await fetchAllTodos(page);
         } else {
             await fetchUserTodos(username, page);
@@ -82,35 +81,33 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
         return pageNumber;
     }
 
-
     useEffect(() => {
-        loadData(showUser);
-    }, [showUser, page])
+        loadData(showTodoUser, page);
+    }, [showTodoUser, page])
 
     return (
         <div className={"todo-list"}>
-            {todo.loading && <i className={"inactive-text loader"}>Loading...</i>}
-            {auth.authenticated && <div className={"todos-navigation"}>
+            {todoState.loading && <i className={"inactive-text loader"}>Loading...</i>}
+            {authState.authenticated && <div className={"todos-navigation"}>
                 <NavLink exact to={`/todos?page=0`}>All Todos</NavLink>
                 {" / "}
-                <NavLink exact to={`/todos/${auth.username}?page=0`}>My Todos</NavLink>
+                <NavLink exact to={`/todos/${authState.username}?page=0`}>My Todos</NavLink>
             </div>}
             <div className={"tools-bar vertical-buttons-wrap"}>
-                {auth.authenticated ?
-                    <button title="Logout" className={`${todo.loading ? "disabled" : "primary"}`}>
+                {authState.authenticated ?
+                    <button title="Logout" className={`${todoState.loading ? "disabled" : "primary"}`}>
                         <FontAwesomeIcon icon={faSignOutAlt}/>
                     </button> :
-                    <button title="Login" className={`${todo.loading ? "disabled" : "primary"}`}
-                            onClick={()=> authenticate()}>
+                    <button title="Login" className={`${todoState.loading ? "disabled" : "primary"}`} onClick={()=> authenticate()}>
                         <FontAwesomeIcon icon={faSignInAlt}/>
                     </button>}
-                {auth.authenticated?
+                {authState.authenticated?
                     <Link to={{ pathname: '/edit', state: {from: location} }}>
-                        <button title="Add todo" className={`${todo.loading? "disabled": "primary"}`}>
+                        <button title="Add todo" className={`${todoState.loading? "disabled": "primary"}`}>
                             <FontAwesomeIcon icon={faPlus}/>
                         </button>
                     </Link> :
-                    <button title="Add todo" className={`${todo.loading? "disabled": "primary"}`}
+                    <button title="Add todo" className={`${todoState.loading? "disabled": "primary"}`}
                             onClick={()=>alert("Please log in to add todo")}>
                         <FontAwesomeIcon icon={faPlus}/>
                     </button>}
@@ -124,33 +121,33 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                             submitSearch={handleSubmitSearch}
                         />
                     </React.Suspense>}
-                    <button title="Search todos" className={`${todo.loading ? "disabled" : "primary"}`}
-                            onClick={() => !todo.loading && setIsSearchOpen(!isSearchOpen)}>
+                    <button title="Search todos" className={`${todoState.loading ? "disabled" : "primary"}`}
+                            onClick={() => !todoState.loading && setIsSearchOpen(!isSearchOpen)}>
                         <FontAwesomeIcon icon={faSearch}/>
                     </button>
                 </div>
-                <button title="Download todos" className={`${todo.loading ? "disabled" : "primary"}`}
+                <button title="Download todos" className={`${todoState.loading ? "disabled" : "primary"}`}
                         onClick={handleDownloadTodosClick}>
                     <FontAwesomeIcon icon={faFileDownload}/>
                 </button>
             </div>
-            {todo.loadTodoError && <i className={"warning-text"}>{todo.errorMessage}</i>}
-            <div>{todo.todos.map((t: ITodo) => (
+            {todoState.loadTodoError && <i className={"warning-text"}>{todoState.errorMessage}</i>}
+            <div>{todoState.todos.map((todo: ITodo) => (
                 <TodoItem
-                    key={hashCode(t.title + t.description + t.priority + Object.keys(t._links).length)}
-                    todo={t}
+                    key={hashCode(todo.title + todo.description + todo.priority + Object.keys(todo._links).length)}
+                    todo={todo}
                     onEdit={handleEditTodo}
-                    loading={todo.loading}
+                    loading={todoState.loading}
                     onChangeStatus={changeTodoStatus}
                 />))}
             </div>
             <Pagination
-                onFirstPageClick={() => fetchTodos(todo.firstPageUrl)}
-                onPrevPageClick={() => fetchTodos(todo.prevPageUrl)}
-                onNextPageClick={() => fetchTodos(todo.nextPageUrl)}
-                onLastPageClick={() => fetchTodos(todo.lastPageUrl)}
-                currentPage={todo.currentPage + 1}
-                totalPages={todo.totalPages}
+                onFirstPageClick={() => history.push(location.pathname+`?page=${0}`)}
+                onPrevPageClick={() => history.push(location.pathname+`?page=${page-1}`)}
+                onNextPageClick={() => history.push(location.pathname+`?page=${page+1}`)}
+                onLastPageClick={() => history.push(location.pathname+`?page=${todoState.totalPages<=1?0:todoState.totalPages-1}`)}
+                currentPage={todoState.currentPage + 1}
+                totalPages={todoState.totalPages === 0?1:todoState.totalPages }
             />
         </div>)
 }

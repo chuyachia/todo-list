@@ -11,7 +11,6 @@ interface ITodoItem {
 }
 
 const TodoItem: React.FC<ITodoItem> = (props) => {
-    console.log(props.todo);
     const [todo, setTodo] = useState(props.todo);
     const {self, edit, ...links} = todo._links;
     const isHighPriority = todo.priority === 'High';

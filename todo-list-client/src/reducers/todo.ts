@@ -28,7 +28,7 @@ export default (state: ITodoState, action: IAction): ITodoState => {
                 nextPageUrl: action.payload.next,
                 lastPageUrl: action.payload.last,
                 currentPage: action.payload.currentPage,
-                totalPages: action.payload.totalPages === 0 ? 1 : action.payload.totalPages,
+                totalPages: action.payload.totalPages,
             };
         case LOAD_TODOS_REQUEST:
             return {

@@ -3,7 +3,6 @@
     background: var(--beige);
     color: #282c34;
     padding: var(--small-space);
-    margin-top: var(--large-space);
     margin-bottom: var(--large-space);
     min-width: 30vw;
 }
