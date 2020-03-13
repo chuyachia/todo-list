@@ -12,11 +12,9 @@ import useApi from "../hooks/useApi";
 import useInput from "../hooks/useInput";
 import ITodoItem from "../models/ITodo";
 import hashCode from '../util/hashCode';
-import {IState} from "../states";
 import ITodo from "../models/ITodo";
 import {TodoActionCreater} from "../actions";
 
-const TodoItemForm = React.lazy(() => import('../components/TodoItemForm'));
 const SearchInput = React.lazy(() => import('../components/SearchInput'));
 
 interface IRouteProps {
@@ -26,21 +24,22 @@ interface IRouteProps {
 const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location}) => {
     const [{auth: authState, todo: todoState}, _] = useStateValue();
     const {
-        fetchUserTodos, fetchAllTodos, searchTodos, submitNewTodo, fetchTodos,
-        updateTodo, downloadTodos, changeTodoStatus, getUserInfo, authenticate
+        fetchUserTodos, fetchAllTodos, searchTodos,downloadTodos, changeTodoStatus,
+        getUserInfo, authenticate, revokeToken
     } = useApi();
     const {setActiveTodo} = TodoActionCreater();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const {value: searchValue, onChange: onSearchValueChange, reset: resetSearchValue} = useInput<HTMLInputElement>("");
+    const [authenticationChecked, setAuthenticationChecked] = useState(false);
+    const {value: searchValue, onChange: onSearchValueChange} = useInput<HTMLInputElement>("");
 
     const history = useHistory();
-    const {search} = useLocation();
+    const {search, pathname} = useLocation();
     const page = parsePageNumber(search);
     const showTodoUser = match.params.username;
 
     const handleEditTodo = (todo: ITodoItem) => {
         setActiveTodo(todo);
-        history.push(`/edit/${todo.id}`);
+        history.push(`/edit/${todo.id}`, {from : pathname+ search});
     }
 
     const handleSubmitSearch = (value: string) => {
@@ -57,15 +56,22 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
         }
     }
 
-    const loadData = async (username: string, page: number) => {
-        if (!authState.authenticated) {
+    const loadData = async (username: string, page: number, authenticationChecked: boolean) => {
+        if (!authenticationChecked) {
             await getUserInfo();
-        }
-        if (!authState.authenticated || !username) {
-            await fetchAllTodos(page);
+            setAuthenticationChecked(true);
         } else {
-            await fetchUserTodos(username, page);
+            if (! authState.authenticated|| !username) {
+                await fetchAllTodos(page);
+            } else {
+                await fetchUserTodos(username, page);
+            }
         }
+    }
+
+    const handleLogout = async() => {
+        await revokeToken();
+        history.push("/");
     }
 
     function parsePageNumber(search:string) {
@@ -82,8 +88,8 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
     }
 
     useEffect(() => {
-        loadData(showTodoUser, page);
-    }, [showTodoUser, page])
+        loadData(showTodoUser, page, authenticationChecked);
+    }, [showTodoUser, page, authenticationChecked])
 
     return (
         <div className={"todo-list"}>
@@ -95,14 +101,14 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             </div>}
             <div className={"tools-bar vertical-buttons-wrap"}>
                 {authState.authenticated ?
-                    <button title="Logout" className={`${todoState.loading ? "disabled" : "primary"}`}>
+                    <button title="Logout" className={`${todoState.loading ? "disabled" : "primary"}`} onClick={handleLogout}>
                         <FontAwesomeIcon icon={faSignOutAlt}/>
                     </button> :
-                    <button title="Login" className={`${todoState.loading ? "disabled" : "primary"}`} onClick={()=> authenticate()}>
+                    <button title="Login" className={`${todoState.loading ? "disabled" : "primary"}`} onClick={authenticate}>
                         <FontAwesomeIcon icon={faSignInAlt}/>
                     </button>}
                 {authState.authenticated?
-                    <Link to={{ pathname: '/edit', state: {from: location} }}>
+                    <Link to={{pathname: "/edit", state: {from : pathname+ search}}}>
                         <button title="Add todo" className={`${todoState.loading? "disabled": "primary"}`}>
                             <FontAwesomeIcon icon={faPlus}/>
                         </button>

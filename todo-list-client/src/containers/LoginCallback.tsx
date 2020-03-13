@@ -17,7 +17,7 @@ const LoginCallback: React.FC<RouteChildrenProps> = ({location}) => {
         await getToken(code);
     }
 
-    return null;
+    return <span>Redirecting...</span>;
 }
 
 export default LoginCallback;

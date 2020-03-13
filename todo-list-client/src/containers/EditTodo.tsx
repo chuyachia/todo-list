@@ -1,6 +1,5 @@
 import React, {useEffect} from 'react';
 import {RouteComponentProps, useHistory, useLocation} from "react-router";
-import queryString from "query-string";
 
 import TodoItemForm from '../components/TodoItemForm';
 import {useStateValue} from "../state";
@@ -12,25 +11,28 @@ interface IRouteProps {
 }
 
 const EditTodo: React.FC<RouteComponentProps<IRouteProps>> = ({match}) => {
-    const [{auth, todo}, dispatch] = useStateValue();
+    const [{todo}, _] = useStateValue();
     const {
-        submitNewTodo, updateTodo, fetchOneTodo
+        submitNewTodo, updateTodo, fetchOneTodoForEdit
     } = useApi();
     const {resetErrorState, setActiveTodo} = TodoActionCreater();
 
-    const {search, state} = useLocation();
     const id = match.params.id;
     const history = useHistory();
-    const {from} = state || {from: {pathname: "/"}};
+    const { state} = useLocation();
+    const from = state && state.from ||  "/";
+    console.log(state);
+    console.log(from);
 
     const handleBack = () => {
         setActiveTodo(undefined);
+        console.log(from);
         history.push(from);
     }
 
     const initializeActiveTodo = async () => {
-        const todo = await fetchOneTodo(id);
-        if (todo !== null) {
+        const todo = await fetchOneTodoForEdit(id);
+        if (todo !== undefined) {
             setActiveTodo(todo);
         }
     }

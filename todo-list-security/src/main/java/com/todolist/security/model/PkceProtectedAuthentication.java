@@ -3,7 +3,12 @@ package com.todolist.security.model;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
-public class PkceProtectedAuthentication {
+import java.io.Serializable;
+
+public class PkceProtectedAuthentication implements Serializable {
+
+    private static final long serialVersionUID = -2497941503429890572L;
+
     private final OAuth2Authentication authentication;
     private final CodeChallengeMethod codeChallengeMethod;
     private final String codeChallenge;

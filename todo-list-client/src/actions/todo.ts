@@ -1,5 +1,3 @@
-import React from "react";
-
 import ITodo from "../models/ITodo";
 import {
     LOAD_TODOS_FAILURE,

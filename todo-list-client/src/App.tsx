@@ -6,7 +6,7 @@ import {
 } from "react-router-dom";
 
 import './App.css';
-import {StateProvider, useStateValue} from "./state";
+import {StateProvider} from "./state";
 import {initialState} from "./states"
 import reducer from './reducers/';
 

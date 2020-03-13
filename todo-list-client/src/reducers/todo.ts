@@ -38,10 +38,10 @@ export default (state: ITodoState, action: IAction): ITodoState => {
             }
         case LOAD_TODOS_FAILURE:
             return {
+                ...state,
                 loadTodoError: true,
                 loading: false,
                 errorMessage: action.payload,
-                ...state,
             }
         case SUBMIT_TODO_REQUEST:
             return {

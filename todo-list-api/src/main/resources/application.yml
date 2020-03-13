@@ -30,7 +30,6 @@ logging:
           filter:
             CommonsRequestLoggingFilter: DEBUG
 ---
-debug: true
 spring:
   profiles: local
   datasource:
@@ -46,3 +45,6 @@ oauth:
 todolist:
   cors:
     origin: http://localhost:3000
+
+logging:
+  level: debug

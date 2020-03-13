@@ -1,7 +1,7 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 
 import useDebounce from '../hooks/useDebounce';
-import {ESCAPE_KEY} from '../constants';
+import {ENTER_KEY, ESCAPE_KEY} from '../constants';
 
 interface ISearchInput {
     value: string;
@@ -11,15 +11,12 @@ interface ISearchInput {
 }
 
 const SearchInput: React.FC<ISearchInput> = (props) => {
-    const debouncedSubmitSearch = useDebounce(props.submitSearch, 200, true);
-    const debouncedOnChange = useDebounce(props.onChange, 200, true);
+    const debouncedSubmitSearch = useDebounce(props.submitSearch, 1000, true);
 
-    const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        debouncedOnChange(e);
-        debouncedSubmitSearch(e.target.value);
-    }
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleEnterKey = (e: React.KeyboardEvent) => {
+        if (e.keyCode === ENTER_KEY) {
+            debouncedSubmitSearch(props.value);
+        }
         if (e.keyCode === ESCAPE_KEY) {
             props.onClose();
         }
@@ -28,7 +25,7 @@ const SearchInput: React.FC<ISearchInput> = (props) => {
     return (
         <span tabIndex={0}>
             <input className={"form-input"} type={"text"} placeholder={"Enter search term"} onBlur={props.onClose}
-                   autoFocus={true} value={props.value} onChange={handleValueChange} onKeyDown={handleKeyDown}/>
+                   autoFocus={true} value={props.value} onChange={props.onChange} onKeyDown={handleEnterKey}/>
         </span>);
 }
 

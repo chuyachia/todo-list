@@ -1,7 +1,6 @@
 import React, {useContext, useReducer, createContext, ReducerState, Dispatch, ReducerAction} from 'react';
 import {IState, initialState} from './states';
 import IAction from './actions/IAction';
-import reducer from './reducers';
 
 type TReducer = React.Reducer<IState, IAction>;
 

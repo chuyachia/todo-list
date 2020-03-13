@@ -1,5 +1,5 @@
-import React from 'react';
 import queryString from "query-string";
+import {useHistory} from "react-router-dom";
 
 import ITodo from '../models/ITodo';
 import safeGet from '../util/safeGet';
@@ -14,13 +14,14 @@ interface ITodoApis {
     fetchAllTodos: (page: number) => void;
     searchTodos: (searchValue: string, user?: string) => void;
     fetchTodos: (url: string) => void;
-    fetchOneTodo: (id: string) => Promise<ITodo | null>;
-    submitNewTodo: (title: string, description: string, priority: string) => Promise<ITodo | null>;
-    updateTodo: (title: string, description: string, priority: string) => Promise<ITodo | null>;
+    fetchOneTodoForEdit: (id: string) => Promise<ITodo | void>;
+    submitNewTodo: (title: string, description: string, priority: string) => Promise<ITodo | void>;
+    updateTodo: (title: string, description: string, priority: string) => Promise<ITodo | void>;
     downloadTodos: (searchValue?: string, user?: string) => void;
-    changeTodoStatus: (url: string) => Promise<ITodo | null>;
+    changeTodoStatus: (url: string) => Promise<ITodo | void>;
     resetPaginations: () => void;
     getUserInfo: () => void;
+    revokeToken: () => void;
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
@@ -34,12 +35,14 @@ const useApi = (): ITodoApis => {
         searchTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/search',
         downloadTodosEndPoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/file',
         userInfoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/user-info',
-        authorizeEndpoint = process.env.REACT_APP_OAUTH_SERVER_AUTHORIZE,
-        getTokenEndpoint = process.env.REACT_APP_OAUTH_SERVER_TOKEN;
+        authorizeEndpoint = process.env.REACT_APP_OAUTH_SERVER + '/oauth/authorize',
+        getTokenEndpoint = process.env.REACT_APP_OAUTH_SERVER + '/oauth/token',
+        revokeTokenEndpoint = process.env.REACT_APP_OAUTH_SERVER + '/oauth/revoke-token';
 
-    const [{todo: todoState, auth: authState}, _] = useStateValue();
     const authActions = AuthActionCreater();
     const todoActions = TodoActionCreater();
+    const [{todo: todoState, auth: authState}, _] = useStateValue();
+    const history = useHistory();
 
     const authenticate = () => {
         const randomString = Math.random().toString(36).substring(7);
@@ -47,7 +50,7 @@ const useApi = (): ITodoApis => {
         sessionStorage.setItem('redirect_path', window.location.pathname + window.location.search);
 
         const url = queryString.stringifyUrl({
-            url: authorizeEndpoint as string,
+            url: authorizeEndpoint,
             query: {
                 client_id: process.env.REACT_APP_CLIENT_ID,
                 grant_type: 'authorization_code',
@@ -65,7 +68,7 @@ const useApi = (): ITodoApis => {
         sessionStorage.removeItem('code_challenge');
 
         const url = queryString.stringifyUrl({
-            url: getTokenEndpoint as string,
+            url: getTokenEndpoint,
             query: {
                 code,
                 grant_type: 'authorization_code',
@@ -83,14 +86,30 @@ const useApi = (): ITodoApis => {
         sessionStorage.setItem('expiry', expiry.toString());
         const redirectPath = sessionStorage.getItem('redirect_path') || "/";
         sessionStorage.removeItem('redirect_path');
+        authActions.userLoggedIn();
 
-        window.location.href = redirectPath;
+        history.push(redirectPath);
+    }
+
+    const revokeToken = async () => {
+        let headers = getHeaders(true);
+
+        const response = await fetch(revokeTokenEndpoint, {
+            credentials: 'include',
+            method: 'DELETE',
+            mode: 'cors',
+            headers
+        })
+
+        if (response.ok) {
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('expiry');
+            authActions.userLoggedOut();
+        }
     }
 
     async function getUserInfo() {
-        getNewTokenIfNeeded();
-
-        let headers = getHeaders();
+        let headers = getHeaders(true);
 
         const response = await fetch(userInfoEndpoint, {
             credentials: 'include',
@@ -99,7 +118,7 @@ const useApi = (): ITodoApis => {
         })
         if (response.ok) {
             const res = await response.json();
-            authActions.setLoggedInUser(res.username);
+            await authActions.setLoggedInUser(res.username);
         }
     }
 
@@ -121,101 +140,68 @@ const useApi = (): ITodoApis => {
     }
 
 
-    async function fetchOneTodo(id: string): Promise<ITodo | null> {
-        getNewTokenIfNeeded();
-
-        let url = `${fetchOneTodoEndpoint}/${id}`;
-        let headers = getHeaders();
-        const response = await fetch(url, {
-            credentials: 'include',
-            method: 'GET',
-            headers
-        });
-
-        if (response.ok) {
-            return await response.json();
+    async function fetchOneTodoForEdit(id: string): Promise<ITodo | void> {
+        if (!tokenIsPresent() || tokenIsExpired()) {
+            authenticate();
         } else {
-            return null;
+            const headers = getHeaders(authState.authenticated);
+
+            let url = `${fetchOneTodoEndpoint}/${id}`;
+            const response = await fetch(url, {
+                credentials: 'include',
+                method: 'GET',
+                headers,
+            });
+
+            if (response.ok) {
+                return await response.json();
+            }
         }
     }
 
     async function fetchTodos(url: string) {
-        getNewTokenIfNeeded();
-
         if (url.length > 0) {
-            try {
-                todoActions.loadTodosRequest();
-                let headers = getHeaders();
-
-                const response = await fetch(url, {
-                    credentials: 'include',
-                    method: 'GET',
-                    headers
-                });
-
-                if (response.ok) {
-                    const res = await response.json();
-                    const todos = safeGet(['_embedded', 'todoList'], res, []);
-                    todoActions.loadTodos(todos);
-                    setPaginations(res);
-                } else {
-                    const errorMessage = await getErrorMessage(response);
-                    todoActions.loadTodosFailure(errorMessage);
-                }
-            } catch (e) {
-                console.error(e);
-                todoActions.loadTodosFailure(DEFAULT_ERROR_MESSAGE);
-            }
-        }
-    }
-
-    async function submitNewTodo(title: string, description: string, priority: string): Promise<ITodo | null> {
-        getNewTokenIfNeeded();
-
-        try {
-            todoActions.submitTodoRequest()
-            let headers = getHeaders('application/json');
-
-            const response = await fetch(sumbitNewTodoEndpoint, {
-                credentials: 'include',
-                method: 'POST',
-                mode: 'cors',
-                body: JSON.stringify({
-                    title,
-                    description,
-                    priority,
-                }),
-                headers
-            });
-
-            if (response.ok) {
-                const todo = await response.json();
-                todoActions.submitTodoSuccess(todo);
-                return todo;
+            if (authState.authenticated && (!tokenIsPresent() || tokenIsExpired())) {
+                authenticate();
             } else {
-                const errorMessage = await getErrorMessage(response);
-                todoActions.submitTodoFailure(errorMessage);
+                try {
+                    todoActions.loadTodosRequest();
+
+                    const headers = getHeaders(authState.authenticated);
+                    const response = await fetch(url, {
+                        credentials: 'include',
+                        method: 'GET',
+                        headers,
+                    });
+
+                    if (response.ok) {
+                        const res = await response.json();
+                        const todos = safeGet(['_embedded', 'todoList'], res, []);
+                        todoActions.loadTodos(todos);
+                        setPaginations(res);
+                    } else {
+                        const errorMessage = await getErrorMessage(response);
+                        todoActions.loadTodosFailure(errorMessage);
+                    }
+                } catch (e) {
+                    console.error(e);
+                    todoActions.loadTodosFailure(DEFAULT_ERROR_MESSAGE);
+                }
             }
-
-        } catch (e) {
-            console.error(e);
-            todoActions.submitTodoFailure(DEFAULT_ERROR_MESSAGE);
         }
-
-        return Promise.resolve(null);
     }
 
-    async function updateTodo(title: string, description: string, priority: string): Promise<ITodo | null> {
-        if (todoState.activeTodo !== undefined) {
-            getNewTokenIfNeeded();
-
+    async function submitNewTodo(title: string, description: string, priority: string): Promise<ITodo | void> {
+        if (!tokenIsPresent() || tokenIsExpired()) {
+            authenticate();
+        } else {
             try {
-                todoActions.submitTodoRequest();
-                let headers = getHeaders('application/json');
+                todoActions.submitTodoRequest()
+                let headers = getHeaders(true, 'application/json');
 
-                const response = await fetch(todoState.activeTodo._links.edit.href, {
+                const response = await fetch(sumbitNewTodoEndpoint, {
                     credentials: 'include',
-                    method: 'PUT',
+                    method: 'POST',
                     mode: 'cors',
                     body: JSON.stringify({
                         title,
@@ -239,40 +225,75 @@ const useApi = (): ITodoApis => {
                 todoActions.submitTodoFailure(DEFAULT_ERROR_MESSAGE);
             }
         }
-        return Promise.resolve(null);
     }
 
-    async function changeTodoStatus(link: string): Promise<ITodo | null> {
-        getNewTokenIfNeeded();
+    async function updateTodo(title: string, description: string, priority: string): Promise<ITodo | void> {
+        if (todoState.activeTodo !== undefined) {
+            if (!tokenIsPresent() || tokenIsExpired()) {
+                authenticate();
+            } else {
 
-        let todo = null;
-        try {
-            todoActions.submitTodoRequest();
-            let headers = getHeaders('application/json');
+                try {
+                    todoActions.submitTodoRequest();
+                    let headers = getHeaders(true, 'application/json');
 
-            const response = await fetch(link, {
-                credentials: 'include',
-                method: 'POST',
-                mode: 'cors',
-                headers
-            })
+                    const response = await fetch(todoState.activeTodo._links.edit.href, {
+                        credentials: 'include',
+                        method: 'PUT',
+                        mode: 'cors',
+                        body: JSON.stringify({
+                            title,
+                            description,
+                            priority,
+                        }),
+                        headers
+                    });
 
-            if (response.ok) {
-                const todo = await response.json();
-                todoActions.submitTodoSuccess(todo);
-                return todo;
+                    if (response.ok) {
+                        const todo = await response.json();
+                        todoActions.submitTodoSuccess(todo);
+                        return todo;
+                    } else {
+                        const errorMessage = await getErrorMessage(response);
+                        todoActions.submitTodoFailure(errorMessage);
+                    }
+
+                } catch (e) {
+                    console.error(e);
+                    todoActions.submitTodoFailure(DEFAULT_ERROR_MESSAGE);
+                }
             }
-        } catch (e) {
-            console.error(e);
-            todoActions.submitTodoFailure(DEFAULT_ERROR_MESSAGE);
         }
+    }
 
-        return todo;
+    async function changeTodoStatus(link: string): Promise<ITodo | void> {
+        if (!tokenIsPresent() || tokenIsExpired()) {
+            authenticate();
+        } else {
+            try {
+                todoActions.submitTodoRequest();
+                let headers = getHeaders(true, 'application/json');
+
+                const response = await fetch(link, {
+                    credentials: 'include',
+                    method: 'POST',
+                    mode: 'cors',
+                    headers
+                })
+
+                if (response.ok) {
+                    const todo = await response.json();
+                    todoActions.submitTodoSuccess(todo);
+                    return todo;
+                }
+            } catch (e) {
+                console.error(e);
+                todoActions.submitTodoFailure(DEFAULT_ERROR_MESSAGE);
+            }
+        }
     }
 
     const downloadTodos = (searchValue = "", user?: string) => {
-        getNewTokenIfNeeded();
-
         let url = downloadTodosEndPoint + `?q=${searchValue.toLowerCase()}`;
         if (user !== undefined) url += `&user=${user}`
         window.location.assign(url);
@@ -283,11 +304,13 @@ const useApi = (): ITodoApis => {
     }
 
     async function getErrorMessage(response: Response): Promise<string> {
+        const responseJson = await response.json();
+        console.error(responseJson);
+
         if (response.status.toString() === "401") {
             return UNAUTHORIZED_MESSAGE;
         } else if (response.status.toString().startsWith("4")) {
-            const res = await response.json();
-            return res.message || DEFAULT_ERROR_MESSAGE;
+            return responseJson.message || DEFAULT_ERROR_MESSAGE;
         } else {
             return DEFAULT_ERROR_MESSAGE;
         }
@@ -306,11 +329,13 @@ const useApi = (): ITodoApis => {
         todoActions.setTodoPagingInfo(pagingInfo);
     }
 
-    function getHeaders(contentType?: string) {
+    function getHeaders(addToken: boolean, contentType?: string) {
         const headers = new Headers();
-        const token = sessionStorage.getItem('token');
-        if (token) {
-            headers.append('Authorization', `Bearer ${token}`);
+        if (addToken) {
+            const token = sessionStorage.getItem('token');
+            if (token) {
+                headers.append('Authorization', `Bearer ${token}`);
+            }
         }
         if (contentType) {
             headers.append('Content-Type', contentType);
@@ -319,15 +344,16 @@ const useApi = (): ITodoApis => {
         return headers;
     }
 
-    function getNewTokenIfNeeded() {
+    function tokenIsPresent() {
         const token = sessionStorage.getItem('token');
-        if (token) {
-            const expiry = parseInt(sessionStorage.getItem('expiry') as string);
-            if (isNaN(expiry) || expiry < Date.now()) {
-                console.info('Token expired. Fetching new token');
-                authenticate();
-            }
-        }
+
+        return token !== undefined;
+    }
+
+    function tokenIsExpired() {
+        const expiry = parseInt(sessionStorage.getItem('expiry') as string);
+
+        return isNaN(expiry) || expiry < Date.now();
     }
 
     return {
@@ -335,7 +361,7 @@ const useApi = (): ITodoApis => {
         getToken,
         fetchUserTodos,
         fetchAllTodos,
-        fetchOneTodo,
+        fetchOneTodoForEdit,
         searchTodos,
         fetchTodos,
         submitNewTodo,
@@ -344,6 +370,7 @@ const useApi = (): ITodoApis => {
         changeTodoStatus,
         resetPaginations,
         getUserInfo,
+        revokeToken,
     }
 
 }

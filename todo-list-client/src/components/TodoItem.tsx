@@ -7,7 +7,7 @@ interface ITodoItem {
     loading: boolean;
     todo: ITodo;
     onEdit: (todo: ITodo) => void;
-    onChangeStatus: (url: string) => Promise<ITodo | null>;
+    onChangeStatus: (url: string) => Promise<ITodo | void>;
 }
 
 const TodoItem: React.FC<ITodoItem> = (props) => {
@@ -18,7 +18,7 @@ const TodoItem: React.FC<ITodoItem> = (props) => {
 
     async function changeTodoStatus(url: string) {
         const todo = await props.onChangeStatus(url);
-        if (todo !== null) {
+        if (todo !== undefined) {
             setTodo(todo);
         }
     }

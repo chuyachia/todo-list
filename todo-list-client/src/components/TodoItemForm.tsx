@@ -8,7 +8,7 @@ import ITodo from '../models/ITodo';
 
 interface ITodoItemForm {
     onBack: () => void;
-    onSubmit: (title: string, description: string, priority: string) => Promise<ITodo | null>;
+    onSubmit: (title: string, description: string, priority: string) => Promise<ITodo | void>;
     submitError: boolean;
     submitSuccess: boolean;
     todo: ITodoItem | undefined;

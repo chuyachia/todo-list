@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import {useState} from 'react';
 
 const useDebounce =  (func: Function, wait:number, leading: boolean): Function => {
     const [timeoutValue, setTimeoutValue] = useState(0);
