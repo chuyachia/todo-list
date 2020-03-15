@@ -1,11 +1,26 @@
 spring:
   application:
     name: "todo-list-security"
+  datasource:
+    driver-class-name: org.postgresql.Driver
   profiles:
     active:
       - local
 server:
   port: 8089
+oauth:
+  todo-list-api-secret: ${TODO_LIST_API_SECRET}
+  todo-list-api-swagger-secret: ${TODO_LIST_API_SWAGGER_SECRET}
+  todo-list-app-callback-url: ${TODO_LIST_APP_CALLBACK_URL}
+  todo-list-api-swagger-callback-url: ${TODO_LIST_API_SWAGGER_CALLBACK_URL}
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
+debug: ${DEBUG}
+logging:
+  level:
+    org:
+      springframework:
+        security: ${LOG_LEVEL}
 ---
 spring:
   profiles: local
@@ -22,4 +37,8 @@ oauth:
 cors:
   allowed-origins: http://localhost:3000,http://localhost:8088
 debug: true
-logging.level.org.springframework.security: DEBUG
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

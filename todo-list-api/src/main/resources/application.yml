@@ -17,7 +17,20 @@ server:
 
 todolist:
   cors:
-    origin: https://todolist-cyc-client.herokuapp.com
+    origin: ${TODO_LIST_APP_URL}
+
+oauth:
+  todo-list-api-secret: ${TODO_LIST_API_SECRET}
+  todo-list-api-swagger-secret: ${TODO_LIST_API_SWAGGER_SECRET}
+  authentication-endpoint: ${AUTHENTICATION_ENDPOINT}
+  get-token-endpoint: ${GET_TOKEN_ENDPOINT}
+  check-token-endpoint: ${CHECK_TOKEN_ENDPOINT}
+debug: ${DEBUG}
+logging:
+  level:
+    org:
+      springframework:
+        web: ${LOG_LEVEL}
 ---
 spring:
   profiles: local
@@ -37,3 +50,9 @@ oauth:
 todolist:
   cors:
     origin: http://localhost:3000
+debug: true
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
