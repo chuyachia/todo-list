@@ -6,14 +6,7 @@ spring:
       - local
 server:
   port: 8089
-logging:
-    org:
-      springframework:
-        web:
-          filter:
-            CommonsRequestLoggingFilter: DEBUG
 ---
-debug: true
 spring:
   profiles: local
   datasource:
@@ -21,3 +14,12 @@ spring:
     username: security
     password: security
     driver-class-name: com.mysql.cj.jdbc.Driver
+oauth:
+  todo-list-api-secret: dev-secret
+  todo-list-api-swagger-secret: dev-secret
+  todo-list-app-callback-url: http://localhost:3000/oauth-callback
+  todo-list-api-swagger-callback-url: http://localhost:8088/webjars/springfox-swagger-ui/oauth2-redirect.html
+cors:
+  allowed-origins: http://localhost:3000,http://localhost:8088
+debug: true
+logging.level.org.springframework.security: DEBUG

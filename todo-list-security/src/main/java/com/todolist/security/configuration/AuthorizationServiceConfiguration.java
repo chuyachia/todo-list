@@ -4,6 +4,7 @@ import com.todolist.security.service.PkceAuthorizationCodeServices;
 import com.todolist.security.service.PkceAuthorizationCodeTokenGranter;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,13 +16,25 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
-
-import javax.sql.DataSource;
+import springfox.documentation.service.AuthorizationCodeGrant;
 
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServiceConfiguration extends AuthorizationServerConfigurerAdapter {
 // client_id=todo-list-app&grant_type=authorization_code&response_type=code&scope=any
+    private final static String TODO_LIST_APP = "todo-list-app";
+    private final static String TODO_LIST_API = "todo-list-api";
+    private final static String TODO_LIST_API_SWAGGER = "todo-list-api-swagger";
+    private final static int ACCESS_TOKEN_VALIDITY_SEC = 600;
+    @Value("${oauth.todo-list-app-callback-url:}")
+    private String todoListAppCallbackUrl;
+    @Value("${oauth.todo-list-api-swagger-callback-url:}")
+    private String todoListApiSwaggerCallbackUrl;
+    @Value("${oauth.todo-list-api-swagger-secret:}")
+    private String todoListApiSwaggerSecret;
+    @Value("${oauth.todo-list-api-secret:}")
+    private String todoListApiSecret;
+
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
@@ -52,19 +65,22 @@ public class AuthorizationServiceConfiguration extends AuthorizationServerConfig
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        // TODO put client details in DB
-        // TODO externalize configs
         clients
                 .inMemory()
-                .withClient("todo-list-app") // public client
+                .withClient(TODO_LIST_APP) // public client
+                .accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SEC)
                 .autoApprove("any")
-//                .accessTokenValiditySeconds(1800)
-                .accessTokenValiditySeconds(30)
                 .authorizedGrantTypes("authorization_code")
-                .redirectUris("http://localhost:3000/oauth-callback")
+                .redirectUris(todoListAppCallbackUrl)
                 .and()
-                .withClient("todo-list-api")
-                .secret(this.passwordEncoder.encode("dev-secret"));
+                .withClient(TODO_LIST_API_SWAGGER)
+                .secret(this.passwordEncoder.encode(todoListApiSwaggerSecret))
+                .authorizedGrantTypes("authorization_code")
+                .redirectUris(todoListApiSwaggerCallbackUrl)
+                .accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SEC)
+                .and()
+                .withClient(TODO_LIST_API)
+                .secret(this.passwordEncoder.encode(todoListApiSecret));
     }
 
     @Override

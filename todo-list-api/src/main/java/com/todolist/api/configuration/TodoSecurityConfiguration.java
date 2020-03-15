@@ -22,9 +22,8 @@ import org.springframework.security.oauth2.provider.token.UserAuthenticationConv
 @Configuration
 @EnableResourceServer
 public class TodoSecurityConfiguration extends ResourceServerConfigurerAdapter {
-    @Value("${oauth.client-id:}")
-    String clientId;
-    @Value("${oauth.client-secret:}")
+    private final static String CLIENT_ID = "todo-list-api";
+    @Value("${oauth.todo-list-api-secret:}")
     String clientSecret;
     @Value("${oauth.check-token-endpoint:}")
     String checkTokenEndpoint;
@@ -51,7 +50,7 @@ public class TodoSecurityConfiguration extends ResourceServerConfigurerAdapter {
     public void configure(ResourceServerSecurityConfigurer resources) {
         RemoteTokenServices remoteTokenServices = new RemoteTokenServices();
         remoteTokenServices.setCheckTokenEndpointUrl(checkTokenEndpoint);
-        remoteTokenServices.setClientId(clientId);
+        remoteTokenServices.setClientId(CLIENT_ID);
         remoteTokenServices.setClientSecret(clientSecret);
         remoteTokenServices.setAccessTokenConverter(accessTokenConverter());
 
