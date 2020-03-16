@@ -8,7 +8,7 @@ export interface IAuthState {
 
 export const initialAuthState: IAuthState = {
     failed: false,
-    loading: false,
+    loading: true,
     reason: "",
     authenticated: false,
     username: ""

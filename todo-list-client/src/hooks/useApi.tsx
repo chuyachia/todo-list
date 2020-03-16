@@ -28,10 +28,6 @@ const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
 const UNAUTHORIZED_MESSAGE = "Unauthorized operation.";
 
 const useApi = (): ITodoApis => {
-    console.log("todo list api url");
-    console.log(process.env.REACT_APP_TODO_LIST_API);
-    console.log("oauth server url");
-    console.log(process.env.REACT_APP_OAUTH_SERVER);
     const fetchAllTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos',
         fetchOneTodoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/id',
         fetchUserTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/user',

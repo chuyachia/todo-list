@@ -21,12 +21,9 @@ const EditTodo: React.FC<RouteComponentProps<IRouteProps>> = ({match}) => {
     const history = useHistory();
     const { state} = useLocation();
     const from = state && state.from ||  "/";
-    console.log(state);
-    console.log(from);
 
     const handleBack = () => {
         setActiveTodo(undefined);
-        console.log(from);
         history.push(from);
     }
 

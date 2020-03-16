@@ -10,11 +10,13 @@ export default (state: IAuthState, action: IAction): IAuthState => {
                 ...state,
                 username: action.payload,
                 authenticated: true,
+                loading: false,
             }
         case USER_LOGGED_IN:
             return {
                 ...state,
                 authenticated: true,
+                loading: false,
             }
         case USER_LOGGED_OUT:
             return {

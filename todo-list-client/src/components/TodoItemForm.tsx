@@ -39,8 +39,8 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
     }
 
     const goBack = () => {
-        props.onBack();
         props.resetErrorState();
+        props.onBack();
     }
 
     const resetSubmitted = () => {
