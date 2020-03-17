@@ -5,7 +5,6 @@ import {IState} from "../states";
 import IAction from '../actions/IAction';
 
 export default ({auth, todo}: IState, action: IAction): IState => {
-    console.log(action);
     // middleware deal with async action
     // if (typeof action.payload === "function") {
     //     action.payload = await action.payload();
