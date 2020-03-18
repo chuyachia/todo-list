@@ -1,10 +1,12 @@
-Work in progress
-
-### Todolist web client
-CRA, React Hook, Typescript.
-
+#### Todo List App 
 [https://todolist-cyc-client.herokuapp.com/](https://todolist-cyc-client.herokuapp.com/)
-### Todolist REST API
-RESTful API using Hateoas with Spring Data JPA, Spring Security, MySQL database and Docker.
 
-[https://todolist-cyc-api.herokuapp.com/swagger-ui.html#/](https://todolist-cyc-api.herokuapp.com/swagger-ui.html#/)
+#### Web client [/todo-list-client]
+Single Page App web client. React, React Hook, Typescript
+
+
+#### RESTful API [/todo-list-api]
+RESTful API with Hateoas. Spring Boot, Spring Security, SQL 
+
+#### OAuth server [/todo-list-security]
+OAuth server supporting Authorization Code flow with PKCE for SPA web client. Spring Boot, Spring Security, SQL 
