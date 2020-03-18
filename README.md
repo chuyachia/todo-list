@@ -1,4 +1,5 @@
-#### Todo List App 
+Application that allows users to post, edit todo items, see other people's todos and download todos in CSV format.
+
 [https://todolist-cyc-client.herokuapp.com/](https://todolist-cyc-client.herokuapp.com/)
 
 #### Web client [/todo-list-client]
