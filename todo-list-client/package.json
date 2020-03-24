@@ -23,12 +23,14 @@
     "build": "react-scripts build && npm run custom-sw",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "custom-sw": "cat src/serviceWorkerCacheAjax.js >> build/service-worker.js"
+    "custom-sw": "cat src/serviceWorkerCacheAjax.js >> build/service-worker.js",
+    "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx --fix"
   },
   "eslintConfig": {
     "extends": "react-app",
     "rules": {
-      "quotes": ["warn", "single"]
+      "quotes": ["warn", "single"],
+      "function-call-argument-newline": ["warn", "consistent"]
     }
   },
   "browserslist": {

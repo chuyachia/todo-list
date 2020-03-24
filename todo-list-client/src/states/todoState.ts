@@ -1,4 +1,4 @@
-import ITodo from "../models/ITodo";
+import ITodo from '../models/ITodo';
 
 export interface ITodoState {
     todos: ITodo[];
@@ -20,17 +20,17 @@ export interface ITodoState {
 
 export const initialTodoState: ITodoState = {
     submitTodoSuccess: false,
-    errorMessage: "",
+    errorMessage: '',
     loadTodoError: false,
     loading: true,
     submitTodoError: false,
     activeTodo: undefined,
     currentPage: 0,
-    currentPageUrl: "",
-    firstPageUrl: "",
-    lastPageUrl: "",
-    nextPageUrl: "",
-    prevPageUrl: "",
+    currentPageUrl: '',
+    firstPageUrl: '',
+    lastPageUrl: '',
+    nextPageUrl: '',
+    prevPageUrl: '',
     pageSize: 5,
     todos: [],
     totalPages: 0,

@@ -1,8 +1,8 @@
 import React from 'react';
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faFastBackward, faStepBackward} from "@fortawesome/free-solid-svg-icons";
-import {faStepForward} from "@fortawesome/free-solid-svg-icons/faStepForward";
-import {faFastForward} from "@fortawesome/free-solid-svg-icons/faFastForward";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {faFastBackward, faStepBackward} from '@fortawesome/free-solid-svg-icons';
+import {faStepForward} from '@fortawesome/free-solid-svg-icons/faStepForward';
+import {faFastForward} from '@fortawesome/free-solid-svg-icons/faFastForward';
 
 interface IPagination {
     onFirstPageClick: () => void;
@@ -24,18 +24,18 @@ const Pagination: React.FC<IPagination> = (props) => {
     }
 
     return (
-        <div className={"buttons-wrap pagination"}>
-            <button className={"primary"} onClick={props.onFirstPageClick}>
+        <div className={'buttons-wrap pagination'}>
+            <button className={'primary'} onClick={props.onFirstPageClick}>
                 <FontAwesomeIcon icon={faFastBackward}/>
             </button>
-            <button className={prevPageEnabled ? "primary" : "disabled"} onClick={maybeCallPrevPage}>
+            <button className={prevPageEnabled ? 'primary' : 'disabled'} onClick={maybeCallPrevPage}>
                 <FontAwesomeIcon icon={faStepBackward}/>
             </button>
-            <button className={"disabled"}>{`Page ${props.currentPage} of ${props.totalPages}`}</button>
-            <button className={nextPageEnabled? "primary" : "disabled"} onClick={maybeCallNextPage}>
+            <button className={'disabled'}>{`Page ${props.currentPage} of ${props.totalPages}`}</button>
+            <button className={nextPageEnabled? 'primary' : 'disabled'} onClick={maybeCallNextPage}>
                 <FontAwesomeIcon icon={faStepForward}/>
             </button>
-            <button className={"primary"} onClick={props.onLastPageClick}>
+            <button className={'primary'} onClick={props.onLastPageClick}>
                 <FontAwesomeIcon icon={faFastForward}/>
             </button>
         </div>

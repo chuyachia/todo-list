@@ -1,16 +1,14 @@
-import ITodo from "../models/ITodo";
+import ITodo from '../models/ITodo';
 import {
-    DELETE_TODO_FAILURE, DELETE_TODO_REQUEST,
-    DELETE_TODO_SUCCESS,
     LOAD_TODOS_FAILURE,
     LOAD_TODOS_REQUEST,
     NEW_ACTIVE_TODO,
     NEW_PAGING_INFO,
     NEW_TODOS, RESET_ERROR_STATE, SUBMIT_TODO_FAILURE,
     SUBMIT_TODO_REQUEST, SUBMIT_TODO_SUCCESS
-} from "./constants";
-import {IPagingInfo} from "../models/IPagingInfo";
-import {useStateValue} from "../state";
+} from './constants';
+import {IPagingInfo} from '../models/IPagingInfo';
+import {useStateValue} from '../state';
 
 export const TodoActionCreater = () => {
     const [_, dispatch] = useStateValue();

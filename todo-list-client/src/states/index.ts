@@ -1,5 +1,5 @@
-import {IAuthState, initialAuthState} from "./authState";
-import {initialTodoState, ITodoState} from "./todoState";
+import {IAuthState, initialAuthState} from './authState';
+import {initialTodoState, ITodoState} from './todoState';
 
 export interface IState {
     auth: IAuthState;

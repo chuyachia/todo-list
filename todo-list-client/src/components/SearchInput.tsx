@@ -24,7 +24,7 @@ const SearchInput: React.FC<ISearchInput> = (props) => {
 
     return (
         <span tabIndex={0}>
-            <input className={"form-input"} type={"text"} placeholder={"Enter search term"} onBlur={props.onClose}
+            <input className={'form-input'} type={'text'} placeholder={'Enter search term'} onBlur={props.onClose}
                    autoFocus={true} value={props.value} onChange={props.onChange} onKeyDown={handleEnterKey}/>
         </span>);
 }

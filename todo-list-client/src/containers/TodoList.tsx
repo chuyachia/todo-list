@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {RouteComponentProps, useLocation, Link, useHistory, NavLink} from'react-router-dom';
-import queryString from "query-string";
+import queryString from 'query-string';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faFileDownload, faPlus, faSearch, faSignInAlt, faSignOutAlt} from '@fortawesome/free-solid-svg-icons'
 
@@ -9,14 +9,14 @@ import Pagination from '../components/Pagination';
 import Popup from '../components/Popup';
 
 import {useStateValue} from '../state';
-import useApi from "../hooks/useApi";
-import useInput from "../hooks/useInput";
-import ITodoItem from "../models/ITodo";
+import useApi from '../hooks/useApi';
+import useInput from '../hooks/useInput';
+import ITodoItem from '../models/ITodo';
 import hashCode from '../util/hashCode';
 import safeGet from '../util/safeGet';
-import ITodo from "../models/ITodo";
-import {TodoActionCreater} from "../actions";
-import {IPopup} from "../components/Popup";
+import ITodo from '../models/ITodo';
+import {TodoActionCreater} from '../actions';
+import {IPopup} from '../components/Popup';
 
 const SearchInput = React.lazy(() => import('../components/SearchInput'));
 
@@ -34,15 +34,15 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     const [popupProps, setPopupProps] = useState<IPopup>({
-        title: "",
+        title: '',
         isOpen: false,
-        description: "",
+        description: '',
         leftButton: null,
         rightButton: null,
     });
 
     const [authenticationChecked, setAuthenticationChecked] = useState(false);
-    const {value: searchValue, onChange: onSearchValueChange} = useInput<HTMLInputElement>("");
+    const {value: searchValue, onChange: onSearchValueChange} = useInput<HTMLInputElement>('');
 
     const history = useHistory();
     const {search, pathname} = useLocation();
@@ -58,10 +58,10 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
     const handleDeleteTodo = (todo: ITodoItem) => {
         setPopupProps({
             isOpen: true,
-            title: "Delete Todo Item",
-            description: `Are you sure you want to delete todo item ${safeGet(['title'],todo,"")}?`,
-            leftButton: (<button onClick={() =>handleConfirmDeleteTodo(todo)} className={"danger"}>Delete</button>),
-            rightButton: (<button onClick={() =>handleCloseDeleteTodoPopup()} className={"secondary"}>Cancel</button>),
+            title: 'Delete Todo Item',
+            description: `Are you sure you want to delete todo item ${safeGet(['title'],todo,'')}?`,
+            leftButton: (<button onClick={() =>handleConfirmDeleteTodo(todo)} className={'danger'}>Delete</button>),
+            rightButton: (<button onClick={() =>handleCloseDeleteTodoPopup()} className={'secondary'}>Cancel</button>),
         });
     }
 
@@ -71,7 +71,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             if (deleted) {
                 setPopupProps({
                     title: 'Deleted',
-                    description: `Todo item ${safeGet(['title'],todo,"")} deleted`,
+                    description: `Todo item ${safeGet(['title'],todo,'')} deleted`,
                     leftButton: <button onClick={() =>handleCloseDeleteTodoPopup()}>OK</button>,
                     rightButton: null,
                     isOpen: true,
@@ -79,7 +79,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             } else {
                 setPopupProps({
                     title: 'Error deleting',
-                    description: `Something went wrong thile deleting todo item ${safeGet(['title'],todo,"")} `,
+                    description: `Something went wrong thile deleting todo item ${safeGet(['title'],todo,'')} `,
                     leftButton: <button onClick={() =>setPopupProps({...popupProps, isOpen: false})}>OK</button>,
                     rightButton: null,
                     isOpen: true,
@@ -93,7 +93,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             title: 'Please login',
             description: 'You need to log in to add todo items',
             leftButton: <button onClick={authenticate}>Login</button>,
-            rightButton: <button onClick={()=> setPopupProps({...popupProps, isOpen: false})} className={"secondary"}>Cancel</button>,
+            rightButton: <button onClick={()=> setPopupProps({...popupProps, isOpen: false})} className={'secondary'}>Cancel</button>,
             isOpen: true,
         })
     }
@@ -128,11 +128,11 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                 await fetchUserTodos(username, page);
             }
         }
-    }
+    };
 
     const handleLogout = async() => {
         await revokeToken();
-        history.push("/");
+        history.push('/');
     }
 
     function parsePageNumber(search:string) {
@@ -153,36 +153,36 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
     }, [showTodoUser, page, authenticationChecked])
 
     return (
-        <div className={"todo-list"}>
+        <div className={'todo-list'}>
             <Popup {...popupProps}/>
-            {isLoading && <div className={"overlay"}/>}
-            {isLoading && <i className={"inactive-text loader"}>Loading...</i>}
-            {authState.authenticated && <div className={"todos-navigation"}>
-                <NavLink exact to={`/todos?page=0`}>All Todos</NavLink>
-                {" / "}
+            {isLoading && <div className={'overlay'}/>}
+            {isLoading && <i className={'inactive-text loader'}>Loading...</i>}
+            {authState.authenticated && <div className={'todos-navigation'}>
+                <NavLink exact to={'/todos?page=0'}>All Todos</NavLink>
+                {' / '}
                 <NavLink exact to={`/todos/${authState.username}?page=0`}>My Todos</NavLink>
             </div>}
-            <div className={"tools-bar vertical-buttons-wrap"}>
+            <div className={'tools-bar vertical-buttons-wrap'}>
                 {authState.authenticated ?
-                    <button title="Logout" className={"primary"} onClick={handleLogout}>
+                    <button title="Logout" className={'primary'} onClick={handleLogout}>
                         <FontAwesomeIcon icon={faSignOutAlt}/>
                     </button> :
-                    <button title="Login" className={"primary"} onClick={authenticate}>
+                    <button title="Login" className={'primary'} onClick={authenticate}>
                         <FontAwesomeIcon icon={faSignInAlt}/>
                     </button>}
                 {authState.authenticated?
-                    <Link to={{pathname: "/edit", state: {from : pathname+ search}}}>
-                        <button title="Add todo" className={"primary"}>
+                    <Link to={{pathname: '/edit', state: {from : pathname+ search}}}>
+                        <button title="Add todo" className={'primary'}>
                             <FontAwesomeIcon icon={faPlus}/>
                         </button>
                     </Link> :
-                    <button title="Add todo" className={"primary"}
+                    <button title="Add todo" className={'primary'}
                             onClick={loginPrompt}>
                         <FontAwesomeIcon icon={faPlus}/>
                     </button>}
                 <div>
                     {isSearchOpen &&
-                    <React.Suspense fallback={<i className={"inactive-text loader"}>Loading...</i>}>
+                    <React.Suspense fallback={<i className={'inactive-text loader'}>Loading...</i>}>
                         <SearchInput
                             onClose={() => setIsSearchOpen(false)}
                             value={searchValue}
@@ -190,17 +190,17 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                             submitSearch={handleSubmitSearch}
                         />
                     </React.Suspense>}
-                    <button title="Search todos" className={"primary"}
+                    <button title="Search todos" className={'primary'}
                             onClick={() => !isLoading && setIsSearchOpen(!isSearchOpen)}>
                         <FontAwesomeIcon icon={faSearch}/>
                     </button>
                 </div>
-                <button title="Download todos" className={"primary"}
+                <button title="Download todos" className={'primary'}
                         onClick={handleDownloadTodosClick}>
                     <FontAwesomeIcon icon={faFileDownload}/>
                 </button>
             </div>
-            {todoState.loadTodoError && <i className={"warning-text"}>{todoState.errorMessage}</i>}
+            {todoState.loadTodoError && <i className={'warning-text'}>{todoState.errorMessage}</i>}
             <div>{todoState.todos.map((todo: ITodo) => (
                 <TodoItem
                     key={hashCode(todo.title + todo.description + todo.priority + Object.keys(todo._links).length)}

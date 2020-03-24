@@ -1,11 +1,11 @@
-import queryString from "query-string";
-import {useHistory} from "react-router-dom";
+import queryString from 'query-string';
+import {useHistory} from 'react-router-dom';
 
 import ITodo from '../models/ITodo';
 import safeGet from '../util/safeGet';
-import {AuthActionCreater, TodoActionCreater} from "../actions";
-import {useStateValue} from "../state";
-import {IPagingInfo} from "../models/IPagingInfo";
+import {AuthActionCreater, TodoActionCreater} from '../actions';
+import {useStateValue} from '../state';
+import {IPagingInfo} from '../models/IPagingInfo';
 
 interface ITodoApis {
     authenticate: () => void;
@@ -25,8 +25,8 @@ interface ITodoApis {
     deleteTodo: (id: number) => Promise<boolean>;
 }
 
-const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
-const UNAUTHORIZED_MESSAGE = "Unauthorized operation.";
+const DEFAULT_ERROR_MESSAGE = 'Something went wrong. Please try again later.';
+const UNAUTHORIZED_MESSAGE = 'Unauthorized operation.';
 
 const useApi = (): ITodoApis => {
     const fetchAllTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos',
@@ -86,7 +86,7 @@ const useApi = (): ITodoApis => {
         sessionStorage.setItem('token', tokenResponse.access_token);
         const expiry = Date.now() + tokenResponse.expires_in * 1000;
         sessionStorage.setItem('expiry', expiry.toString());
-        const redirectPath = sessionStorage.getItem('redirect_path') || "/";
+        const redirectPath = sessionStorage.getItem('redirect_path') || '/';
         sessionStorage.removeItem('redirect_path');
         authActions.userLoggedIn();
 
@@ -322,7 +322,7 @@ const useApi = (): ITodoApis => {
         return false;
     }
 
-    const downloadTodos = (searchValue = "", user?: string) => {
+    const downloadTodos = (searchValue = '', user?: string) => {
         let url = downloadTodosEndPoint + `?q=${searchValue.toLowerCase()}`;
         if (user !== undefined) url += `&user=${user}`
         window.location.assign(url);
@@ -336,9 +336,9 @@ const useApi = (): ITodoApis => {
         const responseJson = await response.json();
         console.error(responseJson);
 
-        if (response.status.toString() === "401") {
+        if (response.status.toString() === '401') {
             return UNAUTHORIZED_MESSAGE;
-        } else if (response.status.toString().startsWith("4")) {
+        } else if (response.status.toString().startsWith('4')) {
             return responseJson.message || DEFAULT_ERROR_MESSAGE;
         } else {
             return DEFAULT_ERROR_MESSAGE;
@@ -347,11 +347,11 @@ const useApi = (): ITodoApis => {
 
     function setPaginations(res: any) {
         const pagingInfo: IPagingInfo = {
-            first: safeGet(['_links', 'first', 'href'], res, ""),
-            prev: safeGet(['_links', 'prev', 'href'], res, ""),
-            self: safeGet(['_links', 'self', 'href'], res, ""),
-            next: safeGet(['_links', 'next', 'href'], res, ""),
-            last: safeGet(['_links', 'last', 'href'], res, ""),
+            first: safeGet(['_links', 'first', 'href'], res, ''),
+            prev: safeGet(['_links', 'prev', 'href'], res, ''),
+            self: safeGet(['_links', 'self', 'href'], res, ''),
+            next: safeGet(['_links', 'next', 'href'], res, ''),
+            last: safeGet(['_links', 'last', 'href'], res, ''),
             currentPage: safeGet(['page', 'number'], res, 0),
             totalPages: safeGet(['page', 'totalPages'], res, 0),
         }

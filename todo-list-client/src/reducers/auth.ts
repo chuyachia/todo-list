@@ -1,6 +1,6 @@
 import {IAuthState} from '../states/authState';
 import IAction from '../actions/IAction';
-import {ANONYMOUS_USERNAME, NEW_USERNAME, USER_LOGGED_IN, USER_LOGGED_OUT} from "../actions/constants";
+import {ANONYMOUS_USERNAME, NEW_USERNAME, USER_LOGGED_IN, USER_LOGGED_OUT} from '../actions/constants';
 
 export default (state: IAuthState, action: IAction): IAuthState => {
 

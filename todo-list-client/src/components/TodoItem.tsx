@@ -14,7 +14,7 @@ const TodoItem: React.FC<ITodoItem> = (props) => {
     const [todo, setTodo] = useState(props.todo);
     const {self, edit, remove, ...links} = todo._links;
     const isHighPriority = todo.priority === 'High';
-    const isDone = todo.status === "Won't Do" || todo.status === 'Done';
+    const isDone = todo.status === 'Won\'t Do' || todo.status === 'Done';
 
     async function changeTodoStatus(url: string) {
         const todo = await props.onChangeStatus(url);
@@ -30,13 +30,13 @@ const TodoItem: React.FC<ITodoItem> = (props) => {
             <p>Priority: {todo.priority}</p>
             <p>Status: {todo.status}</p>
             <p>{todo.description}</p>
-            <div className={"buttons-wrap"}>
+            <div className={'buttons-wrap'}>
                 {(Object.keys(links) as Array<keyof typeof links>).map((link) =>
                     <button key={link} onClick={() => changeTodoStatus(links[link].href)}>
                         {links[link].title}
                     </button>)}
                 {edit !== undefined && <button onClick={() => props.onEdit(todo)}>{edit.title}</button>}
-                {remove !== undefined && <button className={"danger"} onClick={() => props.onDelete(todo)}>{remove.title}</button>}
+                {remove !== undefined && <button className={'danger'} onClick={() => props.onDelete(todo)}>{remove.title}</button>}
             </div>
         </article>)
 }

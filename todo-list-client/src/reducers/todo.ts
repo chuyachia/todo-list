@@ -7,7 +7,7 @@ import {
     NEW_PAGING_INFO,
     NEW_TODOS, RESET_ERROR_STATE, SUBMIT_TODO_FAILURE,
     SUBMIT_TODO_REQUEST, SUBMIT_TODO_SUCCESS
-} from "../actions/constants";
+} from '../actions/constants';
 
 export default (state: ITodoState, action: IAction): ITodoState => {
     switch (action.type) {

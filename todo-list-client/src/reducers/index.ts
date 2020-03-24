@@ -1,7 +1,7 @@
 import authReducer from './auth';
 import todoReducer from './todo';
 
-import {IState} from "../states";
+import {IState} from '../states';
 import IAction from '../actions/IAction';
 
 export default ({auth, todo}: IState, action: IAction): IState => {

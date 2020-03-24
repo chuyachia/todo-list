@@ -1,5 +1,5 @@
-import {ANONYMOUS_USERNAME, NEW_USERNAME, USER_LOGGED_IN, USER_LOGGED_OUT} from "./constants";
-import {useStateValue} from "../state";
+import {ANONYMOUS_USERNAME, NEW_USERNAME, USER_LOGGED_IN, USER_LOGGED_OUT} from './constants';
+import {useStateValue} from '../state';
 
 
 export const AuthActionCreater = () => {
