@@ -15,6 +15,6 @@ public interface TodoService {
     Todo updateStatus(Integer id, Status status);
     Todo update(Integer id, Todo todo);
     Todo save(Todo todo);
-    void delete(Integer id);
+    Todo delete(Integer id);
     void streamAll(OutputStream outputStream, String q, String username);
 }

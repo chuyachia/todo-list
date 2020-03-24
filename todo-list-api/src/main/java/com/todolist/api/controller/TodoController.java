@@ -137,7 +137,9 @@ public class TodoController {
 
     @DeleteMapping("/todos/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void delete(@PathVariable Integer id) {
-        service.delete(id);
+    public Resource<Todo> delete(@PathVariable Integer id) {
+        Todo deletedTodo = service.delete(id);
+
+        return assembler.toResource(deletedTodo);
     }
 }

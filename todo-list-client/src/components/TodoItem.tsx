@@ -4,15 +4,15 @@ import ITodo from '../models/ITodo';
 import './TodoItem.css';
 
 interface ITodoItem {
-    loading: boolean;
     todo: ITodo;
     onEdit: (todo: ITodo) => void;
+    onDelete: (todo: ITodo) => void;
     onChangeStatus: (url: string) => Promise<ITodo | void>;
 }
 
 const TodoItem: React.FC<ITodoItem> = (props) => {
     const [todo, setTodo] = useState(props.todo);
-    const {self, edit, ...links} = todo._links;
+    const {self, edit, remove, ...links} = todo._links;
     const isHighPriority = todo.priority === 'High';
     const isDone = todo.status === "Won't Do" || todo.status === 'Done';
 
@@ -32,12 +32,11 @@ const TodoItem: React.FC<ITodoItem> = (props) => {
             <p>{todo.description}</p>
             <div className={"buttons-wrap"}>
                 {(Object.keys(links) as Array<keyof typeof links>).map((link) =>
-                    <button key={link} className={`${props.loading ? 'disabled' : ''}`}
-                            onClick={() => !props.loading && changeTodoStatus(links[link].href)}
-                            disabled={props.loading}>
+                    <button key={link} onClick={() => changeTodoStatus(links[link].href)}>
                         {links[link].title}
                     </button>)}
                 {edit !== undefined && <button onClick={() => props.onEdit(todo)}>{edit.title}</button>}
+                {remove !== undefined && <button className={"danger"} onClick={() => props.onDelete(todo)}>{remove.title}</button>}
             </div>
         </article>)
 }

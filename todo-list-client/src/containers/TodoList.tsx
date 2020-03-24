@@ -6,14 +6,17 @@ import {faFileDownload, faPlus, faSearch, faSignInAlt, faSignOutAlt} from '@fort
 
 import TodoItem from '../components/TodoItem';
 import Pagination from '../components/Pagination';
+import Popup from '../components/Popup';
 
 import {useStateValue} from '../state';
 import useApi from "../hooks/useApi";
 import useInput from "../hooks/useInput";
 import ITodoItem from "../models/ITodo";
 import hashCode from '../util/hashCode';
+import safeGet from '../util/safeGet';
 import ITodo from "../models/ITodo";
 import {TodoActionCreater} from "../actions";
+import {IPopup} from "../components/Popup";
 
 const SearchInput = React.lazy(() => import('../components/SearchInput'));
 
@@ -25,10 +28,19 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
     const [{auth: authState, todo: todoState}, _] = useStateValue();
     const {
         fetchUserTodos, fetchAllTodos, searchTodos,downloadTodos, changeTodoStatus,
-        getUserInfo, authenticate, revokeToken
+        getUserInfo, authenticate, revokeToken, deleteTodo
     } = useApi();
     const {setActiveTodo} = TodoActionCreater();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+    const [popupProps, setPopupProps] = useState<IPopup>({
+        title: "",
+        isOpen: false,
+        description: "",
+        leftButton: null,
+        rightButton: null,
+    });
+
     const [authenticationChecked, setAuthenticationChecked] = useState(false);
     const {value: searchValue, onChange: onSearchValueChange} = useInput<HTMLInputElement>("");
 
@@ -36,10 +48,59 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
     const {search, pathname} = useLocation();
     const page = parsePageNumber(search);
     const showTodoUser = match.params.username;
+    const isLoading = todoState.loading || authState.loading;
 
     const handleEditTodo = (todo: ITodoItem) => {
         setActiveTodo(todo);
         history.push(`/edit/${todo.id}`, {from : pathname+ search});
+    }
+
+    const handleDeleteTodo = (todo: ITodoItem) => {
+        setPopupProps({
+            isOpen: true,
+            title: "Delete Todo Item",
+            description: `Are you sure you want to delete todo item ${safeGet(['title'],todo,"")}?`,
+            leftButton: (<button onClick={() =>handleConfirmDeleteTodo(todo)} className={"danger"}>Delete</button>),
+            rightButton: (<button onClick={() =>handleCloseDeleteTodoPopup()} className={"secondary"}>Cancel</button>),
+        });
+    }
+
+    const handleConfirmDeleteTodo = async (todo: ITodoItem) => {
+        if (todo && todo.id) {
+            const deleted = await deleteTodo(todo.id);
+            if (deleted) {
+                setPopupProps({
+                    title: 'Deleted',
+                    description: `Todo item ${safeGet(['title'],todo,"")} deleted`,
+                    leftButton: <button onClick={() =>handleCloseDeleteTodoPopup()}>OK</button>,
+                    rightButton: null,
+                    isOpen: true,
+                })
+            } else {
+                setPopupProps({
+                    title: 'Error deleting',
+                    description: `Something went wrong thile deleting todo item ${safeGet(['title'],todo,"")} `,
+                    leftButton: <button onClick={() =>setPopupProps({...popupProps, isOpen: false})}>OK</button>,
+                    rightButton: null,
+                    isOpen: true,
+                })
+            }
+        }
+    }
+
+    const loginPrompt = () => {
+        setPopupProps({
+            title: 'Please login',
+            description: 'You need to log in to add todo items',
+            leftButton: <button onClick={authenticate}>Login</button>,
+            rightButton: <button onClick={()=> setPopupProps({...popupProps, isOpen: false})} className={"secondary"}>Cancel</button>,
+            isOpen: true,
+        })
+    }
+
+    const handleCloseDeleteTodoPopup = () => {
+        setPopupProps({...popupProps, isOpen: false})
+        loadData(showTodoUser, page, authenticationChecked);
     }
 
     const handleSubmitSearch = (value: string) => {
@@ -51,7 +112,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
     }
 
     const handleDownloadTodosClick = () => {
-        if (!todoState.loading) {
+        if (!isLoading) {
             downloadTodos(searchValue, showTodoUser);
         }
     }
@@ -93,7 +154,9 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
 
     return (
         <div className={"todo-list"}>
-            {todoState.loading && <i className={"inactive-text loader"}>Loading...</i>}
+            <Popup {...popupProps}/>
+            {isLoading && <div className={"overlay"}/>}
+            {isLoading && <i className={"inactive-text loader"}>Loading...</i>}
             {authState.authenticated && <div className={"todos-navigation"}>
                 <NavLink exact to={`/todos?page=0`}>All Todos</NavLink>
                 {" / "}
@@ -101,20 +164,20 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             </div>}
             <div className={"tools-bar vertical-buttons-wrap"}>
                 {authState.authenticated ?
-                    <button title="Logout" className={`${todoState.loading ? "disabled" : "primary"}`} onClick={handleLogout}>
+                    <button title="Logout" className={"primary"} onClick={handleLogout}>
                         <FontAwesomeIcon icon={faSignOutAlt}/>
                     </button> :
-                    <button title="Login" className={`${todoState.loading ? "disabled" : "primary"}`} onClick={authenticate}>
+                    <button title="Login" className={"primary"} onClick={authenticate}>
                         <FontAwesomeIcon icon={faSignInAlt}/>
                     </button>}
                 {authState.authenticated?
                     <Link to={{pathname: "/edit", state: {from : pathname+ search}}}>
-                        <button title="Add todo" className={`${todoState.loading? "disabled": "primary"}`}>
+                        <button title="Add todo" className={"primary"}>
                             <FontAwesomeIcon icon={faPlus}/>
                         </button>
                     </Link> :
-                    <button title="Add todo" className={`${todoState.loading? "disabled": "primary"}`}
-                            onClick={()=>alert("Please log in to add todo")}>
+                    <button title="Add todo" className={"primary"}
+                            onClick={loginPrompt}>
                         <FontAwesomeIcon icon={faPlus}/>
                     </button>}
                 <div>
@@ -127,12 +190,12 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                             submitSearch={handleSubmitSearch}
                         />
                     </React.Suspense>}
-                    <button title="Search todos" className={`${todoState.loading ? "disabled" : "primary"}`}
-                            onClick={() => !todoState.loading && setIsSearchOpen(!isSearchOpen)}>
+                    <button title="Search todos" className={"primary"}
+                            onClick={() => !isLoading && setIsSearchOpen(!isSearchOpen)}>
                         <FontAwesomeIcon icon={faSearch}/>
                     </button>
                 </div>
-                <button title="Download todos" className={`${todoState.loading ? "disabled" : "primary"}`}
+                <button title="Download todos" className={"primary"}
                         onClick={handleDownloadTodosClick}>
                     <FontAwesomeIcon icon={faFileDownload}/>
                 </button>
@@ -143,7 +206,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                     key={hashCode(todo.title + todo.description + todo.priority + Object.keys(todo._links).length)}
                     todo={todo}
                     onEdit={handleEditTodo}
-                    loading={todoState.loading}
+                    onDelete={handleDeleteTodo}
                     onChangeStatus={changeTodoStatus}
                 />))}
             </div>

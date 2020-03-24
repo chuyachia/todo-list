@@ -33,5 +33,5 @@ export const initialTodoState: ITodoState = {
     prevPageUrl: "",
     pageSize: 5,
     todos: [],
-    totalPages: 0
+    totalPages: 0,
 }

@@ -27,41 +27,39 @@ public class TodoResourceAssembler implements ResourceAssembler<Todo, Resource> 
                 linkTo(methodOn(TodoController.class).getOne(todo.getId())).withSelfRel());
 
         boolean isAdmin = auth.getAuthorities().contains(adminGrant);
-        boolean isTodoAuthor =  !isAnonymous && todoUserDetail.getTodoUser().getUsername().equals(todo.getUser().getUsername());
+        boolean isTodoAuthor = !isAnonymous && todoUserDetail.getTodoUser().getUsername().equals(todo.getUser().getUsername());
         if (isAdmin || isTodoAuthor) {
             todoResource.add(
                     linkTo(methodOn(TodoController.class)
                             .update(null, todo.getId())).withRel("edit").withTitle("Edit"));
+
+            todoResource.add(
+                    linkTo(methodOn(TodoController.class).delete(todo.getId())).withRel("remove").withTitle("Delete"));
 
             Status status = todo.getStatus();
             switch (status) {
                 case TODO:
                     todoResource.add(
                             linkTo(methodOn(TodoController.class)
-                                    .inProgress(todo.getId())).withRel("inProgress").withTitle(Status.INPROGRESS.getName())
-                    );
+                                    .inProgress(todo.getId())).withRel("inProgress").withTitle(Status.INPROGRESS.getName()));
                     break;
                 case INPROGRESS:
                     todoResource.add(
                             linkTo(methodOn(TodoController.class)
-                                    .done(todo.getId())).withRel("done").withTitle(Status.DONE.getName())
-                    );
+                                    .done(todo.getId())).withRel("done").withTitle(Status.DONE.getName()));
                     todoResource.add(
                             linkTo(methodOn(TodoController.class)
-                                    .wontDo(todo.getId())).withRel("wontDo").withTitle(Status.WONTDO.getName())
-                    );
+                                    .wontDo(todo.getId())).withRel("wontDo").withTitle(Status.WONTDO.getName()));
                     break;
                 case DONE:
                     todoResource.add(
                             linkTo(methodOn(TodoController.class)
-                                    .unDo(todo.getId())).withRel("unDo").withTitle("Undo")
-                    );
+                                    .unDo(todo.getId())).withRel("unDo").withTitle("Undo"));
                     break;
                 case WONTDO:
                     todoResource.add(
                             linkTo(methodOn(TodoController.class)
-                                    .unDo(todo.getId())).withRel("unDo").withTitle(Status.TODO.getName())
-                    );
+                                    .unDo(todo.getId())).withRel("unDo").withTitle(Status.TODO.getName()));
             }
         }
 

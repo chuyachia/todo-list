@@ -106,8 +106,17 @@ public class TodoServiceImpl implements TodoService {
     }
 
     @Override
-    public void delete(Integer id) {
-        repository.deleteById(id);
+    public Todo delete(Integer id) {
+        Todo deletedTodo = repository.findById(id).orElse(null);
+        if (deletedTodo!=null) {
+            if (isTodoAuthorOrAdmin(deletedTodo)) {
+                repository.deleteById(id);
+            } else {
+                throw new UnAuthorizedOperationException("Deleting other users' todos are not allowed");
+            }
+        }
+
+        return deletedTodo;
     }
 
     @Override

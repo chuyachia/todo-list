@@ -22,6 +22,7 @@ interface ITodoApis {
     resetPaginations: () => void;
     getUserInfo: () => void;
     revokeToken: () => void;
+    deleteTodo: (id: number) => Promise<boolean>;
 }
 
 const DEFAULT_ERROR_MESSAGE = "Something went wrong. Please try again later.";
@@ -34,6 +35,7 @@ const useApi = (): ITodoApis => {
         sumbitNewTodoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos',
         searchTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/search',
         downloadTodosEndPoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/file',
+        deleteTodoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos',
         userInfoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/user-info',
         authorizeEndpoint = process.env.REACT_APP_OAUTH_SERVER + '/oauth/authorize',
         getTokenEndpoint = process.env.REACT_APP_OAUTH_SERVER + '/oauth/token',
@@ -119,6 +121,8 @@ const useApi = (): ITodoApis => {
         if (response.ok) {
             const res = await response.json();
             await authActions.setLoggedInUser(res.username);
+        } else {
+            await authActions.setAnonymousUser();
         }
     }
 
@@ -293,6 +297,31 @@ const useApi = (): ITodoApis => {
         }
     }
 
+    async function deleteTodo(id: number): Promise<boolean> {
+        if (!tokenIsPresent() || tokenIsExpired()) {
+            authenticate();
+        } else {
+            try {
+                let headers = getHeaders(true, 'application/json');
+
+                const response = await fetch(`${deleteTodoEndpoint}/${id}`, {
+                    credentials: 'include',
+                    method: 'DELETE',
+                    mode: 'cors',
+                    headers
+                })
+
+                if (response.ok) {
+                    return true;
+                }
+            } catch (e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
     const downloadTodos = (searchValue = "", user?: string) => {
         let url = downloadTodosEndPoint + `?q=${searchValue.toLowerCase()}`;
         if (user !== undefined) url += `&user=${user}`
@@ -371,6 +400,7 @@ const useApi = (): ITodoApis => {
         resetPaginations,
         getUserInfo,
         revokeToken,
+        deleteTodo,
     }
 
 }

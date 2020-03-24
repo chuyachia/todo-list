@@ -1,4 +1,4 @@
-import {NEW_USERNAME, USER_LOGGED_IN, USER_LOGGED_OUT} from "./constants";
+import {ANONYMOUS_USERNAME, NEW_USERNAME, USER_LOGGED_IN, USER_LOGGED_OUT} from "./constants";
 import {useStateValue} from "../state";
 
 
@@ -14,6 +14,10 @@ export const AuthActionCreater = () => {
         payload: username,
     })
 
+    const setAnonymousUser = () => dispatch({
+        type: ANONYMOUS_USERNAME,
+    })
+
     const userLoggedOut = () => dispatch({
         type: USER_LOGGED_OUT,
     })
@@ -22,5 +26,6 @@ export const AuthActionCreater = () => {
         userLoggedIn,
         setLoggedInUser,
         userLoggedOut,
+        setAnonymousUser,
     }
 };

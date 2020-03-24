@@ -26,7 +26,10 @@
     "custom-sw": "cat src/serviceWorkerCacheAjax.js >> build/service-worker.js"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "rules": {
+      "quotes": ["warn", "single"]
+    }
   },
   "browserslist": {
     "production": [

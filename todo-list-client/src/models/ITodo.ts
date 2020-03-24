@@ -1,9 +1,9 @@
 import IUser from './IUser';
 
-type TTodoLinks = 'self' | 'inProgress' | 'wontDo' | 'done' | 'edit';
+type TTodoLinks = 'self' | 'inProgress' | 'wontDo' | 'done' | 'edit' | 'remove';
 
 export default interface ITodoItem {
-    id: string;
+    id: number;
     title: string;
     status: string;
     priority: string;
