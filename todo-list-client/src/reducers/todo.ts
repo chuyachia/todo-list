@@ -18,7 +18,12 @@ export default (state: ITodoState, action: IAction): ITodoState => {
                 loading: false,
             };
         case NEW_ACTIVE_TODO:
-            return {...state, activeTodo: action.payload};
+            return {
+                ...state,
+                activeTodo: action.payload,
+                submitTodoError: false,
+                submitTodoSuccess: false,
+            };
         case NEW_PAGING_INFO:
             return {
                 ...state,
