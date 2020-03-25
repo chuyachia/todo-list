@@ -21,7 +21,6 @@ import static org.hibernate.jpa.QueryHints.HINT_FETCH_SIZE;
 
 @Repository
 public interface TodoRepository extends JpaRepository<Todo, Integer> {
-    @Cacheable(cacheNames = "todos", unless = "#result==null")
     Optional<Todo> findById(Integer id);
 
     Page<Todo> findByUserUsername(String username, Pageable pageable);

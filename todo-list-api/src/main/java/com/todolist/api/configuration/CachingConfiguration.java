@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @EnableCaching
 public class CachingConfiguration {
-
+    // TODO add cache to some todo repo method
     @Bean
     CacheManager cacheManager(){
         return new ConcurrentMapCacheManager("todos") {

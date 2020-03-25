@@ -6,9 +6,6 @@ spring:
   profiles:
     active:
       - local
-  cache:
-    caffeine:
-      spec: maximumSize=500,expireAfterAccess=1m
 server:
   port: 8088
   servlet:

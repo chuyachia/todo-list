@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {RouteComponentProps, useLocation, Link, useHistory, NavLink} from'react-router-dom';
 import queryString from 'query-string';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
@@ -50,22 +50,17 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
     const showTodoUser = match.params.username;
     const isLoading = todoState.loading || authState.loading;
 
-    const handleEditTodo = (todo: ITodoItem) => {
+    const handleEditTodo = useCallback((todo: ITodoItem) => {
         setActiveTodo(todo);
         history.push(`/edit/${todo.id}`, {from : pathname+ search});
-    }
+    },[pathname, search])
 
-    const handleDeleteTodo = (todo: ITodoItem) => {
-        setPopupProps({
-            isOpen: true,
-            title: 'Delete Todo Item',
-            description: `Are you sure you want to delete todo item ${safeGet(['title'],todo,'')}?`,
-            leftButton: (<button onClick={() =>handleConfirmDeleteTodo(todo)} className={'danger'}>Delete</button>),
-            rightButton: (<button onClick={() =>handleCloseDeleteTodoPopup()} className={'secondary'}>Cancel</button>),
-        });
-    }
+    const handleCloseDeleteTodoPopup = useCallback(() => {
+        setPopupProps({...popupProps, isOpen: false})
+        loadData(showTodoUser, page, authenticationChecked);
+    }, [showTodoUser, page, authenticationChecked, setPopupProps])
 
-    const handleConfirmDeleteTodo = async (todo: ITodoItem) => {
+    const handleConfirmDeleteTodo = useCallback(async (todo: ITodoItem) => {
         if (todo && todo.id) {
             const deleted = await deleteTodo(todo.id);
             if (deleted) {
@@ -86,7 +81,19 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                 })
             }
         }
-    }
+    }, [handleCloseDeleteTodoPopup, setPopupProps, deleteTodo])
+
+
+
+    const handleDeleteTodo = useCallback((todo: ITodoItem) => {
+        setPopupProps({
+            isOpen: true,
+            title: 'Delete Todo Item',
+            description: `Are you sure you want to delete todo item ${safeGet(['title'],todo,'')}?`,
+            leftButton: (<button onClick={() =>handleConfirmDeleteTodo(todo)} className={'danger'}>Delete</button>),
+            rightButton: (<button onClick={() =>handleCloseDeleteTodoPopup()} className={'secondary'}>Cancel</button>),
+        });
+    }, [handleConfirmDeleteTodo, handleCloseDeleteTodoPopup, setPopupProps])
 
     const loginPrompt = () => {
         setPopupProps({
@@ -98,10 +105,6 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
         })
     }
 
-    const handleCloseDeleteTodoPopup = () => {
-        setPopupProps({...popupProps, isOpen: false})
-        loadData(showTodoUser, page, authenticationChecked);
-    }
 
     const handleSubmitSearch = (value: string) => {
         if (showTodoUser === undefined) {
@@ -147,6 +150,14 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
 
         return pageNumber;
     }
+
+    const toFirstPage = useCallback(() => history.push(location.pathname+`?page=${0}`), [])
+
+    const toPrevPage = useCallback(() => history.push(location.pathname+`?page=${page-1}`),[])
+
+    const toNextPage = useCallback(() => history.push(location.pathname+`?page=${page+1}`), [])
+
+    const toLastPage =useCallback(() => history.push(location.pathname+`?page=${todoState.totalPages<=1?0:todoState.totalPages-1}`),[])
 
     useEffect(() => {
         loadData(showTodoUser, page, authenticationChecked);
@@ -203,7 +214,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             {todoState.loadTodoError && <i className={'warning-text'}>{todoState.errorMessage}</i>}
             <div>{todoState.todos.map((todo: ITodo) => (
                 <TodoItem
-                    key={hashCode(todo.title + todo.description + todo.priority + Object.keys(todo._links).length)}
+                    key={hashCode(todo.title + todo.description + todo.status + todo.priority + Object.keys(todo._links).length)}
                     todo={todo}
                     onEdit={handleEditTodo}
                     onDelete={handleDeleteTodo}
@@ -211,10 +222,10 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                 />))}
             </div>
             <Pagination
-                onFirstPageClick={() => history.push(location.pathname+`?page=${0}`)}
-                onPrevPageClick={() => history.push(location.pathname+`?page=${page-1}`)}
-                onNextPageClick={() => history.push(location.pathname+`?page=${page+1}`)}
-                onLastPageClick={() => history.push(location.pathname+`?page=${todoState.totalPages<=1?0:todoState.totalPages-1}`)}
+                onFirstPageClick={toFirstPage}
+                onPrevPageClick={toPrevPage}
+                onNextPageClick={toNextPage}
+                onLastPageClick={toLastPage}
                 currentPage={todoState.currentPage + 1}
                 totalPages={todoState.totalPages === 0?1:todoState.totalPages }
             />

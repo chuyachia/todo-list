@@ -1,3 +1,4 @@
+import {useMemo} from 'react';
 import queryString from 'query-string';
 import {useHistory} from 'react-router-dom';
 
@@ -385,7 +386,7 @@ const useApi = (): ITodoApis => {
         return isNaN(expiry) || expiry < Date.now();
     }
 
-    return {
+    const apis = useMemo(() => ({
         authenticate,
         getToken,
         fetchUserTodos,
@@ -401,8 +402,9 @@ const useApi = (): ITodoApis => {
         getUserInfo,
         revokeToken,
         deleteTodo,
-    }
+    }), [authState.authenticated, sessionStorage.getItem('token')]);
 
+    return apis;
 }
 
 export default useApi;

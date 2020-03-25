@@ -41,4 +41,4 @@ const TodoItem: React.FC<ITodoItem> = (props) => {
         </article>)
 }
 
-export default TodoItem;
+export default React.memo(TodoItem);
