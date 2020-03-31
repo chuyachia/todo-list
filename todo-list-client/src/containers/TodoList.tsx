@@ -153,11 +153,11 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
 
     const toFirstPage = useCallback(() => history.push(location.pathname+`?page=${0}`), [])
 
-    const toPrevPage = useCallback(() => history.push(location.pathname+`?page=${page-1}`),[])
+    const toPrevPage = useCallback(() => history.push(location.pathname+`?page=${page-1}`),[page])
 
-    const toNextPage = useCallback(() => history.push(location.pathname+`?page=${page+1}`), [])
+    const toNextPage = useCallback(() => history.push(location.pathname+`?page=${page+1}`), [page])
 
-    const toLastPage =useCallback(() => history.push(location.pathname+`?page=${todoState.totalPages<=1?0:todoState.totalPages-1}`),[])
+    const toLastPage =useCallback(() => history.push(location.pathname+`?page=${todoState.totalPages<=1?0:todoState.totalPages-1}`),[todoState.totalPages])
 
     useEffect(() => {
         loadData(showTodoUser, page, authenticationChecked);
