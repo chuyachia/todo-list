@@ -74,7 +74,7 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
                 <option value={'Low'}>Low</option>
             </select>
             <div className={'buttons-wrap'}>
-                <button className={`submit-button ${props.loading ? 'disabled' : 'primary'}`}
+                <button className={`submit-button ${props.loading ? 'disabled' : 'action'}`}
                         onClick={() => !props.loading && submitNewTodo()}>Submit
                 </button>
                 <button className={'submit-button'} onClick={goBack}>Back</button>

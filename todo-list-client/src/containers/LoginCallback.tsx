@@ -1,10 +1,12 @@
 import React, {useEffect} from 'react';
-import {RouteChildrenProps} from 'react-router';
+import {RouteChildrenProps, useHistory} from 'react-router';
 import queryString from 'query-string'
-import useApi from '../hooks/useApi';
+import {getToken} from '../api';
+import {AuthActionCreater} from "../actions";
 
 const LoginCallback: React.FC<RouteChildrenProps> = ({location}) => {
-    const {getToken} = useApi();
+    const history = useHistory();
+    const authActions = AuthActionCreater();
 
     useEffect(() => {
         callGetTokenEndpoint();
@@ -15,6 +17,11 @@ const LoginCallback: React.FC<RouteChildrenProps> = ({location}) => {
         const code = valueMap.code as string;
 
         await getToken(code);
+        const redirectPath = sessionStorage.getItem('redirect_path') || '/';
+        sessionStorage.removeItem('redirect_path');
+        authActions.userLoggedIn();
+
+        history.push(redirectPath);
     }
 
     return <span>Redirecting...</span>;

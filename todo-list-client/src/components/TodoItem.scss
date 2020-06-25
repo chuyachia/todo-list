@@ -1,0 +1,40 @@
+@import '../variables';
+
+.todo-item {
+    position: relative;
+    background: $beige;
+    color: $black;
+    padding: $small-space;
+    margin-bottom: $large-space;
+    min-width: 30vw;
+}
+
+.todo-item.warning {
+    background: $danger-color-alt;
+}
+
+.todo-item.disabled {
+    background: $light-grey;
+}
+
+.todo-item:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-width: 0 30px 30px 0;
+    border-style: solid;
+    border-color: darken($beige, 10) $white;
+}
+
+.todo-item.disabled:before {
+    border-color: darken($light-grey, 10) $white;
+}
+
+.todo-item.warning:before {
+    border-color: $pink $white;
+}
+
+.todo-item p {
+    font-weight: lighter;
+}

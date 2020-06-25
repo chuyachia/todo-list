@@ -9,14 +9,27 @@ import Pagination from '../components/Pagination';
 import Popup from '../components/Popup';
 
 import {useStateValue} from '../state';
-import useApi from '../hooks/useApi';
+import {
+    fetchUserTodos,
+    fetchAllTodos,
+    searchTodos,
+    downloadTodos,
+    changeTodoStatus,
+    getUserInfo,
+    authenticate,
+    revokeToken,
+    deleteTodo,
+    getErrorMessage
+} from '../api';
 import useInput from '../hooks/useInput';
 import ITodoItem from '../models/ITodo';
 import hashCode from '../util/hashCode';
 import safeGet from '../util/safeGet';
 import ITodo from '../models/ITodo';
-import {TodoActionCreater} from '../actions';
+import {AuthActionCreater, TodoActionCreater} from '../actions';
 import {IPopup} from '../components/Popup';
+import {IPagingInfo} from "../models/IPagingInfo";
+import {DEFAULT_ERROR_MESSAGE} from "../constants";
 
 const SearchInput = React.lazy(() => import('../components/SearchInput'));
 
@@ -25,14 +38,15 @@ interface IRouteProps {
 }
 
 const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location}) => {
+    // Global application state
     const [{auth: authState, todo: todoState}, _] = useStateValue();
-    const {
-        fetchUserTodos, fetchAllTodos, searchTodos,downloadTodos, changeTodoStatus,
-        getUserInfo, authenticate, revokeToken, deleteTodo
-    } = useApi();
-    const {setActiveTodo} = TodoActionCreater();
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+    // Action dispather
+    const authActions = AuthActionCreater();
+    const todoActions = TodoActionCreater();
+
+    // Local state
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [popupProps, setPopupProps] = useState<IPopup>({
         title: '',
         isOpen: false,
@@ -40,18 +54,17 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
         leftButton: null,
         rightButton: null,
     });
-
     const [authenticationChecked, setAuthenticationChecked] = useState(false);
     const {value: searchValue, onChange: onSearchValueChange} = useInput<HTMLInputElement>('');
-
     const history = useHistory();
     const {search, pathname} = useLocation();
+
     const page = parsePageNumber(search);
     const showTodoUser = match.params.username;
     const isLoading = todoState.loading || authState.loading;
 
     const handleEditTodo = useCallback((todo: ITodoItem) => {
-        setActiveTodo(todo);
+        todoActions.setActiveTodo(todo);
         history.push(`/edit/${todo.id}`, {from : pathname+ search});
     },[pathname, search])
 
@@ -62,8 +75,8 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
 
     const handleConfirmDeleteTodo = useCallback(async (todo: ITodoItem) => {
         if (todo && todo.id) {
-            const deleted = await deleteTodo(todo.id);
-            if (deleted) {
+            const response = await deleteTodo(todo.id);
+            if (response !== undefined && response.ok) {
                 setPopupProps({
                     title: 'Deleted',
                     description: `Todo item ${safeGet(['title'],todo,'')} deleted`,
@@ -91,7 +104,8 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             title: 'Delete Todo Item',
             description: `Are you sure you want to delete todo item ${safeGet(['title'],todo,'')}?`,
             leftButton: (<button onClick={() =>handleConfirmDeleteTodo(todo)} className={'danger'}>Delete</button>),
-            rightButton: (<button onClick={() =>handleCloseDeleteTodoPopup()} className={'secondary'}>Cancel</button>),
+            rightButton: (<button onClick={() =>handleCloseDeleteTodoPopup()}
+            >Cancel</button>),
         });
     }, [handleConfirmDeleteTodo, handleCloseDeleteTodoPopup, setPopupProps])
 
@@ -100,17 +114,24 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             title: 'Please login',
             description: 'You need to log in to add todo items',
             leftButton: <button onClick={authenticate}>Login</button>,
-            rightButton: <button onClick={()=> setPopupProps({...popupProps, isOpen: false})} className={'secondary'}>Cancel</button>,
+            rightButton: <button onClick={()=> setPopupProps({...popupProps, isOpen: false})}>Cancel</button>,
             isOpen: true,
         })
     }
 
+    const handleEditClick = () => {
+       if (authState.authenticated) {
+           history.push({pathname: '/edit', state: {from : pathname+ search}});
+        } else {
+           loginPrompt();
+       }
+    }
 
     const handleSubmitSearch = (value: string) => {
         if (showTodoUser === undefined) {
-            searchTodos(value);
+            searchTodos(value, todoState.pageSize, authState.authenticated);
         } else {
-            searchTodos(value, showTodoUser);
+            searchTodos(value, todoState.pageSize, authState.authenticated, showTodoUser);
         }
     }
 
@@ -122,20 +143,79 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
 
     const loadData = async (username: string, page: number, authenticationChecked: boolean) => {
         if (!authenticationChecked) {
-            await getUserInfo();
+            const response = await getUserInfo();
+            if (response.ok) {
+                const res = await response.json();
+                await authActions.setLoggedInUser(res.username);
+            } else {
+                await authActions.setAnonymousUser();
+            }
             setAuthenticationChecked(true);
         } else {
-            if (! authState.authenticated|| !username) {
-                await fetchAllTodos(page);
-            } else {
-                await fetchUserTodos(username, page);
-            }
+            todoActions.loadTodosRequest();
+
+            try {
+                let response;
+                if (!authState.authenticated || !username) {
+                    response = await fetchAllTodos(page, todoState.pageSize, authState.authenticated);
+                } else {
+                    response = await fetchUserTodos(username, page, todoState.pageSize, authState.authenticated);
+                }
+                if (response!== undefined) {
+                    if (response.ok) {
+                        const res = await response.json();
+                        const todos = safeGet(['_embedded', 'todoList'], res, []);
+                        todoActions.loadTodos(todos);
+                        setPaginations(res);
+                    } else {
+                        const errorMessage = await getErrorMessage(response);
+                        todoActions.loadTodosFailure(errorMessage);
+                    }
+                }
+            }  catch (e) {
+                    console.error(e);
+                    todoActions.loadTodosFailure(DEFAULT_ERROR_MESSAGE);
+                }
         }
     };
 
+    const handleChangeStatus = async (changeStatusUrl: string) => {
+        todoActions.submitTodoRequest();
+        try {
+            const response = await changeTodoStatus(changeStatusUrl);
+            if (response!== undefined && response.ok) {
+                const todo = await response.json();
+                todoActions.submitTodoSuccess(todo);
+            }
+        } catch (e) {
+            console.error(e);
+            todoActions.submitTodoFailure(DEFAULT_ERROR_MESSAGE);
+        }
+    }
+
     const handleLogout = async() => {
-        await revokeToken();
-        history.push('/');
+        const response = await revokeToken();
+
+        if (response.ok) {
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('expiry');
+            authActions.userLoggedOut();
+            history.push('/');
+        }
+    }
+
+
+    function setPaginations(res: any) {
+        const pagingInfo: IPagingInfo = {
+            first: safeGet(['_links', 'first', 'href'], res, ''),
+            prev: safeGet(['_links', 'prev', 'href'], res, ''),
+            self: safeGet(['_links', 'self', 'href'], res, ''),
+            next: safeGet(['_links', 'next', 'href'], res, ''),
+            last: safeGet(['_links', 'last', 'href'], res, ''),
+            currentPage: safeGet(['page', 'number'], res, 0),
+            totalPages: safeGet(['page', 'totalPages'], res, 0),
+        }
+        todoActions.setTodoPagingInfo(pagingInfo);
     }
 
     function parsePageNumber(search:string) {
@@ -168,30 +248,25 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             <Popup {...popupProps}/>
             {isLoading && <div className={'overlay'}/>}
             {isLoading && <i className={'inactive-text loader'}>Loading...</i>}
-            {authState.authenticated && <div className={'todos-navigation'}>
+            {authState.authenticated &&
+            <div className={'todos-navigation'}>
                 <NavLink exact to={'/todos?page=0'}>All Todos</NavLink>
                 {' / '}
                 <NavLink exact to={`/todos/${authState.username}?page=0`}>My Todos</NavLink>
             </div>}
             <div className={'tools-bar vertical-buttons-wrap'}>
                 {authState.authenticated ?
-                    <button title="Logout" className={'primary'} onClick={handleLogout}>
+                    <button title="Logout" className={''} onClick={handleLogout}>
                         <FontAwesomeIcon icon={faSignOutAlt}/>
                     </button> :
-                    <button title="Login" className={'primary'} onClick={authenticate}>
+                    <button title="Login" className={''} onClick={authenticate}>
                         <FontAwesomeIcon icon={faSignInAlt}/>
-                    </button>}
-                {authState.authenticated?
-                    <Link to={{pathname: '/edit', state: {from : pathname+ search}}}>
-                        <button title="Add todo" className={'primary'}>
-                            <FontAwesomeIcon icon={faPlus}/>
-                        </button>
-                    </Link> :
-                    <button title="Add todo" className={'primary'}
-                            onClick={loginPrompt}>
-                        <FontAwesomeIcon icon={faPlus}/>
-                    </button>}
-                <div>
+                    </button>
+                }
+                <button title="Add todo" className={'primary'} onClick={handleEditClick}>
+                    <FontAwesomeIcon icon={faPlus}/>
+                </button>
+                <>
                     {isSearchOpen &&
                     <React.Suspense fallback={<i className={'inactive-text loader'}>Loading...</i>}>
                         <SearchInput
@@ -205,7 +280,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                             onClick={() => !isLoading && setIsSearchOpen(!isSearchOpen)}>
                         <FontAwesomeIcon icon={faSearch}/>
                     </button>
-                </div>
+                </>
                 <button title="Download todos" className={'primary'}
                         onClick={handleDownloadTodosClick}>
                     <FontAwesomeIcon icon={faFileDownload}/>
@@ -218,7 +293,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                     todo={todo}
                     onEdit={handleEditTodo}
                     onDelete={handleDeleteTodo}
-                    onChangeStatus={changeTodoStatus}
+                    onChangeStatus={handleChangeStatus}
                 />))}
             </div>
             <Pagination

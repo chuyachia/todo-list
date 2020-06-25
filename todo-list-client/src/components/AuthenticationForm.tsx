@@ -77,7 +77,7 @@ const AuthenticationForm: React.FC<IAuthenticationFormProps> = ({
             </small>
             <div className={'buttons-wrap'}>
                 <button
-                    className={`submit-button ${(!usernameValidation.valid || !passwordValidation.valid || loading) ? 'disabled' : 'primary'}`}
+                    className={`submit-button ${(!usernameValidation.valid || !passwordValidation.valid || loading) ? 'disabled' : ''}`}
                     disabled={!usernameValidation.valid || !passwordValidation.valid || loading}
                     onClick={submitAuthentication}>{submitButtonText}
                 </button>

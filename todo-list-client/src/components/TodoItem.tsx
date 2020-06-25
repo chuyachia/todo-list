@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import ITodo from '../models/ITodo';
 
-import './TodoItem.css';
+import './TodoItem.scss';
 
 interface ITodoItem {
     todo: ITodo;
@@ -32,10 +32,10 @@ const TodoItem: React.FC<ITodoItem> = (props) => {
             <p>{todo.description}</p>
             <div className={'buttons-wrap'}>
                 {(Object.keys(links) as Array<keyof typeof links>).map((link) =>
-                    <button key={link} onClick={() => changeTodoStatus(links[link].href)}>
+                    <button key={link} onClick={() => changeTodoStatus(links[link].href)} className={'action'}>
                         {links[link].title}
                     </button>)}
-                {edit !== undefined && <button onClick={() => props.onEdit(todo)}>{edit.title}</button>}
+                {edit !== undefined && <button onClick={() => props.onEdit(todo)} className={'action'}>{edit.title}</button>}
                 {remove !== undefined && <button className={'danger'} onClick={() => props.onDelete(todo)}>{remove.title}</button>}
             </div>
         </article>)

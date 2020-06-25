@@ -5,8 +5,9 @@ import {
     Route, Redirect,
 } from 'react-router-dom';
 
-import './App.css';
-import {StateProvider} from './state';
+import 'normalize.css';
+import './App.scss';
+import {StateProvider, useStateValue} from './state';
 import {initialState} from './states'
 import reducer from './reducers/';
 
@@ -14,10 +15,15 @@ const TodoList = React.lazy(() => import('./containers/TodoList'));
 const EditTodo = React.lazy(() => import('./containers/EditTodo'));
 const LoginCallback = React.lazy(() => import('./containers/LoginCallback'));
 
-const App: React.FC = () => (
+const App: React.FC = () => {
+    const [{auth}, _] = useStateValue();
+    console.log(auth);
+    return (
         <StateProvider state={initialState} reducer={reducer}>
             <main className="App">
-                <h3>Todo List App</h3>
+                <header>
+                    <h3>Todo List App</h3>
+                </header>
                 <Router>
                     <React.Suspense fallback={<i className={'inactive-text loader'}>Loading...</i>}>
                         <Switch>
@@ -30,5 +36,6 @@ const App: React.FC = () => (
                 </Router>
             </main>
         </StateProvider>);
+    }
 
 export default App;

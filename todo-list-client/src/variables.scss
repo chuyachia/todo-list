@@ -1,0 +1,25 @@
+$large-space: 40px;
+$base-space: 20px;
+$small-space: 10px;
+
+
+$white: #f0f0f0;
+$black: #2a2725;
+$grey: #959392;
+$light-grey: #e0e0e0;
+$blue: #3fc1c9;
+$deep-blue: #364f6b;
+$pink: #fc5185;
+$beige: #faebd7;
+
+
+$action-color: lighten($blue, 10);
+$action-color-alt: $blue;
+$primary-color: lighten($deep-blue, 10);
+$primary-color-alt: $deep-blue;
+$danger-color: lighten($pink, 10);
+$danger-color-alt: $pink;
+$muted-color: $light-grey;
+
+
+$border-radius: 3px;
