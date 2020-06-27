@@ -1,8 +1,8 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {ChangeEvent, useCallback, useEffect, useState} from 'react';
 import {RouteComponentProps, useLocation, Link, useHistory, NavLink} from'react-router-dom';
 import queryString from 'query-string';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faFileDownload, faPlus, faSearch, faSignInAlt, faSignOutAlt} from '@fortawesome/free-solid-svg-icons'
+import {faFileDownload, faPlus, faSearch, faSignInAlt, faSignOutAlt, faArrowDown, faArrowUp} from '@fortawesome/free-solid-svg-icons'
 
 import TodoItem from '../components/TodoItem';
 import Pagination from '../components/Pagination';
@@ -12,14 +12,14 @@ import {useStateValue} from '../state';
 import {
     fetchUserTodos,
     fetchAllTodos,
-    searchTodos,
     downloadTodos,
     changeTodoStatus,
     getUserInfo,
     authenticate,
     revokeToken,
     deleteTodo,
-    getErrorMessage
+    getErrorMessage,
+    ISort,
 } from '../api';
 import useInput from '../hooks/useInput';
 import ITodoItem from '../models/ITodo';
@@ -30,6 +30,7 @@ import {AuthActionCreater, TodoActionCreater} from '../actions';
 import {IPopup} from '../components/Popup';
 import {IPagingInfo} from "../models/IPagingInfo";
 import {DEFAULT_ERROR_MESSAGE} from "../constants";
+import useDebounce from "../hooks/useDebounce";
 
 const SearchInput = React.lazy(() => import('../components/SearchInput'));
 
@@ -56,10 +57,11 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
     });
     const [authenticationChecked, setAuthenticationChecked] = useState(false);
     const {value: searchValue, onChange: onSearchValueChange} = useInput<HTMLInputElement>('');
+    const {value: sortValue, onChange: onSortValueChange} = useInput<HTMLSelectElement>('priority,desc');
     const history = useHistory();
     const {search, pathname} = useLocation();
 
-    const page = parsePageNumber(search);
+    const [page, setPage] = useState(parsePageNumber(search));
     const showTodoUser = match.params.username;
     const isLoading = todoState.loading || authState.loading;
 
@@ -70,7 +72,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
 
     const handleCloseDeleteTodoPopup = useCallback(() => {
         setPopupProps({...popupProps, isOpen: false})
-        loadData(showTodoUser, page, authenticationChecked);
+        loadData(showTodoUser, page, searchValue, sortValue, authenticationChecked);
     }, [showTodoUser, page, authenticationChecked, setPopupProps])
 
     const handleConfirmDeleteTodo = useCallback(async (todo: ITodoItem) => {
@@ -80,7 +82,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                 setPopupProps({
                     title: 'Deleted',
                     description: `Todo item ${safeGet(['title'],todo,'')} deleted`,
-                    leftButton: <button onClick={() =>handleCloseDeleteTodoPopup()}>OK</button>,
+                    leftButton: <button className={'action'} onClick={handleCloseDeleteTodoPopup}>OK</button>,
                     rightButton: null,
                     isOpen: true,
                 })
@@ -88,7 +90,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                 setPopupProps({
                     title: 'Error deleting',
                     description: `Something went wrong thile deleting todo item ${safeGet(['title'],todo,'')} `,
-                    leftButton: <button onClick={() =>setPopupProps({...popupProps, isOpen: false})}>OK</button>,
+                    leftButton: <button className={'action'} onClick={() =>setPopupProps({...popupProps, isOpen: false})}>OK</button>,
                     rightButton: null,
                     isOpen: true,
                 })
@@ -113,7 +115,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
         setPopupProps({
             title: 'Please login',
             description: 'You need to log in to add todo items',
-            leftButton: <button onClick={authenticate}>Login</button>,
+            leftButton: <button onClick={authenticate} className={'action'}>Login</button>,
             rightButton: <button onClick={()=> setPopupProps({...popupProps, isOpen: false})}>Cancel</button>,
             isOpen: true,
         })
@@ -127,13 +129,13 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
        }
     }
 
-    const handleSubmitSearch = (value: string) => {
-        if (showTodoUser === undefined) {
-            searchTodos(value, todoState.pageSize, authState.authenticated);
-        } else {
-            searchTodos(value, todoState.pageSize, authState.authenticated, showTodoUser);
-        }
+
+    const handleSearchValueChange = (e: ChangeEvent<HTMLInputElement>) => {
+        onSearchValueChange(e);
+        setPage(0);
     }
+
+    const debouncedHandleSearchValueChange = useDebounce(handleSearchValueChange, 200, true);
 
     const handleDownloadTodosClick = () => {
         if (!isLoading) {
@@ -141,7 +143,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
         }
     }
 
-    const loadData = async (username: string, page: number, authenticationChecked: boolean) => {
+    const loadData = async (username: string, page: number, search: string, sort: string, authenticationChecked: boolean) => {
         if (!authenticationChecked) {
             const response = await getUserInfo();
             if (response.ok) {
@@ -153,13 +155,13 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             setAuthenticationChecked(true);
         } else {
             todoActions.loadTodosRequest();
-
+            const sortObject: ISort = { column : sort.split(',')[0], dir: sort.split(',')[1] as 'desc'| 'asc'};
             try {
                 let response;
                 if (!authState.authenticated || !username) {
-                    response = await fetchAllTodos(page, todoState.pageSize, authState.authenticated);
+                    response = await fetchAllTodos(page, todoState.pageSize, [sortObject], search, authState.authenticated);
                 } else {
-                    response = await fetchUserTodos(username, page, todoState.pageSize, authState.authenticated);
+                    response = await fetchUserTodos(username, page, todoState.pageSize, [sortObject], search, authState.authenticated);
                 }
                 if (response!== undefined) {
                     if (response.ok) {
@@ -173,9 +175,9 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                     }
                 }
             }  catch (e) {
-                    console.error(e);
-                    todoActions.loadTodosFailure(DEFAULT_ERROR_MESSAGE);
-                }
+                console.error(e);
+                todoActions.loadTodosFailure(DEFAULT_ERROR_MESSAGE);
+            }
         }
     };
 
@@ -183,13 +185,20 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
         todoActions.submitTodoRequest();
         try {
             const response = await changeTodoStatus(changeStatusUrl);
-            if (response!== undefined && response.ok) {
-                const todo = await response.json();
-                todoActions.submitTodoSuccess(todo);
+            if (response !== undefined) {
+                if (response.ok) {
+                    const todo = await response.json();
+                    todoActions.submitTodoSuccess(todo);
+                } else {
+                    const errorMessage = await getErrorMessage(response);
+                    todoActions.submitTodoFailure(errorMessage);
+                }
             }
         } catch (e) {
             console.error(e);
             todoActions.submitTodoFailure(DEFAULT_ERROR_MESSAGE);
+        } finally {
+            await loadData(showTodoUser, page, searchValue, sortValue, authenticationChecked);
         }
     }
 
@@ -231,63 +240,63 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
         return pageNumber;
     }
 
-    const toFirstPage = useCallback(() => history.push(location.pathname+`?page=${0}`), [])
+    const toFirstPage = () => setPage(0);
 
-    const toPrevPage = useCallback(() => history.push(location.pathname+`?page=${page-1}`),[page])
+    const toPrevPage = () => setPage(page-1);
 
-    const toNextPage = useCallback(() => history.push(location.pathname+`?page=${page+1}`), [page])
+    const toNextPage = () => setPage(page+1);
 
-    const toLastPage =useCallback(() => history.push(location.pathname+`?page=${todoState.totalPages<=1?0:todoState.totalPages-1}`),[todoState.totalPages])
+    const toLastPage = () => setPage(todoState.totalPages<=1?0:todoState.totalPages-1);
 
     useEffect(() => {
-        loadData(showTodoUser, page, authenticationChecked);
-    }, [showTodoUser, page, authenticationChecked])
+        loadData(showTodoUser, page,searchValue, sortValue, authenticationChecked);
+    }, [showTodoUser, page, searchValue, sortValue, authenticationChecked])
 
     return (
         <div className={'todo-list'}>
             <Popup {...popupProps}/>
             {isLoading && <div className={'overlay'}/>}
             {isLoading && <i className={'inactive-text loader'}>Loading...</i>}
+
             {authState.authenticated &&
             <div className={'todos-navigation'}>
                 <NavLink exact to={'/todos?page=0'}>All Todos</NavLink>
                 {' / '}
                 <NavLink exact to={`/todos/${authState.username}?page=0`}>My Todos</NavLink>
             </div>}
+
             <div className={'tools-bar vertical-buttons-wrap'}>
                 {authState.authenticated ?
-                    <button title="Logout" className={''} onClick={handleLogout}>
+                    <button title="Logout" className={'float'} onClick={handleLogout}>
                         <FontAwesomeIcon icon={faSignOutAlt}/>
                     </button> :
-                    <button title="Login" className={''} onClick={authenticate}>
+                    <button title="Login" className={'float'} onClick={authenticate}>
                         <FontAwesomeIcon icon={faSignInAlt}/>
                     </button>
                 }
-                <button title="Add todo" className={'primary'} onClick={handleEditClick}>
+                <button title="Add todo" className={'action float'} onClick={handleEditClick}>
                     <FontAwesomeIcon icon={faPlus}/>
                 </button>
-                <>
-                    {isSearchOpen &&
-                    <React.Suspense fallback={<i className={'inactive-text loader'}>Loading...</i>}>
-                        <SearchInput
-                            onClose={() => setIsSearchOpen(false)}
-                            value={searchValue}
-                            onChange={onSearchValueChange}
-                            submitSearch={handleSubmitSearch}
-                        />
-                    </React.Suspense>}
-                    <button title="Search todos" className={'primary'}
-                            onClick={() => !isLoading && setIsSearchOpen(!isSearchOpen)}>
-                        <FontAwesomeIcon icon={faSearch}/>
-                    </button>
-                </>
-                <button title="Download todos" className={'primary'}
-                        onClick={handleDownloadTodosClick}>
+                <button title="Download todos" className={'action float'} onClick={handleDownloadTodosClick}>
                     <FontAwesomeIcon icon={faFileDownload}/>
                 </button>
             </div>
+
+            <input className={'search'} placeholder={'Enter search term'}
+               value={searchValue}
+               onChange={debouncedHandleSearchValueChange} />
+
+
             {todoState.loadTodoError && <i className={'warning-text'}>{todoState.errorMessage}</i>}
-            <div>{todoState.todos.map((todo: ITodo) => (
+
+            <div>
+                <div className={'right-aligned'}>
+                    <select className={'form-input'} onChange={onSortValueChange}>
+                        <option value={'priority,desc'}>Highest priority first</option>
+                        <option value={'priority,asc'}>Lowest priority first</option>
+                    </select>
+                </div>
+                {todoState.todos.map((todo: ITodo) => (
                 <TodoItem
                     key={hashCode(todo.title + todo.description + todo.status + todo.priority + Object.keys(todo._links).length)}
                     todo={todo}
@@ -296,6 +305,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
                     onChangeStatus={handleChangeStatus}
                 />))}
             </div>
+
             <Pagination
                 onFirstPageClick={toFirstPage}
                 onPrevPageClick={toPrevPage}

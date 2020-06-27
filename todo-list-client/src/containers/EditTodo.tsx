@@ -29,9 +29,16 @@ const EditTodo: React.FC<RouteComponentProps<IRouteProps>> = ({match}) => {
     }
 
     const initializeActiveTodo = async () => {
-        const todo = await fetchOneTodoForEdit(id);
-        if (todo !== undefined) {
-            setActiveTodo(todo);
+        try {
+            const response = await fetchOneTodoForEdit(id);
+            if (response!== undefined && response.ok) {
+                const todo = await response.json();
+                if (todo !== undefined) {
+                    setActiveTodo(todo);
+                }
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 

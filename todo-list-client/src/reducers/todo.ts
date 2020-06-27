@@ -23,6 +23,7 @@ export default (state: ITodoState, action: IAction): ITodoState => {
                 activeTodo: action.payload,
                 submitTodoError: false,
                 submitTodoSuccess: false,
+                loading: false,
             };
         case NEW_PAGING_INFO:
             return {
@@ -67,7 +68,6 @@ export default (state: ITodoState, action: IAction): ITodoState => {
                 ...state,
                 loading: false,
                 submitTodoSuccess: true,
-                activeTodo: undefined,
             }
         case RESET_ERROR_STATE:
             return {

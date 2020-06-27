@@ -79,7 +79,7 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
                 </button>
                 <button className={'submit-button'} onClick={goBack}>Back</button>
             </div>
-            {props.submitSuccess&& <i className={'success-text'}>Successfully submitted! Directing back...</i>}
+            {props.submitSuccess&& <i>Successfully submitted!</i>}
             {props.submitError && <i className={'warning-text'}>{props.errorMessage}</i>}
         </div>);
 }

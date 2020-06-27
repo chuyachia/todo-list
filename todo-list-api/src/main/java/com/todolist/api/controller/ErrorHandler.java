@@ -16,10 +16,21 @@ public class ErrorHandler {
     @ExceptionHandler({ConstraintViolationException.class})
     public void handleCastException(ConstraintViolationException ex, HttpServletResponse response) throws IOException {
         String details = ex.getConstraintViolations()
-                .parallelStream()
+                .stream()
                 .map(e -> e.getMessage())
                 .collect(Collectors.joining(";"));
 
         response.sendError(HttpStatus.BAD_REQUEST.value(), details);
+    }
+
+    @ExceptionHandler({MethodArgumentNotValidException.class})
+    public void handleValidationException(MethodArgumentNotValidException ex, HttpServletResponse response) throws IOException {
+        String details = ex.getBindingResult().getAllErrors()
+                .stream()
+                .map(e -> e.getDefaultMessage())
+                .collect(Collectors.joining(";"));
+
+        response.sendError(HttpStatus.BAD_REQUEST.value(), details);
+
     }
 }

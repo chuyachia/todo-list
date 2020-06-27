@@ -16,8 +16,6 @@ const EditTodo = React.lazy(() => import('./containers/EditTodo'));
 const LoginCallback = React.lazy(() => import('./containers/LoginCallback'));
 
 const App: React.FC = () => {
-    const [{auth}, _] = useStateValue();
-    console.log(auth);
     return (
         <StateProvider state={initialState} reducer={reducer}>
             <main className="App">

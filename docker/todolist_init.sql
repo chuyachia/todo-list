@@ -83,8 +83,8 @@ CREATE TABLE IF NOT EXISTS users_roles (
 CREATE TABLE IF NOT EXISTS todos (
     id INTEGER AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
-    status TEXT NOT NULL,
-    priority TEXT,
+    status VARCHAR(255) NOT NULL,
+    priority TINYINT,
     description TEXT,
     username VARCHAR(255) NOT NULL,
     PRIMARY KEY (id),

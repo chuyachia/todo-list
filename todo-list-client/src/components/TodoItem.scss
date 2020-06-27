@@ -5,12 +5,8 @@
     background: $beige;
     color: $black;
     padding: $small-space;
-    margin-bottom: $large-space;
+    margin-bottom: $base-space;
     min-width: 30vw;
-}
-
-.todo-item.warning {
-    background: $danger-color-alt;
 }
 
 .todo-item.disabled {
@@ -29,10 +25,6 @@
 
 .todo-item.disabled:before {
     border-color: darken($light-grey, 10) $white;
-}
-
-.todo-item.warning:before {
-    border-color: $pink $white;
 }
 
 .todo-item p {

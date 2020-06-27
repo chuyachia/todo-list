@@ -1,0 +1,23 @@
+@import "../variables";
+
+.popup {
+  position: fixed;
+  background: $white;
+  width: 400px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 3px;
+  padding: $small-space;
+  border: 1px solid $light-grey;
+}
+
+.popup-title {
+  color:white;
+  margin-top: calc(0px - #{$small-space});
+  margin-left: calc(0px - #{$small-space});
+  margin-right: calc(0px - #{$small-space});
+  background: $black;
+  padding-top: $small-space;
+  padding-bottom: $small-space;
+}

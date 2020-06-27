@@ -4,8 +4,9 @@ import com.todolist.api.model.enums.Role;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
-@Component
+@Converter
 public class RoleConverter implements AttributeConverter<Role, String> {
     @Override
     public String convertToDatabaseColumn(Role role) {

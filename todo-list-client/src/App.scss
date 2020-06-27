@@ -14,7 +14,7 @@ button {
     color: $black;
     border-style: solid;
     border-width: 1px;
-    border-color: $black;
+    border-color: $light-grey;
     border-radius: $border-radius;
     padding: $small-space;
     cursor: pointer;
@@ -65,16 +65,20 @@ button.disabled:hover {
     background-color: $muted-color;
 }
 
+.right-aligned {
+    text-align: right;
+}
+
+.float {
+    box-shadow: 0 6px 6px -6px $grey;
+}
+
 .muted-text {
     color: $muted-color;
 }
 
 .warning-text {
     color: $danger-color;
-}
-
-.success-text {
-    color: $primary-color;
 }
 
 .clickable {
@@ -90,27 +94,24 @@ select {
     appearance: none;
     border: none;
     background-color: inherit;
-    border-bottom: 2px solid $grey;
+    border-bottom: 1px solid $black;
     cursor: pointer;
-}
-
-select:hover {
-    border-bottom: 2px solid $primary-color;
+    padding-bottom: $small-space;
 }
 
 textarea {
     background-color: inherit;
     appearance: none;
-    border: 1px solid $grey;
+    border: 1px solid $black;
+    height: 150px;
 }
 
 input {
     border: none;
     background-color: inherit;
-    border-bottom: 2px solid $grey;
+    border-bottom: 1px solid $black;
     padding-bottom: $small-space;
 }
-
 
 .App {
     text-align: center;
@@ -124,6 +125,10 @@ input {
 
 .App > .loader {
     flex: 1 1 auto;
+}
+
+.search {
+    margin-bottom: $base-space;
 }
 
 .edit-todo,
@@ -149,7 +154,7 @@ input {
 .validation-text {
     height: $base-space;
     align-self: flex-start;
-    color: $primary-color;
+    color: $grey;
     font-style: italic;
     font-size: 0.5em;
 }
@@ -158,10 +163,6 @@ input {
     margin-top: $small-space;
     margin-bottom: $small-space;
     font-size: 1rem;
-}
-
-textarea.form-input {
-    height: 150px;
 }
 
 .tools-bar {
@@ -174,7 +175,6 @@ textarea.form-input {
 .vertical-buttons-wrap {
     display: flex;
     flex-flow: column nowrap;
-    align-items: flex-end;
     > button {
         margin: $small-space;
     }
@@ -220,27 +220,4 @@ textarea.form-input {
     left: 0;
     right: 0;
     z-index: 3;
-}
-
-.popup {
-    box-sizing: border-box;
-    position: fixed;
-    background: white;
-    color:$deep-blue;
-    width: 400px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 3px;
-    padding: $small-space;
-}
-
-.popup-title {
-    color:white;
-    margin-top: calc(0px - #{$small-space});
-    margin-left: calc(0px - #{$small-space});
-    margin-right: calc(0px - #{$small-space});
-    background: $deep-blue;
-    padding-top: $small-space;
-    padding-bottom: $small-space;
 }

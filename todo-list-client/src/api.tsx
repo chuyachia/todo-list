@@ -1,7 +1,11 @@
 import queryString from 'query-string';
 
-import ITodo from './models/ITodo';
 import {DEFAULT_ERROR_MESSAGE} from "./constants";
+
+export interface ISort {
+    column: string;
+    dir: 'desc' | 'asc';
+}
 
 const UNAUTHORIZED_MESSAGE = 'Unauthorized operation.';
 const fetchAllTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos',
@@ -82,40 +86,41 @@ export async function getUserInfo(){
     })
 }
 
-export async function fetchUserTodos(username: string, page: number, size: number, isAuthenticated: boolean) {
-    let url = `${fetchUserTodosEndpoint}/${username}?page=${page}&size=${size}`;
+export async function fetchUserTodos(username: string, page: number, size: number, sort:ISort[], search: string, isAuthenticated: boolean) {
+    let url;
+    const sortString = sort.reduce(((acc, cur) => acc+ '&sort='+ cur.column + ',' + cur.dir), '');
+    if (search.length > 0) {
+        url = searchTodosEndpoint + `?q=${search.toLowerCase()}&page=${page}&size=${size}&user=${username}${sortString}`;
+    } else {
+        url = `${fetchUserTodosEndpoint}/${username}?page=${page}&size=${size}${sortString}`;
+    }
+
     return fetchTodos(url, isAuthenticated);
 }
 
-export async function fetchAllTodos  (page: number, size: number, isAuthenticated: boolean) {
-    let url = `${fetchAllTodosEndpoint}?page=${page}&size=${size}`;
+export async function fetchAllTodos  (page: number, size: number, sort:ISort[], search: string, isAuthenticated: boolean) {
+    let url;
+    const sortString = sort.reduce(((acc, cur) => acc+ '&sort='+ cur.column + ',' + cur.dir), '');
+    if (search.length > 0) {
+        url = searchTodosEndpoint + `?q=${search.toLowerCase()}&page=${page}&size=${size}${sortString}`;
+    } else {
+        url = `${fetchAllTodosEndpoint}?page=${page}&size=${size}${sortString}`;
+    }
     return fetchTodos(url, isAuthenticated);
 }
 
-
-export async function searchTodos(searchValue: string, size: number, isAuthenticated: boolean, user?: string)  {
-    let url = searchTodosEndpoint + `?q=${searchValue.toLowerCase()}&page=0&size=${size}`;
-    if (user !== undefined) url += `&user=${user}`
-    return fetchTodos(url, isAuthenticated);
-}
-
-
-export async function fetchOneTodoForEdit(id: string): Promise<ITodo | void> {
+export async function fetchOneTodoForEdit(id: string) {
     if (!tokenIsPresent() || tokenIsExpired()) {
         authenticate();
     } else {
         const headers = getHeaders(true);
 
         let url = `${fetchOneTodoEndpoint}/${id}`;
-        const response = await fetch(url, {
+        return await fetch(url, {
             credentials: 'include',
             method: 'GET',
             headers,
         });
-
-        if (response.ok) {
-            return await response.json();
-        }
     }
 }
 
@@ -183,7 +188,7 @@ export async function changeTodoStatus(link: string) {
 
         return fetch(link, {
             credentials: 'include',
-            method: 'POST',
+            method: 'PUT',
             mode: 'cors',
             headers
         });

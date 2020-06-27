@@ -32,22 +32,19 @@ public class TodoServiceImpl implements TodoService {
     private TodoRepository repository;
 
     @Override
-    public Page<Todo> findAll(Integer page, Integer size) {
-        Pageable pageable = getPageable(page, size);
+    public Page<Todo> findAll(Pageable pageable) {
 
         return repository.findAll(pageable);
     }
 
     @Override
-    public Page<Todo> findByUserUsername(String username, Integer page, Integer size) {
-        Pageable pageable = getPageable(page, size);
+    public Page<Todo> findByUserUsername(String username, Pageable pageable) {
 
         return repository.findByUserUsername(username, pageable);
     }
 
     @Override
-    public Page<Todo> findByCriteria(String q, Priority p, Status s, String user, Integer page, Integer size) {
-        Pageable pageable = getPageable(page, size);
+    public Page<Todo> findByCriteria(String q, Priority p, Status s, String user, Pageable pageable) {
         Page<Todo> todos = Page.empty();
 
         if (q != null) {
@@ -125,16 +122,6 @@ public class TodoServiceImpl implements TodoService {
         Stream<Todo> todoStream = repository.streamAll(q, username);
         writeCSVHeader(outputStream);
         todoStream.forEach(todo -> writeCSVRow(todo,outputStream));
-    }
-    private Pageable getPageable(Integer page, Integer size) {
-        Pageable pageable;
-        if (size == null || page == null) {
-            pageable = Pageable.unpaged();
-        } else {
-            pageable = PageRequest.of(page, size);
-        }
-
-        return pageable;
     }
 
     private void writeCSVHeader(OutputStream outputStream) {

@@ -7,6 +7,8 @@ import com.todolist.api.model.enums.Priority;
 import com.todolist.api.model.enums.Status;
 import com.todolist.api.service.impl.TodoServiceImpl;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
@@ -16,6 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import javax.validation.Valid;
 
 @Validated
 @RestController
@@ -32,8 +36,8 @@ public class TodoController {
     }
 
     @GetMapping("/todos")
-    public PagedResources<Resource<Todo>> getAll(@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
-        Page<Todo> todosPage = service.findAll(page, size);
+    public PagedResources<Resource<Todo>> getAll(@PageableDefault Pageable pageable) {
+        Page<Todo> todosPage = service.findAll(pageable);
 
         return pagedResourcesAssembler.toResource(
                 todosPage, assembler);
@@ -61,8 +65,8 @@ public class TodoController {
     }
 
     @GetMapping("/todos/user/{username}")
-    public PagedResources<Resource<Todo>> getByUsername(@PathVariable String username, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer size) {
-        Page<Todo> todosPage = service.findByUserUsername(username, page, size);
+    public PagedResources<Resource<Todo>> getByUsername(@PathVariable String username, @PageableDefault Pageable pageable) {
+        Page<Todo> todosPage = service.findByUserUsername(username, pageable);
 
         return pagedResourcesAssembler.toResource(
                 todosPage, assembler);
@@ -73,9 +77,8 @@ public class TodoController {
                                                        @RequestParam(required = false) Priority priority,
                                                        @RequestParam(required = false) Status status,
                                                        @RequestParam(required = false) String user,
-                                                       @RequestParam(required = false) Integer page,
-                                                       @RequestParam(required = false) Integer size) {
-        Page<Todo> todosPage = service.findByCriteria(q, priority, status, user, page, size);
+                                                       @PageableDefault Pageable pageable) {
+        Page<Todo> todosPage = service.findByCriteria(q, priority, status, user, pageable);
 
         return pagedResourcesAssembler.toResource(
                 todosPage, assembler);
@@ -84,7 +87,7 @@ public class TodoController {
 
     @PostMapping(value = "/todos", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public Resource<Todo> create(@RequestBody Todo todo) {
+    public Resource<Todo> create(@Valid @RequestBody Todo todo) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         TodoUserDetail todoUserDetail = (TodoUserDetail) auth.getPrincipal();
         Todo newTodo = new Todo.Builder(todo)
@@ -95,7 +98,7 @@ public class TodoController {
         return assembler.toResource(service.save(newTodo));
     }
 
-    @PostMapping("/todos/{id}/done")
+    @PutMapping("/todos/{id}/done")
     @ResponseStatus(HttpStatus.OK)
     public Resource<Todo> done(@PathVariable Integer id) {
         Todo updatedTodo = service.updateStatus(id, Status.DONE);
@@ -103,7 +106,7 @@ public class TodoController {
         return assembler.toResource(updatedTodo);
     }
 
-    @PostMapping("/todos/{id}/in-progress")
+    @PutMapping("/todos/{id}/in-progress")
     @ResponseStatus(HttpStatus.OK)
     public Resource<Todo> inProgress(@PathVariable Integer id) {
         Todo updatedTodo = service.updateStatus(id, Status.INPROGRESS);
@@ -111,7 +114,7 @@ public class TodoController {
         return assembler.toResource(updatedTodo);
     }
 
-    @PostMapping("/todos/{id}/wont-do")
+    @PutMapping("/todos/{id}/wont-do")
     @ResponseStatus(HttpStatus.OK)
     public Resource<Todo> wontDo(@PathVariable Integer id) {
         Todo updatedTodo = service.updateStatus(id, Status.WONTDO);
@@ -119,7 +122,7 @@ public class TodoController {
         return assembler.toResource(updatedTodo);
     }
 
-    @PostMapping("/todos/{id}/undo")
+    @PutMapping("/todos/{id}/undo")
     @ResponseStatus(HttpStatus.OK)
     public Resource<Todo> unDo(@PathVariable Integer id) {
         Todo updatedTodo = service.updateStatus(id, Status.TODO);
@@ -129,7 +132,7 @@ public class TodoController {
 
     @PutMapping("/todos/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Resource<Todo> update(@RequestBody Todo todoUpdates, @PathVariable Integer id) {
+    public Resource<Todo> update(@Valid @RequestBody Todo todoUpdates, @PathVariable Integer id) {
         Todo updatedTodo = service.update(id, todoUpdates);
 
         return assembler.toResource(updatedTodo);
