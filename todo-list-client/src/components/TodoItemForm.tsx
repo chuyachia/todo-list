@@ -58,12 +58,12 @@ const TodoItemForm: React.FC<ITodoItemForm> = (props: ITodoItemForm) => {
             <label>Title</label>
             <input className={'form-input'} type={'text'} placeholder={'Enter title'}
                    onChange={titleInputValidation.onChange} onFocus={titleInputValidation.onFocus}
-                   value={titleInput.value} disabled={disableEdit}/>
+                   value={titleInput.value} disabled={disableEdit} maxLength={255}/>
             <small className={'validation-text'}>
                 {titleInputValidation.touched && !titleInputValidation.valid && 'Title must not be empty'}
             </small>
             <label>Description</label>
-            <textarea maxLength={200} className={'form-input'} placeholder={'Enter description'}
+            <textarea maxLength={1500} className={'form-input'} placeholder={'Enter description'}
                       onChange={descriptionInput.onChange} value={descriptionInput.value} disabled={disableEdit}/>
             <label>Priority</label>
             <select className={'form-input'} value={priorityInput.value}

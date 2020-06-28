@@ -83,10 +83,12 @@ CREATE TABLE IF NOT EXISTS users_roles (
 CREATE TABLE IF NOT EXISTS todos (
     id INTEGER AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
-    status VARCHAR(255) NOT NULL,
+    status VARCHAR(15) NOT NULL,
     priority TINYINT,
     description TEXT,
     username VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ,
+    updated_at DATETIME,
     PRIMARY KEY (id),
     FOREIGN KEY (username) REFERENCES users(username)
     ON DELETE CASCADE

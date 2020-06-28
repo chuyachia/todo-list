@@ -1,5 +1,7 @@
 package com.todolist.api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.todolist.api.model.enums.Priority;
 import com.todolist.api.model.converter.PriorityConverter;
@@ -9,6 +11,7 @@ import com.todolist.api.model.converter.StatusConverter;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Date;
 
 @Entity
 @Table(name = "todos")
@@ -20,6 +23,7 @@ public class Todo {
     private Integer id;
     @NotNull(message = "Title must not be empty")
     @Size(min = 1, message = "Title must not be empty")
+    @Size(max = 255, message = "Title must not contain more than 255 characters")
     private String title;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Convert(converter = StatusConverter.class)
@@ -31,6 +35,10 @@ public class Todo {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JoinColumn(name = "username", nullable = false)
     private TodoUser user;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Date createdAt = new Date();
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Date updatedAt;
 
     public Integer getId() {
         return id;
@@ -66,6 +74,8 @@ public class Todo {
         priority = builder.priority;
         description = builder.description;
         user = builder.user;
+        createdAt = builder.createdAt;
+        updatedAt = builder.updatedAt;
     }
 
     public static class Builder {
@@ -75,6 +85,8 @@ public class Todo {
         private Priority priority;
         private String description;
         private TodoUser user;
+        private Date createdAt;
+        private Date updatedAt;
 
         public Builder() {
         }
@@ -86,6 +98,8 @@ public class Todo {
             this.priority = todo.priority;
             this.description = todo.description;
             this.user = todo.user;
+            this.createdAt = todo.createdAt;
+            this.updatedAt = todo.updatedAt;
         }
 
         public Builder title(String title) {
@@ -119,6 +133,13 @@ public class Todo {
         public Builder user(TodoUser user) {
             if (user != null) {
                 this.user = user;
+            }
+            return this;
+        }
+
+        public Builder updatedAt(Date date) {
+            if (date != null) {
+                this.updatedAt = date;
             }
             return this;
         }

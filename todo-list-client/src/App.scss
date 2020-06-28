@@ -83,6 +83,7 @@ button.disabled:hover {
 
 .clickable {
     cursor: pointer;
+    text-decoration: underline;
 }
 
 a {
@@ -136,15 +137,11 @@ input {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
+    width:400px;
 }
 
-.form {
-    display: flex;
-    flex-flow: column wrap;
-    padding: $base-space;
-    width: 300px;
-}
 
+.todo
 .submit-button {
     align-self: center;
     margin-top: $small-space;

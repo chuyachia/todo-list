@@ -6,7 +6,6 @@
     color: $black;
     padding: $small-space;
     margin-bottom: $base-space;
-    min-width: 30vw;
 }
 
 .todo-item.disabled {
@@ -29,4 +28,12 @@
 
 .todo-item p {
     font-weight: lighter;
+}
+
+.todo-item .scroll {
+    overflow-x: scroll;
+}
+
+.todo-item > h3 {
+    overflow-x: scroll;
 }

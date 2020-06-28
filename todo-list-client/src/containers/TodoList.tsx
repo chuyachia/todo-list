@@ -57,7 +57,7 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
     });
     const [authenticationChecked, setAuthenticationChecked] = useState(false);
     const {value: searchValue, onChange: onSearchValueChange} = useInput<HTMLInputElement>('');
-    const {value: sortValue, onChange: onSortValueChange} = useInput<HTMLSelectElement>('priority,desc');
+    const {value: sortValue, onChange: onSortValueChange} = useInput<HTMLSelectElement>('priority:desc');
     const history = useHistory();
     const {search, pathname} = useLocation();
 
@@ -143,6 +143,10 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
         }
     }
 
+    const constructSortObject = (sortString:string): ISort[] => {
+        return sortString.split(',').map(sort => ({column: sort.split(':')[0], dir: sort.split(':')[1] as 'desc' | 'asc'}));
+    }
+
     const loadData = async (username: string, page: number, search: string, sort: string, authenticationChecked: boolean) => {
         if (!authenticationChecked) {
             const response = await getUserInfo();
@@ -155,13 +159,14 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             setAuthenticationChecked(true);
         } else {
             todoActions.loadTodosRequest();
-            const sortObject: ISort = { column : sort.split(',')[0], dir: sort.split(',')[1] as 'desc'| 'asc'};
+            console.log(sort);
+            const sortObject: ISort[] =constructSortObject(sort);
             try {
                 let response;
                 if (!authState.authenticated || !username) {
-                    response = await fetchAllTodos(page, todoState.pageSize, [sortObject], search, authState.authenticated);
+                    response = await fetchAllTodos(page, todoState.pageSize, sortObject, search, authState.authenticated);
                 } else {
-                    response = await fetchUserTodos(username, page, todoState.pageSize, [sortObject], search, authState.authenticated);
+                    response = await fetchUserTodos(username, page, todoState.pageSize, sortObject, search, authState.authenticated);
                 }
                 if (response!== undefined) {
                     if (response.ok) {
@@ -292,8 +297,11 @@ const TodoList: React.FC<RouteComponentProps<IRouteProps>> = ({match, location})
             <div>
                 <div className={'right-aligned'}>
                     <select className={'form-input'} onChange={onSortValueChange}>
-                        <option value={'priority,desc'}>Highest priority first</option>
-                        <option value={'priority,asc'}>Lowest priority first</option>
+                        <option value={'priority:desc'}>Highest priority first</option>
+                        <option value={'priority:asc'}>Lowest priority first</option>
+                        <option value={'createdAt:desc'}>Newest first</option>
+                        <option value={'createdAt:asc'}>Oldest first</option>
+
                     </select>
                 </div>
                 {todoState.todos.map((todo: ITodo) => (

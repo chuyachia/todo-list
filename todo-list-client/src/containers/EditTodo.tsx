@@ -36,8 +36,11 @@ const EditTodo: React.FC<RouteComponentProps<IRouteProps>> = ({match}) => {
                 if (todo !== undefined) {
                     setActiveTodo(todo);
                 }
+            } else {
+                history.push('/notfound');
             }
         } catch (e) {
+            setActiveTodo(undefined);
             console.error(e);
         }
     }
@@ -70,6 +73,8 @@ const EditTodo: React.FC<RouteComponentProps<IRouteProps>> = ({match}) => {
     useEffect(() => {
         if (todo.activeTodo === undefined && id !== undefined) {
             initializeActiveTodo();
+        } else if (id === undefined) {
+            setActiveTodo(undefined);
         }
     }, [])
 

@@ -25,11 +25,13 @@ const TodoItem: React.FC<ITodoItem> = (props) => {
 
     return (
         <article className={`todo-item ${isDone ? 'disabled' : isHighPriority ? 'warning' : ''}`}>
-            <h3>{todo.title}</h3>
+            <h3 className={'scroll'}>{todo.title}</h3>
+            <div className={'validation-text'}>Created at : {new Date(todo.createdAt).toLocaleString()}</div>
+            {todo.updatedAt && <div className={'validation-text'}>Updated at : {new Date(todo.updatedAt).toLocaleString()}</div>}
             <p>By: {todo.user.username}</p>
             <p>Priority: {todo.priority}</p>
             <p>Status: {todo.status}</p>
-            <p>{todo.description}</p>
+            <p className={'scroll'}>{todo.description}</p>
             <div className={'buttons-wrap'}>
                 {(Object.keys(links) as Array<keyof typeof links>).map((link) =>
                     <button key={link} onClick={() => changeTodoStatus(links[link].href)} className={'action'}>

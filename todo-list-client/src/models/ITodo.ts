@@ -8,6 +8,8 @@ export default interface ITodoItem {
     status: string;
     priority: string;
     description: string;
+    createdAt: string;
+    updatedAt: string;
     user: IUser;
     _links: Record<TTodoLinks, Record<'href' | 'title', string>>;
 }
