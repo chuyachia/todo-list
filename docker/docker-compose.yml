@@ -13,21 +13,50 @@ services:
       - todo-list-db:/var/lib/mysql
       - ./todolist_init.sql:/docker-entrypoint-initdb.d/todolist_init.sql:ro
   todo-list-api:
-    image: chuyachia/todo-list-api:latest
     container_name: todo-list-api
+    env_file:
+      - ./env_file.env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://todo-list-db:3306/TODOLIST?useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&allowPublicKeyRetrieval=true
     depends_on:
       - todo-list-db
     ports:
       - 8088:8088
     networks:
       - todo-list-network
-    volumes:
-      - todo-list-api:/tmp
+    build:
+      context: ../todo-list-api
+      dockerfile: Dockerfile
+  todo-list-security:
+    container_name: todo-list-security
+    env_file:
+      - ./env_file.env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://todo-list-db:3306/SECURITY?useSSL=false&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&allowPublicKeyRetrieval=true
+    depends_on:
+      - todo-list-db
+    ports:
+      - 8089:8089
+    networks:
+      - todo-list-network
+    build:
+      context: ../todo-list-security
+      dockerfile: Dockerfile
+  todo-list-client:
+    container_name: todo-list-client
+    depends_on:
+      - todo-list-api
+      - todo-list-security
+    ports:
+      - 3000:3000
+    networks:
+      - todo-list-network
+    build:
+      context: ../todo-list-client
+      dockerfile: Dockerfile
 networks:
   todo-list-network:
     driver: bridge
 volumes:
   todo-list-db: null
-  todo-list-api: null
-
 
