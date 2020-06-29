@@ -44,6 +44,8 @@ services:
       dockerfile: Dockerfile
   todo-list-client:
     container_name: todo-list-client
+    env_file:
+      - ./env_file.env
     depends_on:
       - todo-list-api
       - todo-list-security

@@ -8,17 +8,21 @@ export interface ISort {
 }
 
 const UNAUTHORIZED_MESSAGE = 'Unauthorized operation.';
-const fetchAllTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos',
-    fetchOneTodoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/id',
-    fetchUserTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/user',
-    sumbitNewTodoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos',
-    searchTodosEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/search',
-    downloadTodosEndPoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos/file',
-    deleteTodoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/api/todos',
-    userInfoEndpoint = process.env.REACT_APP_TODO_LIST_API + '/user-info',
-    authorizeEndpoint = process.env.REACT_APP_OAUTH_SERVER + '/oauth/authorize',
-    getTokenEndpoint = process.env.REACT_APP_OAUTH_SERVER + '/oauth/token',
-    revokeTokenEndpoint = process.env.REACT_APP_OAUTH_SERVER + '/oauth/revoke-token';
+const TODO_LIST_API_URL = process.env.REACT_APP_TODO_LIST_API || 'http://localhost:8088';
+const OAUTH_SERVER_URL = process.env.REACT_APP_OAUTH_SERVER || 'http://localhost:8089';
+const REACT_APP_CLIENT_ID = process.env.REACT_APP_CLIENT_ID || 'todo-list-app';
+
+const fetchAllTodosEndpoint = TODO_LIST_API_URL + '/api/todos',
+    fetchOneTodoEndpoint = TODO_LIST_API_URL + '/api/todos/id',
+    fetchUserTodosEndpoint = TODO_LIST_API_URL + '/api/todos/user',
+    sumbitNewTodoEndpoint = TODO_LIST_API_URL + '/api/todos',
+    searchTodosEndpoint = TODO_LIST_API_URL + '/api/todos/search',
+    downloadTodosEndPoint = TODO_LIST_API_URL + '/api/todos/file',
+    deleteTodoEndpoint = TODO_LIST_API_URL + '/api/todos',
+    userInfoEndpoint = TODO_LIST_API_URL + '/user-info',
+    authorizeEndpoint = OAUTH_SERVER_URL + '/oauth/authorize',
+    getTokenEndpoint = OAUTH_SERVER_URL + '/oauth/token',
+    revokeTokenEndpoint = OAUTH_SERVER_URL + '/oauth/revoke-token';
 
 export async function authenticate() {
     const randomString = Math.random().toString(36).substring(7);
@@ -28,7 +32,7 @@ export async function authenticate() {
     const url = queryString.stringifyUrl({
         url: authorizeEndpoint,
         query: {
-            client_id: process.env.REACT_APP_CLIENT_ID,
+            client_id: REACT_APP_CLIENT_ID,
             grant_type: 'authorization_code',
             response_type: 'code',
             scope: 'any',
@@ -53,7 +57,7 @@ export async function getToken(code: string) {
         }
     })
     let headers = new Headers();
-    headers.set('Authorization', 'Basic ' + btoa(process.env.REACT_APP_CLIENT_ID + ':'));
+    headers.set('Authorization', 'Basic ' + btoa(REACT_APP_CLIENT_ID + ':'));
 
     const response = await fetch(url, {method: 'POST', headers});
     const tokenResponse = await response.json();
@@ -95,7 +99,7 @@ export async function fetchUserTodos(username: string, page: number, size: numbe
         url = `${fetchUserTodosEndpoint}/${username}?page=${page}&size=${size}${sortString}`;
     }
 
-    return fetchTodos(url, isAuthenticated);
+    return fetchTodos(encodeURI(url), isAuthenticated);
 }
 
 export async function fetchAllTodos  (page: number, size: number, sort:ISort[], search: string, isAuthenticated: boolean) {
@@ -106,7 +110,7 @@ export async function fetchAllTodos  (page: number, size: number, sort:ISort[], 
     } else {
         url = `${fetchAllTodosEndpoint}?page=${page}&size=${size}${sortString}`;
     }
-    return fetchTodos(url, isAuthenticated);
+    return fetchTodos(encodeURI(url), isAuthenticated);
 }
 
 export async function fetchOneTodoForEdit(id: string) {
@@ -213,7 +217,7 @@ export async function deleteTodo(id: number) {
 export const downloadTodos = (searchValue = '', user?: string) => {
     let url = downloadTodosEndPoint + `?q=${searchValue.toLowerCase()}`;
     if (user !== undefined) url += `&user=${user}`
-    window.location.assign(url);
+    window.location.assign(encodeURI(url));
 }
 
 export async function getErrorMessage(response: Response): Promise<string> {
